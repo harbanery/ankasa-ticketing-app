@@ -1,0 +1,86 @@
+D:.
+├───node_modules
+├───.env
+├───.env.example
+├───.eslintrc.cjs
+├───.gitignore
+├───index.html
+├───README.md
+├───vite.config.js
+├───vercel.json
+├───package.json
+├───package-lock.json
+├───public
+|   ├───brandicon.ico
+│   └───screenshots
+└───src
+    ├───App.jsx
+    ├───App.css
+    ├───index.css
+    ├───main.jsx
+    ├───assets
+    │   ├───img
+    │   ├───icons
+    │   └───fonts
+    ├───component
+    │   ├───base
+    │   │   ├───Alert
+    │   │   │   └───index.jsx
+    │   │   └───Card
+    │   └───module
+    │       ├───auth
+    │       │   └───Dashboard
+    |       │           └───index.jsx
+    │       ├───main
+    │       ├───Footer
+    │       │   └───index.jsx
+    │       └───Navbar
+    │           └───index.jsx
+    ├───configs
+    │   └───redux
+    ├───hooks
+    ├───pages
+    │   ├───auth
+    │   │   ├───ConfirmPassword
+    │   │   │       └───index.jsx
+    │   │   ├───Login
+    │   │   │       └───index.jsx
+    │   │   ├───Register
+    │   │   │       └───index.jsx
+    │   │   └───ForgotPassword
+    │   │           └───index.jsx
+    │   └───main
+    │       ├───Explore
+    │       │       └───index.jsx
+    │       ├───Browse
+    │       │       └───index.jsx
+    │       ├───FlightDetail
+    │       │       └───index.jsx
+    │       ├───profile
+    │       │   ├───MyProfile
+    │       │   │   └───index.jsx
+    │       │   └───MyBooking
+    │       │       └───index.jsx
+    │       ├───BookingDetail
+    │       │       └───index.jsx
+    │       └───Chat
+    │               └───index.jsx
+    ├───routes
+    │   ├───RootRouter
+    │   │       └───index.jsx
+    │   ├───PrivateRouter
+    │   │       └───index.jsx
+    │   └───PublicRouter
+    │           └───index.jsx
+    ├───services
+    │   └───api.js
+    ├───styles
+    │   ├───themes.jsx
+    |   ├───fonts.jsx
+    │   ├───components
+    │   │       └───navbar.module.css
+    │   └───pages
+    │           └───explore.module.css
+    └───utils
+        ├───constants.js
+        └───validation.js

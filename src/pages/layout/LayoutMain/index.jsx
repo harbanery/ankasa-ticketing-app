@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 
-const Layout = () => {
+const LayoutMain = () => {
   return (
     <>
       <h1>Navbar</h1>
@@ -11,4 +11,4 @@ const Layout = () => {
   );
 };
 
-export default Layout;
+export default LayoutMain;

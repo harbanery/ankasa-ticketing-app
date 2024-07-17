@@ -1,53 +1,41 @@
 import React from "react";
-import {
-  createBrowserRouter,
-  Outlet,
-  redirect,
-  RouterProvider,
-} from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Explore from "../../pages/main/Explore";
-import Layout from "../../pages/Layout";
-import ProtectedRoute from "../ProtectedRoute";
+import Login from "../../pages/auth/Login";
+import ForgotPassword from "../../pages/auth/ForgotPassword";
+import Register from "../../pages/auth/Register";
+import LayoutMain from "../../pages/layout/LayoutMain";
+import LayoutAuth, { authLoader } from "../../pages/layout/LayoutAuth";
 
 const RootRouter = () => {
   const router = createBrowserRouter([
     {
       path: "/",
-      element: <Layout />,
+      element: <LayoutMain />,
       children: [
         { index: true, element: <Explore /> },
         {
-          path: "about",
-          element: <h1>About</h1>,
+          path: "flight",
+          element: <h1>Flight</h1>,
         },
       ],
     },
     {
       path: "/auth",
-      element: <ProtectedRoute />,
-      loader: ({ request }) => {
-        console.log(request.url);
-        const url = new URL(request.url);
-        const pathname = url.pathname;
-        // console.log(url);
-        if (pathname == "/auth") {
-          return redirect("/auth/login");
-        }
-        return null;
-        // return redirect("/auth/login");
-      },
+      element: <LayoutAuth />,
+      loader: authLoader,
       children: [
         {
           path: "login",
-          element: <h1>Login</h1>,
+          element: <Login />,
         },
         {
           path: "register",
-          element: <h1>Sign Up</h1>,
+          element: <Register />,
         },
         {
-          path: "forgot_password",
-          element: <h1>Forgot Password</h1>,
+          path: "forgot-password",
+          element: <ForgotPassword />,
         },
       ],
     },

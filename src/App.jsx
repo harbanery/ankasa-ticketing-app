@@ -8,24 +8,9 @@ import RootRouter from "./routes/RootRouter";
 
 function App() {
   return (
-    <RootRouter />
-    // <>
-    //   <Fonts />
-    //   <Container>
-    //     <Stack
-    //       fontFamily="myHeading"
-    //       fontSize={70}
-    //       fontWeight={100}
-    //       fontStyle={"italic"}
-    //     >
-    //       <Heading>ANKASA</Heading>
-    //       <Text>ANKASA</Text>
-    //       <Text fontFamily="myBody" fontSize={40} fontStyle={"normal"}>
-    //         ANKASA
-    //       </Text>
-    //     </Stack>
-    //   </Container>
-    // </>
+    <>
+      <RootRouter />
+    </>
   );
 }
 

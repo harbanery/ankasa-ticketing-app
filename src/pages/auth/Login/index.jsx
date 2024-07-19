@@ -1,5 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
   Box,
   Button,
   Container,
@@ -7,24 +11,99 @@ import {
   Heading,
   Image,
   Input,
+  Stack,
   Text,
 } from "@chakra-ui/react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
+import api from "../../../services/api";
+import AlertCustom from "../../../components/base/AlertCustom";
+import { loginValidation } from "../../../utils/validation";
 
 const Login = () => {
+  const navigate = useNavigate();
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+  const [errors, setErrors] = useState({});
+
+  // Alert
+  const [alert, setAlert] = useState({
+    status: "idle",
+    message: "",
+  });
+  const [alertKey, setAlertKey] = useState(0);
+  // Alert
+
+  const handleChange = (e) => {
+    setErrors({
+      ...errors,
+      [e.target.name]: "",
+    });
+
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      await loginValidation.validate(form, { abortEarly: false });
+
+      try {
+        const res = await api.post(`login`, {
+          email: form.email,
+          password: form.password,
+          role: "customer",
+        });
+
+        console.log(res.data.message);
+        setAlert({ status: "success" });
+        setAlertKey(alertKey + 1);
+        navigate("/");
+      } catch (err) {
+        console.log(err);
+        setAlert({ status: "error", message: err?.response?.data?.message });
+        setAlertKey(alertKey + 1);
+      }
+    } catch (err) {
+      if (err.inner) {
+        const formErrors = err.inner.reduce((acc, curr) => {
+          return { ...acc, [curr.path]: curr.message };
+        }, {});
+        setErrors(formErrors);
+      }
+    }
+  };
+
   return (
     <Container my="5%" maxW="sm">
+      <AlertCustom alertState={alert} count={alertKey} />
       <Link to={"/"}>
         <Image
+          display={{ base: "none", md: "flex" }}
           position={"absolute"}
           top={10}
           src="/src/assets/brandicon.png"
-          alt="Ankasa"
-          w="23%"
+          alt="Logo"
+          w="158px"
+          h="36px"
         />
       </Link>
       <Box display="flex" flexDirection="column" h="100%" gap="4">
+        <Link to={"/"}>
+          <Image
+            display={{ base: "flex", md: "none" }}
+            src="/src/assets/brandicon.png"
+            alt="Logo"
+            w="158px"
+            h="36px"
+            mb="3rem"
+          />
+        </Link>
         <Heading fontFamily="Poppins" fontWeight="600">
           Login
         </Heading>
@@ -36,22 +115,71 @@ const Login = () => {
           fontSize="16px"
           fontWeight="400"
         >
-          <Input
-            type="email"
-            size="lg"
-            variant="flushed"
-            placeholder="Email"
-            errorBorderColor="crimson"
-          />
-          <Input
-            type="password"
-            size="lg"
-            variant="flushed"
-            placeholder="Password"
-            errorBorderColor="crimson"
-          />
+          <Stack spacing={1}>
+            <Input
+              isInvalid={errors.email ? true : false}
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              type="email"
+              size="lg"
+              variant="flushed"
+              placeholder="Email"
+              borderBottom="2px"
+              borderBottomColor="#D2C2FFAD"
+              errorBorderColor="crimson"
+              _focus={{
+                borderBottomColor: "#2395FF",
+              }}
+            />
+            <Alert
+              px="2"
+              h="6"
+              fontSize="14"
+              display={errors.email ? "flex" : "none"}
+              status="error"
+              variant="subtle"
+              transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+              rounded="10px"
+            >
+              <AlertIcon w="4" h="4" />
+              <AlertTitle>{errors.email}</AlertTitle>
+            </Alert>
+          </Stack>
+          <Stack spacing={1}>
+            <Input
+              isInvalid={errors.password ? true : false}
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              type="password"
+              size="lg"
+              variant="flushed"
+              placeholder="Password"
+              borderBottom="2px"
+              borderBottomColor="#D2C2FFAD"
+              errorBorderColor="crimson"
+              _focus={{
+                borderBottomColor: "#2395FF",
+              }}
+            />
+            <Alert
+              px="2"
+              h="6"
+              fontSize="14"
+              display={errors.password ? "flex" : "none"}
+              status="error"
+              variant="subtle"
+              transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+              rounded="10px"
+            >
+              <AlertIcon w="4" h="4" />
+              <AlertTitle>{errors.password}</AlertTitle>
+            </Alert>
+          </Stack>
         </Flex>
         <Button
+          onClick={handleLogin}
           bg="#2395FF"
           borderRadius="10px"
           color="white"
@@ -66,9 +194,7 @@ const Login = () => {
           _hover={{ bg: "#1971c2" }}
           _active={{
             bg: "#dddfe2",
-          }}
-          _focus={{
-            boxShadow: "0px 8px 10px 0px #2395FF4D",
+            boxShadow: "0px 8px 10px 0px #dddfe24D",
           }}
         >
           Sign In
@@ -110,8 +236,6 @@ const Login = () => {
               transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
               _active={{
                 bg: "#2395FF",
-              }}
-              _focus={{
                 boxShadow: "0px 8px 10px 0px #2395FF4D",
               }}
             >

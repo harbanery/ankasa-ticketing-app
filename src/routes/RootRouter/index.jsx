@@ -6,6 +6,8 @@ import ForgotPassword from "../../pages/auth/ForgotPassword";
 import Register from "../../pages/auth/Register";
 import LayoutMain from "../../pages/layout/LayoutMain";
 import LayoutAuth, { authLoader } from "../../pages/layout/LayoutAuth";
+import FlightDetail from "../../pages/main/Flight";
+import BoardingPassPage from "../../pages/main/BoardingPass";
 
 const RootRouter = () => {
   const router = createBrowserRouter([
@@ -15,8 +17,16 @@ const RootRouter = () => {
       children: [
         { index: true, element: <Explore /> },
         {
-          path: "flight",
-          element: <h1>Flight</h1>,
+          path: "browse",
+          element: <h1>Browse</h1>,
+        },
+        {
+          path: "flight/:id",
+          element: <FlightDetail />,
+        },
+        {
+          path: "my-booking/:id",
+          element: <BoardingPassPage />,
         },
       ],
     },

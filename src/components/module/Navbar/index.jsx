@@ -9,15 +9,32 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import React from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { AiOutlineBell } from "react-icons/ai";
 import { HiOutlineEnvelope } from "react-icons/hi2";
 import { IoClose } from "react-icons/io5";
 import { FaBars } from "react-icons/fa6";
+import { getTokenfromLocalStorage } from "../../../utils/localStorage";
 
-const Navbar = () => {
+const Navbar = ({ data_user = {}, token = "" }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  // const { token } = getTokenfromLocalStorage();
+
+  const menu_lists = [
+    {
+      name: "Find Ticket",
+      navigation: "/flight",
+      required_token: false,
+    },
+    {
+      name: "My Booking",
+      navigation: "/my-booking",
+      required_token: true,
+    },
+  ];
 
   return (
     <Box
@@ -61,73 +78,68 @@ const Navbar = () => {
           alignItems="center"
           gap="5rem"
         >
-          <NavLink to={"/flight"}>
-            <Text
-              alignItems={"center"}
-              justifyContent={"space-between"}
-              borderBottom={"5px solid"}
-              borderColor={"transparent"}
-              transition="all 0.1s"
-              py="8px"
-              _hover={{
-                borderColor: "#2395FF",
-              }}
-            >
-              Find Ticket
-            </Text>
-          </NavLink>
-          <NavLink to={"/"}>
-            <Text
-              alignItems={"center"}
-              justifyContent={"space-between"}
-              borderBottom={"5px solid"}
-              borderColor={"transparent"}
-              transition="all 0.1s"
-              py="8px"
-              _hover={{
-                borderColor: "#2395FF",
-              }}
-            >
-              My Booking
-            </Text>
-          </NavLink>
+          {menu_lists.map((menu) => {
+            if (menu.required_token == true) {
+              {
+                return (
+                  token && (
+                    <MenuBar key={menu.name} menu={menu} location={location} />
+                  )
+                );
+              }
+            } else {
+              return (
+                <MenuBar key={menu.name} menu={menu} location={location} />
+              );
+            }
+          })}
         </Box>
         <Flex
           justifyContent="space-between"
           alignItems="center"
           gap={{ base: "24px", md: "48px" }}
         >
-          <Button
-            onClick={() => navigate("/auth/register")}
-            bg="#2395FF"
-            borderRadius="10px"
-            color="white"
-            size="lg"
-            w="100%"
-            h={{ base: "40px", lg: "50px" }}
-            px={{ base: "1rem", sm: "2rem", xl: "5rem" }}
-            fontFamily="Poppins"
-            fontSize={{ base: "16px", md: "18px" }}
-            fontWeight="700"
-            transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
-            boxShadow="0px 8px 10px 0px #2395FF4D"
-            _hover={{ bg: "#1971c2" }}
-            _active={{
-              bg: "#dddfe2",
-              boxShadow: "0px 8px 10px 0px #dddfe24D",
-            }}
-          >
-            Sign Up
-          </Button>
-          {/* <Box display={{ base: "none", lg: "block" }}>
-            <HiOutlineEnvelope color="#595959" fontSize="28px" />
-          </Box>
-          <Box display={{ base: "none", lg: "block" }}>
-            <AiOutlineBell color="#595959" fontSize="28px" />
-          </Box>
-          <Box borderRadius="100%" border="2px" borderColor="#2395FF" p="2px">
-            <Avatar name="Dan Abrahmov" src="https://bit.ly/dan-abramov" />
-          </Box> */}
+          {!token ? (
+            <Button
+              onClick={() => navigate("/auth/register")}
+              bg="#2395FF"
+              borderRadius="10px"
+              color="white"
+              size="lg"
+              w="100%"
+              h={{ base: "40px", lg: "50px" }}
+              px={{ base: "1rem", sm: "2rem", xl: "5rem" }}
+              fontFamily="Poppins"
+              fontSize={{ base: "16px", md: "18px" }}
+              fontWeight="700"
+              transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+              boxShadow="0px 8px 10px 0px #2395FF4D"
+              _hover={{ bg: "#1971c2" }}
+              _active={{
+                bg: "#dddfe2",
+                boxShadow: "0px 8px 10px 0px #dddfe24D",
+              }}
+            >
+              Sign Up
+            </Button>
+          ) : (
+            <>
+              <Box display={{ base: "none", md: "block" }}>
+                <HiOutlineEnvelope color="#595959" fontSize="28px" />
+              </Box>
+              <Box display={{ base: "none", md: "block" }}>
+                <AiOutlineBell color="#595959" fontSize="28px" />
+              </Box>
+              <Box
+                borderRadius="100%"
+                border="2px"
+                borderColor="#2395FF"
+                p="2px"
+              >
+                <Avatar name={data_user.username} src={data_user.image} />
+              </Box>
+            </>
+          )}
         </Flex>
       </Flex>
       {isOpen ? (
@@ -141,12 +153,66 @@ const Navbar = () => {
           transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
         >
           <Stack as={"nav"} spacing={4} direction={"column-reverse"}>
-            <NavLink to={"/flight"}>Find Ticket</NavLink>
-            <NavLink to={"/"}>My Booking</NavLink>
+            {menu_lists.map((menu) => {
+              if (menu.required_token == true) {
+                {
+                  return (
+                    token && (
+                      <MenuBarDisclosure
+                        key={menu.name}
+                        menu={menu}
+                        location={location}
+                      />
+                    )
+                  );
+                }
+              } else {
+                return (
+                  <MenuBarDisclosure
+                    key={menu.name}
+                    menu={menu}
+                    location={location}
+                  />
+                );
+              }
+            })}
           </Stack>
         </Box>
       ) : null}
     </Box>
+  );
+};
+
+const MenuBar = ({ menu, location }) => {
+  return (
+    <NavLink to={menu.navigation}>
+      <Text
+        fontWeight={location.pathname == menu.navigation && "700"}
+        alignItems={"center"}
+        justifyContent={"space-between"}
+        borderBottom={"5px solid"}
+        borderColor={
+          location.pathname == menu.navigation ? "#2395FF" : "transparent"
+        }
+        transition="all 0.1s"
+        py="8px"
+        _hover={{
+          borderColor: "#2395FF",
+        }}
+      >
+        {menu.name}
+      </Text>
+    </NavLink>
+  );
+};
+
+const MenuBarDisclosure = ({ menu, location }) => {
+  return (
+    <NavLink to={menu.navigation}>
+      <Text fontWeight={location.pathname == menu.navigation && "700"}>
+        {menu.name}
+      </Text>
+    </NavLink>
   );
 };
 

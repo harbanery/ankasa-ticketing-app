@@ -98,7 +98,7 @@ const Register = () => {
       <AlertCustom alertState={alert} count={alertKey} />
       <Link to={"/"}>
         <Image
-          display={{ base: "none", md: "flex" }}
+          // display={{ base: "none", md: "flex" }}
           position={"absolute"}
           top={10}
           src="/src/assets/brandicon.png"
@@ -108,7 +108,7 @@ const Register = () => {
         />
       </Link>
       <Box display="flex" flexDirection="column" h="100%" gap="4">
-        <Link to={"/"}>
+        {/* <Link to={"/"}>
           <Image
             display={{ base: "flex", md: "none" }}
             src="/src/assets/brandicon.png"
@@ -116,8 +116,9 @@ const Register = () => {
             w="158px"
             h="36px"
             mb="3rem"
+            mx="auto"
           />
-        </Link>
+        </Link> */}
         <Heading fontFamily="Poppins" fontWeight="600">
           Register
         </Heading>
@@ -148,7 +149,8 @@ const Register = () => {
             />
             <Alert
               px="2"
-              h="6"
+              py="1"
+              h="auto"
               fontSize="14"
               display={errors.username ? "flex" : "none"}
               status="error"
@@ -179,7 +181,8 @@ const Register = () => {
             />
             <Alert
               px="2"
-              h="6"
+              py="1"
+              h="auto"
               fontSize="14"
               display={errors.email ? "flex" : "none"}
               status="error"
@@ -210,7 +213,8 @@ const Register = () => {
             />
             <Alert
               px="2"
-              h="6"
+              py="1"
+              h="auto"
               fontSize="14"
               display={errors.password ? "flex" : "none"}
               status="error"
@@ -251,12 +255,7 @@ const Register = () => {
           fontSize="16px"
           fontWeight="400"
         >
-          <Checkbox
-            isInvalid={!formAgreed ? true : false}
-            border="#2395FF"
-            gap={3}
-            onChange={handleChangeCheckbox}
-          >
+          <Checkbox border="#2395FF" gap={3} onChange={handleChangeCheckbox}>
             Accept terms and condition
           </Checkbox>
         </Box>

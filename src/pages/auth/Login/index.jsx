@@ -19,6 +19,9 @@ import { FcGoogle } from "react-icons/fc";
 import api from "../../../services/api";
 import AlertCustom from "../../../components/base/AlertCustom";
 import { loginValidation } from "../../../utils/validation";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth, provider } from "../../../services/firebase";
+import { setTokentoLocalStorage } from "../../../utils/localStorage";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -27,6 +30,46 @@ const Login = () => {
     password: "",
   });
   const [errors, setErrors] = useState({});
+  const [formGoogle, setFormGoogle] = useState({
+    username: "",
+    email: "",
+    phone_number: "",
+    image: "",
+    google_uid: "",
+    // is_Verify: false,
+  });
+
+  const popupGoogle = async () => {
+    try {
+      const response = await signInWithPopup(auth, provider);
+      // const credential = GoogleAuthProvider.credentialFromResult(response);
+      // const token = credential.accessToken;
+      const user = response.user;
+      try {
+        const res = await api.post(`loginAuthProvider`, {
+          username: user.displayName,
+          email: user.email,
+          phone_number: user.phoneNumber,
+          image: user.photoURL,
+          role: "customer",
+          google_uid: user.uid,
+        });
+
+        // console.log(res.data.message);
+        setAlert({ status: "success" });
+        setAlertKey(alertKey + 1);
+        setTokentoLocalStorage(res.data);
+        navigate("/");
+      } catch (err) {
+        console.log(err);
+        setAlert({ status: "error", message: err?.response?.data?.message });
+        setAlertKey(alertKey + 1);
+      }
+    } catch (error) {
+      // console.log(error.code);
+      // console.log(error.message);
+    }
+  };
 
   // Alert
   const [alert, setAlert] = useState({
@@ -60,9 +103,10 @@ const Login = () => {
           role: "customer",
         });
 
-        console.log(res.data.message);
+        // console.log(res.data);
         setAlert({ status: "success" });
         setAlertKey(alertKey + 1);
+        setTokentoLocalStorage(res.data);
         navigate("/");
       } catch (err) {
         console.log(err);
@@ -84,7 +128,7 @@ const Login = () => {
       <AlertCustom alertState={alert} count={alertKey} />
       <Link to={"/"}>
         <Image
-          display={{ base: "none", md: "flex" }}
+          // display={{ base: "none", md: "flex" }}
           position={"absolute"}
           top={10}
           src="/src/assets/brandicon.png"
@@ -94,7 +138,7 @@ const Login = () => {
         />
       </Link>
       <Box display="flex" flexDirection="column" h="100%" gap="4">
-        <Link to={"/"}>
+        {/* <Link to={"/"}>
           <Image
             display={{ base: "flex", md: "none" }}
             src="/src/assets/brandicon.png"
@@ -103,7 +147,7 @@ const Login = () => {
             h="36px"
             mb="3rem"
           />
-        </Link>
+        </Link> */}
         <Heading fontFamily="Poppins" fontWeight="600">
           Login
         </Heading>
@@ -134,7 +178,8 @@ const Login = () => {
             />
             <Alert
               px="2"
-              h="6"
+              py="1"
+              h="auto"
               fontSize="14"
               display={errors.email ? "flex" : "none"}
               status="error"
@@ -165,7 +210,8 @@ const Login = () => {
             />
             <Alert
               px="2"
-              h="6"
+              py="1"
+              h="auto"
               fontSize="14"
               display={errors.password ? "flex" : "none"}
               status="error"
@@ -225,6 +271,7 @@ const Login = () => {
           <Text>or sign in with</Text>
           <Flex gap="4">
             <Button
+              onClick={popupGoogle}
               bg="white"
               borderRadius="10px"
               color="white"

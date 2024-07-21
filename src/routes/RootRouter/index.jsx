@@ -4,7 +4,7 @@ import Explore from "../../pages/main/Explore";
 import Login from "../../pages/auth/Login";
 import ForgotPassword from "../../pages/auth/ForgotPassword";
 import Register from "../../pages/auth/Register";
-import LayoutMain from "../../pages/layout/LayoutMain";
+import LayoutMain, { mainLoader } from "../../pages/layout/LayoutMain";
 import LayoutAuth, { authLoader } from "../../pages/layout/LayoutAuth";
 
 const RootRouter = () => {
@@ -12,6 +12,7 @@ const RootRouter = () => {
     {
       path: "/",
       element: <LayoutMain />,
+      loader: mainLoader,
       children: [
         { index: true, element: <Explore /> },
         {

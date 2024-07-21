@@ -39,7 +39,8 @@ const Login = () => {
     // is_Verify: false,
   });
 
-  const popupGoogle = async () => {
+  const handleLoginGoogle = async (e) => {
+    e.preventDefault();
     try {
       const response = await signInWithPopup(auth, provider);
       // const credential = GoogleAuthProvider.credentialFromResult(response);
@@ -271,7 +272,7 @@ const Login = () => {
           <Text>or sign in with</Text>
           <Flex gap="4">
             <Button
-              onClick={popupGoogle}
+              onClick={handleLoginGoogle}
               bg="white"
               borderRadius="10px"
               color="white"

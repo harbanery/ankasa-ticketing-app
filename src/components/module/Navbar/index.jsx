@@ -3,7 +3,14 @@ import {
   Box,
   Button,
   Flex,
+  IconButton,
   Image,
+  Menu,
+  MenuButton,
+  MenuDivider,
+  MenuGroup,
+  MenuItem,
+  MenuList,
   Stack,
   Text,
   useDisclosure,
@@ -14,19 +21,46 @@ import { AiOutlineBell } from "react-icons/ai";
 import { HiOutlineEnvelope } from "react-icons/hi2";
 import { IoClose } from "react-icons/io5";
 import { FaBars } from "react-icons/fa6";
-import { getTokenfromLocalStorage } from "../../../utils/localStorage";
+import { auth } from "../../../services/firebase";
+import {
+  getTokenfromLocalStorage,
+  removeTokenfromLocalStorage,
+} from "../../../utils/localStorage";
+import api from "../../../services/api";
 
 const Navbar = ({ data_user = {}, token = "" }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  // const { isOpen, onOpen, onClose } = useDisclosure();
 
   // const { token } = getTokenfromLocalStorage();
+
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    try {
+      await api.get(`logout`);
+
+      const user = auth.currentUser;
+      if (user) {
+        try {
+          await signOut(auth);
+        } catch (error) {
+          //
+        }
+      }
+
+      removeTokenfromLocalStorage();
+      navigate("/auth/login");
+    } catch (error) {
+      setAlert({ status: "error", message: err?.response?.data?.message });
+      setAlertKey(alertKey + 1);
+    }
+  };
 
   const menu_lists = [
     {
       name: "Find Ticket",
-      navigation: "/flight",
+      navigation: "/browse",
       required_token: false,
     },
     {
@@ -39,13 +73,14 @@ const Navbar = ({ data_user = {}, token = "" }) => {
   return (
     <Box
       w="100%"
-      minH="158px"
+      minH={{ base: "auto", lg: "158px" }}
       px={{ base: "20px", md: "70px" }}
-      py={{ base: "50px" }}
+      py={{ base: "20px", md: "50px" }}
       fontFamily="Poppins"
+      transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
     >
       <Flex justifyContent="space-between" alignItems="center" gap={"2rem"}>
-        <Button
+        {/* <Button
           display={{ base: "flex", lg: "none" }}
           aspectRatio={1}
           borderRadius="10px"
@@ -53,7 +88,51 @@ const Navbar = ({ data_user = {}, token = "" }) => {
           onClick={isOpen ? onClose : onOpen}
         >
           {isOpen ? <IoClose fontSize="20px" /> : <FaBars />}
-        </Button>
+        </Button> */}
+        <Menu isLazy>
+          {({ isOpen }) => (
+            <>
+              <MenuButton
+                as={IconButton}
+                aria-label="Options"
+                icon={isOpen ? <IoClose fontSize="20px" /> : <FaBars />}
+                variant="outline"
+                borderRadius="10px"
+                display={{ base: "flex", lg: "none" }}
+              />
+              <MenuList
+                borderRadius="10px"
+                display={{ lg: "none" }}
+                boxShadow="0px 8px 10px 0px #dddfe24D"
+                transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+              >
+                {menu_lists.map((menu) => {
+                  if (menu.required_token == true) {
+                    {
+                      return (
+                        token && (
+                          <MenuBarDisclosure
+                            key={menu.name}
+                            menu={menu}
+                            location={location}
+                          />
+                        )
+                      );
+                    }
+                  } else {
+                    return (
+                      <MenuBarDisclosure
+                        key={menu.name}
+                        menu={menu}
+                        location={location}
+                      />
+                    );
+                  }
+                })}
+              </MenuList>
+            </>
+          )}
+        </Menu>
         {/* <IconButton
           size={"md"}
           icon={isOpen ? <IoClose fontSize={28} /> : <FaBars />}
@@ -127,22 +206,61 @@ const Navbar = ({ data_user = {}, token = "" }) => {
               <Box display={{ base: "none", md: "block" }}>
                 <HiOutlineEnvelope color="#595959" fontSize="28px" />
               </Box>
-              <Box display={{ base: "none", md: "block" }}>
+              <Box display={{ base: "none", sm: "block" }}>
                 <AiOutlineBell color="#595959" fontSize="28px" />
               </Box>
-              <Box
+              {/* <Box
                 borderRadius="100%"
                 border="2px"
                 borderColor="#2395FF"
                 p="2px"
               >
                 <Avatar name={data_user.username} src={data_user.image} />
-              </Box>
+              </Box> */}
+              <Menu>
+                <Box
+                  borderRadius="100%"
+                  border="2px"
+                  borderColor="#2395FF"
+                  p="2px"
+                >
+                  <MenuButton
+                    as={Avatar}
+                    cursor="pointer"
+                    src={data_user.image}
+                    borderRadius="100%"
+                    mx="auto"
+                  />
+                </Box>
+                <MenuList
+                  borderRadius="10px"
+                  boxShadow="0px 8px 10px 0px #dddfe24D"
+                  transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+                >
+                  <NavLink to="/">
+                    <MenuItem>My Profile</MenuItem>
+                  </NavLink>
+                  <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                  <MenuDivider display={{ md: "none" }} />
+                  <MenuItem
+                    icon={<HiOutlineEnvelope color="#595959" fontSize="20px" />}
+                    display={{ base: "flex", md: "none" }}
+                  >
+                    Chat
+                  </MenuItem>
+                  <MenuItem
+                    icon={<AiOutlineBell color="#595959" fontSize="20px" />}
+                    display={{ base: "flex", sm: "none" }}
+                  >
+                    Notifications
+                  </MenuItem>
+                </MenuList>
+              </Menu>
             </>
           )}
         </Flex>
       </Flex>
-      {isOpen ? (
+      {/* {isOpen ? (
         <Box
           bg="gray.200"
           position={"absolute"}
@@ -178,7 +296,7 @@ const Navbar = ({ data_user = {}, token = "" }) => {
             })}
           </Stack>
         </Box>
-      ) : null}
+      ) : null} */}
     </Box>
   );
 };
@@ -209,9 +327,11 @@ const MenuBar = ({ menu, location }) => {
 const MenuBarDisclosure = ({ menu, location }) => {
   return (
     <NavLink to={menu.navigation}>
-      <Text fontWeight={location.pathname == menu.navigation && "700"}>
+      <MenuItem
+        fontWeight={location.pathname == menu.navigation ? "700" : "500"}
+      >
         {menu.name}
-      </Text>
+      </MenuItem>
     </NavLink>
   );
 };

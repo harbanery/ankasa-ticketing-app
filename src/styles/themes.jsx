@@ -9,8 +9,8 @@ const colors = {
 };
 
 const fonts = {
-  myHeading: `'Poppins', ${base.fonts?.heading}, sans-serif`,
-  myBody: `'Poppins', ${base.fonts?.body}, sans-serif`,
+  Poppins: `'Poppins', sans-serif`,
+  Lato: `'Lato', sans-serif`,
 };
 
 const theme = extendTheme({ fonts, colors });

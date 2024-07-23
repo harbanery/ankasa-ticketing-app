@@ -1,26 +1,14 @@
 import { Button, Flex, useDisclosure } from "@chakra-ui/react";
 import React from "react";
 import { Outlet } from "react-router-dom";
-import SearchFlight from "../../../components/module/SearchFlightModal";
+import Navbar from "../../../components/module/Navbar";
 
 const LayoutMain = () => {
   return (
     <>
-      <Flex>
-        <h1>Navbar</h1>
-        <Outlet />
-        <Button
-          _active={{
-            bg: null,
-            transform: null,
-          }}
-          bg="white"
-          _hover="none"
-        >
-        footer
-        </Button>
-        <SearchFlight />
-      </Flex>
+      <Navbar />
+      <Outlet />
+      <h1>Footer</h1>
     </>
   );
 };

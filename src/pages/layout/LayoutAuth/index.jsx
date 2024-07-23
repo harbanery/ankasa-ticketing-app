@@ -4,7 +4,7 @@ import { Outlet, redirect } from "react-router-dom";
 
 const LayoutAuth = () => {
   return (
-    <Box h="100vh">
+    <Box h={{ md: "100vh" }}>
       <Flex w="100%" h="100%">
         <Box
           display={{ base: "none", md: "flex" }}

@@ -1,76 +1,166 @@
 import {
   Box,
   Button,
+  Collapse,
   Container,
   Flex,
+  FormControl,
   Heading,
   Image,
   Input,
   Text,
+  useToast,
 } from "@chakra-ui/react";
-import React from "react";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { emailValidation } from "../../../utils/validation";
+import api from "../../../services/api";
+import { optionToast } from "../../../utils/constants";
 
 const ForgotPassword = () => {
+  const toast = useToast();
+  const [form, setForm] = useState({
+    email: "",
+  });
+  const [errors, setErrors] = useState({});
+  const [messageVisible, setMessageVisible] = useState(false);
+
+  const handleChange = (e) => {
+    setErrors({
+      ...errors,
+      [e.target.name]: "",
+    });
+
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    try {
+      await emailValidation.validate(form, { abortEarly: false });
+
+      try {
+        await api.post(`requestResetPassword`, {
+          email: form.email,
+        });
+
+        // console.log(res.data);
+        toast({
+          title: "Request reset password successfully",
+          description: "Please check in your email to reset your password.",
+          status: "success",
+          ...optionToast,
+        });
+        setMessageVisible(true);
+      } catch (err) {
+        console.log(err);
+        toast({
+          title: "Failed",
+          ...(err?.response?.data?.message
+            ? { description: "Email incorrectly." }
+            : {}),
+          status: "error",
+          ...optionToast,
+        });
+      }
+    } catch (err) {
+      if (err.inner) {
+        const formErrors = err.inner.reduce((acc, curr) => {
+          return { ...acc, [curr.path]: curr.message };
+        }, {});
+        setErrors(formErrors);
+      }
+    }
+  };
+
   return (
-    <Box h="100vh">
-      <Flex w="100%" h="100%">
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          w="100%"
-          bg="#2395FF"
+    <Container my="5%" maxW="sm">
+      <Link to={"/"}>
+        <Image
+          // display={{ base: "none", md: "flex" }}
+          position={"absolute"}
+          top={10}
+          src="/src/assets/brandicon.png"
+          alt="Logo"
+          w="158px"
+          h="36px"
+        />
+      </Link>
+      <Box display="flex" flexDirection="column" h="100%" gap="4">
+        <Heading fontFamily="Poppins" fontWeight="600">
+          Forgot Password
+        </Heading>
+        <Flex
+          direction="column"
+          my="5"
+          gap="7"
+          fontFamily="Lato"
+          fontSize="16px"
+          fontWeight="400"
         >
-          <Image
-            src={"/src/assets/illustration.png"}
-            alt="Ankasa Planes"
-            w="50%"
-          />
-        </Box>
+          <FormControl isInvalid={errors.email ? true : false} isRequired>
+            <Input
+              type="email"
+              name="email"
+              value={form.email}
+              size="lg"
+              onChange={handleChange}
+              variant="flushed"
+              placeholder="Email"
+              borderBottom="2px"
+              borderBottomColor="#D2C2FFAD"
+              _focus={{
+                borderBottomColor: "#2395FF",
+              }}
+            />
+            <Collapse in={errors.email ? true : false} animateOpacity>
+              <Text fontSize="14px" mt="8px" textColor="crimson">
+                {errors.email || "."}
+              </Text>
+            </Collapse>
+          </FormControl>
+        </Flex>
+        <Button
+          onClick={handleForgotPassword}
+          bg="#2395FF"
+          borderRadius="10px"
+          color="white"
+          size="lg"
+          w="100%"
+          h="57px"
+          fontFamily="Poppins"
+          fontSize="18px"
+          fontWeight="700"
+          transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+          boxShadow="0px 8px 10px 0px #2395FF4D"
+          _hover={{ bg: "#1971c2" }}
+          _active={{
+            bg: "#dddfe2",
+            boxShadow: "0px 8px 10px 0px #dddfe24D",
+          }}
+        >
+          Send
+        </Button>
         <Box
           display="flex"
           flexDirection="column"
-          justifyContent="center"
-          alignItems="stretch"
-          w="70%"
-          bg="white"
-          position="relative"
+          alignItems="center"
+          fontFamily="Lato"
+          fontSize="16px"
+          fontWeight="400"
         >
-          <Container my="5%" maxW="sm">
-            <Image
-              position={"absolute"}
-              top={10}
-              src="/src/assets/brandicon.png"
-              alt="Ankasa"
-              w="23%"
-            />
-            <Box display="flex" flexDirection="column" h="100%" gap="4">
-              <Heading fontWeight={600}>Login</Heading>
-              <Flex direction="column" my="5" gap="7">
-                <Input
-                  type="text"
-                  size="lg"
-                  variant="flushed"
-                  placeholder="Username"
-                />
-                <Input
-                  type="password"
-                  size="lg"
-                  variant="flushed"
-                  placeholder="Password"
-                />
-              </Flex>
-              <Button colorScheme="blue" size="lg" w="100%">
-                Sign In
-              </Button>
-              <Box display="flex" flexDirection="column" alignItems="center">
-                <Text>Did You Forgot Your Password?</Text>
-              </Box>
-            </Box>
-          </Container>
+          <Text
+            opacity={messageVisible ? "100%" : "0%"}
+            transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+          >
+            You&apos;ll get message soon on your email
+          </Text>
         </Box>
-      </Flex>
-    </Box>
+      </Box>
+    </Container>
   );
 };
 

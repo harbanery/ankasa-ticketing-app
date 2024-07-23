@@ -6,13 +6,17 @@ import {
   AlertTitle,
   Box,
   Button,
+  Collapse,
   Container,
   Flex,
+  FormControl,
+  FormErrorMessage,
   Heading,
   Image,
   Input,
   Stack,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { Link, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
@@ -22,22 +26,16 @@ import { loginValidation } from "../../../utils/validation";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../../../services/firebase";
 import { setTokentoLocalStorage } from "../../../utils/localStorage";
+import { optionToast } from "../../../utils/constants";
 
 const Login = () => {
   const navigate = useNavigate();
+  const toast = useToast();
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
   const [errors, setErrors] = useState({});
-  const [formGoogle, setFormGoogle] = useState({
-    username: "",
-    email: "",
-    phone_number: "",
-    image: "",
-    google_uid: "",
-    // is_Verify: false,
-  });
 
   const handleLoginGoogle = async (e) => {
     e.preventDefault();
@@ -57,28 +55,29 @@ const Login = () => {
         });
 
         // console.log(res.data.message);
-        setAlert({ status: "success" });
-        setAlertKey(alertKey + 1);
+        toast({
+          title: "Login Successfully",
+          status: "success",
+          ...optionToast,
+        });
         setTokentoLocalStorage(res.data);
         navigate("/");
       } catch (err) {
         console.log(err);
-        setAlert({ status: "error", message: err?.response?.data?.message });
-        setAlertKey(alertKey + 1);
+        toast({
+          title: "Login Failed",
+          ...(err?.response?.data?.message
+            ? { description: "Email or password incorrectly." }
+            : {}),
+          status: "error",
+          ...optionToast,
+        });
       }
     } catch (error) {
       // console.log(error.code);
       // console.log(error.message);
     }
   };
-
-  // Alert
-  const [alert, setAlert] = useState({
-    status: "idle",
-    message: "",
-  });
-  const [alertKey, setAlertKey] = useState(0);
-  // Alert
 
   const handleChange = (e) => {
     setErrors({
@@ -105,14 +104,23 @@ const Login = () => {
         });
 
         // console.log(res.data);
-        setAlert({ status: "success" });
-        setAlertKey(alertKey + 1);
+        toast({
+          title: "Login Successfully",
+          status: "success",
+          ...optionToast,
+        });
         setTokentoLocalStorage(res.data);
         navigate("/");
       } catch (err) {
         console.log(err);
-        setAlert({ status: "error", message: err?.response?.data?.message });
-        setAlertKey(alertKey + 1);
+        toast({
+          title: "Login Failed",
+          ...(err?.response?.data?.message
+            ? { description: "Email or password incorrectly." }
+            : {}),
+          status: "error",
+          ...optionToast,
+        });
       }
     } catch (err) {
       if (err.inner) {
@@ -126,7 +134,6 @@ const Login = () => {
 
   return (
     <Container my="5%" maxW="sm">
-      <AlertCustom alertState={alert} count={alertKey} />
       <Link to={"/"}>
         <Image
           // display={{ base: "none", md: "flex" }}
@@ -160,70 +167,48 @@ const Login = () => {
           fontSize="16px"
           fontWeight="400"
         >
-          <Stack spacing={1}>
+          <FormControl isInvalid={errors.email ? true : false} isRequired>
             <Input
-              isInvalid={errors.email ? true : false}
+              type="email"
               name="email"
               value={form.email}
-              onChange={handleChange}
-              type="email"
               size="lg"
+              onChange={handleChange}
               variant="flushed"
               placeholder="Email"
               borderBottom="2px"
               borderBottomColor="#D2C2FFAD"
-              errorBorderColor="crimson"
               _focus={{
                 borderBottomColor: "#2395FF",
               }}
             />
-            <Alert
-              px="2"
-              py="1"
-              h="auto"
-              fontSize="14"
-              display={errors.email ? "flex" : "none"}
-              status="error"
-              variant="subtle"
-              transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
-              rounded="10px"
-            >
-              <AlertIcon w="4" h="4" />
-              <AlertTitle>{errors.email}</AlertTitle>
-            </Alert>
-          </Stack>
-          <Stack spacing={1}>
+            <Collapse in={errors.email ? true : false} animateOpacity>
+              <Text fontSize="14px" mt="8px" textColor="crimson">
+                {errors.email || "."}
+              </Text>
+            </Collapse>
+          </FormControl>
+          <FormControl isInvalid={errors.password ? true : false} isRequired>
             <Input
-              isInvalid={errors.password ? true : false}
+              type="password"
               name="password"
               value={form.password}
-              onChange={handleChange}
-              type="password"
               size="lg"
+              onChange={handleChange}
               variant="flushed"
               placeholder="Password"
               borderBottom="2px"
               borderBottomColor="#D2C2FFAD"
-              errorBorderColor="crimson"
               _focus={{
                 borderBottomColor: "#2395FF",
               }}
             />
-            <Alert
-              px="2"
-              py="1"
-              h="auto"
-              fontSize="14"
-              display={errors.password ? "flex" : "none"}
-              status="error"
-              variant="subtle"
-              transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
-              rounded="10px"
-            >
-              <AlertIcon w="4" h="4" />
-              <AlertTitle>{errors.password}</AlertTitle>
-            </Alert>
-          </Stack>
+            <Collapse in={errors.password ? true : false} animateOpacity>
+              <Text fontSize="14px" mt="8px" textColor="crimson">
+                {errors.password || "."}
+              </Text>
+            </Collapse>
+          </FormControl>
         </Flex>
         <Button
           onClick={handleLogin}

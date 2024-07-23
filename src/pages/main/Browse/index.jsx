@@ -25,8 +25,16 @@ import {
 	Text,
 	VisuallyHidden,
 	VStack,
+	ListIcon,
+	Popover,
+	PopoverTrigger,
+	Portal,
+	PopoverContent,
+	PopoverBody,
+	PopoverCloseButton,
+	PopoverArrow,
 } from '@chakra-ui/react';
-// import { Link as ReactRouterLink } from 'react-router-dom';
+import { Link as ReactRouterLink, useSearchParams } from 'react-router-dom';
 import {
 	FilterIcon,
 	FlighIcon,
@@ -38,6 +46,7 @@ import planeIcon from '../../../assets/plane-icon.svg';
 import garudaIndonesiaLogo from '../../../assets/garuda-indonesia-logo.png';
 import airAsiaLogo from '../../../assets/air-asia-logo.png';
 import lionAirLogo from '../../../assets/lion-air-logo.png';
+import { CiCircleCheck } from 'react-icons/ci';
 
 function SearchDestinationItem({ label, destination, textAlign }) {
 	return (
@@ -307,15 +316,27 @@ function ViewDetails() {
 		<Accordion color='#2395FF' allowToggle>
 			<AccordionItem border='0px'>
 				<h3>
-					<AccordionButton gap='16px' fontWeight='600' px='4px'>
+					<AccordionButton
+						gap='16px'
+						fontWeight='600'
+						pl='4px'
+						justifyContent={{ base: 'space-between', md: 'flex-start' }}
+						_hover={{ bg: 'transparent' }}
+					>
 						<Text as='span'>View Details</Text>
 						<AccordionIcon />
 					</AccordionButton>
 				</h3>
 				<AccordionPanel bgColor='white'>
-					<List display='grid' gap='8px'>
-						<ListItem>Refundable</ListItem>
-						<ListItem>Can reschedule</ListItem>
+					<List display='grid' gap='8px' fontWeight='500'>
+						<ListItem display='flex' alignItems='center'>
+							<ListIcon as={CiCircleCheck} fontSize='24px' />
+							<Text fontSize='14px'>Refundable</Text>
+						</ListItem>
+						<ListItem display='flex' alignItems='center'>
+							<ListIcon as={CiCircleCheck} fontSize='24px' />
+							<Text fontSize='14px'>Can reschedule</Text>
+						</ListItem>
 					</List>
 				</AccordionPanel>
 			</AccordionItem>
@@ -324,7 +345,7 @@ function ViewDetails() {
 }
 
 function FlightCard({ flight }) {
-	const { facilities, price } = flight;
+	const { facilities, price, logo, from, to, estimation_time, id } = flight;
 	return (
 		<GridItem
 			as='li'
@@ -341,12 +362,12 @@ function FlightCard({ flight }) {
 		>
 			<Flex alignItems='center' gap='30px' mb={{ base: '20px', md: '30px' }}>
 				<Image
-					src={garudaIndonesiaLogo}
-					alt='Garuda Indonesia'
+					src={logo.src}
+					alt={logo.alt}
 					display={{ base: 'none', md: 'block' }}
 				/>
 				<Text color='#595959' fontWeight='500'>
-					Garuda Indonesia
+					{logo.alt}
 				</Text>
 			</Flex>
 			<Box flex='1' w='100%' mb={{ base: '10px', md: '20px' }}>
@@ -359,10 +380,10 @@ function FlightCard({ flight }) {
 							lineHeight='1'
 							mb='4px'
 						>
-							IDN
+							{from.country_code}
 						</Text>
 						<Text fontSize='14px' color='#6B6B6B'>
-							12:33
+							{from.time}
 						</Text>
 					</Box>
 					<Box mt='4px'>
@@ -376,10 +397,10 @@ function FlightCard({ flight }) {
 							lineHeight='1'
 							mb='4px'
 						>
-							IDN
+							{to.country_code}
 						</Text>
 						<Text fontSize='14px' color='#6B6B6B'>
-							12:33
+							{to.time}
 						</Text>
 					</Box>
 					<Flex
@@ -388,7 +409,7 @@ function FlightCard({ flight }) {
 						display={{ base: 'none', md: 'flex' }}
 					>
 						<Text fontSize='16px' color='#595959'>
-							3 hours 11 minutes
+							{estimation_time}
 						</Text>
 						<Text fontSize='12px' color='#6B6B6B'>
 							(1 Transit)
@@ -397,7 +418,7 @@ function FlightCard({ flight }) {
 					<List
 						display={{ base: 'none', md: 'flex' }}
 						alignItems='center'
-						gap='10px'
+						gap='12px'
 					>
 						{facilities.map(({ label, icon }) => {
 							return (
@@ -417,11 +438,24 @@ function FlightCard({ flight }) {
 						</Text>
 					</Flex>
 					<Box display={{ base: 'none', md: 'block' }}>
-						<ChakraLink variant='blue'>Select</ChakraLink>
+						<ChakraLink
+							as={ReactRouterLink}
+							to={`/flight/${id}`}
+							fontSize='16px'
+							fontWeight='700'
+							py='14px'
+							color='white'
+							bgColor='#2395FF'
+							px='28px'
+							rounded='8px'
+							boxShadow='0px 8px 10px 0px #2395FF4D'
+						>
+							Select
+						</ChakraLink>
 					</Box>
 				</Flex>
 			</Box>
-			<Box display={{ base: 'none', md: 'block' }}>
+			<Box>
 				<ViewDetails />
 			</Box>
 		</GridItem>
@@ -440,12 +474,22 @@ function FlighList() {
 
 function FilterItem({ item }) {
 	const { label, value } = item;
+	const [searchParams, setSearchParams] = useSearchParams();
+
+	const handleChange = value => {
+		setSearchParams(prev => {
+			console.log('prev > ', prev);
+			return [...prev.entries(), ['facilities', value]];
+		});
+	};
+
 	return (
 		<Checkbox
 			w='100%'
 			flexDir='row-reverse'
 			justifyContent='space-between'
 			value={value}
+			onChange={() => handleChange(value)}
 		>
 			{label}
 		</Checkbox>
@@ -527,95 +571,196 @@ const AIRLINE_LIST = [
 	{ label: 'Lion Air', value: 'Lion Air' },
 ];
 
+function FilterListMobile() {
+	return (
+		<Popover>
+			<PopoverTrigger>
+				<Button
+					rightIcon={<FilterIcon />}
+					variant='ghost'
+					fontSize='14px'
+					fontWeight='500'
+					justifyContent='space-between'
+				>
+					Filter
+				</Button>
+			</PopoverTrigger>
+			<Portal>
+				<PopoverContent mr='28px' pt='30px'>
+					<PopoverArrow />
+					<PopoverCloseButton />
+					<PopoverBody>
+						<VStack>
+							<FilterGroup label='Transit' items={TRANSIT_LIST} />
+							<FilterGroup label='Facilities' items={FACILITY_LIST} />
+							<FilterGroup label='Departure Time' items={DEPARTURE_TIME_LIST} />
+							<FilterGroup label='Arrival Time' items={ARRIVAL_TIME_LIST} />
+							<FilterGroup label='Airlines' items={AIRLINE_LIST} />
+							<Accordion w='100%' allowMultiple defaultIndex={[0, 1]}>
+								<AccordionItem border='0px'>
+									<h2>
+										<AccordionButton>
+											<Box
+												as='span'
+												flex='1'
+												textAlign='left'
+												fontWeight='600'
+												fontSize='16px'
+											>
+												Ticket Price
+											</Box>
+											<AccordionIcon color='#2395FF' />
+										</AccordionButton>
+									</h2>
+
+									<AccordionPanel>
+										<Grid gap='15px'>
+											<Flex
+												justifyContent='space-between'
+												color='#6B6B6B'
+												fontSize='12px'
+											>
+												<Text>Lowest</Text>
+												<Text>Highest</Text>
+											</Flex>
+											<RangeSlider
+												aria-label={['min', 'max']}
+												min={140}
+												max={300}
+												defaultValue={[160, 190]}
+												step={5}
+											>
+												<RangeSliderTrack>
+													<RangeSliderFilledTrack />
+												</RangeSliderTrack>
+												<RangeSliderThumb index={0} />
+												<RangeSliderThumb index={1} />
+											</RangeSlider>
+											<Flex
+												justifyContent='space-between'
+												color='#2395FF'
+												fontSize='16px'
+												fontWeight='600'
+											>
+												<Text>$ 145,00</Text>
+												<Text>$ 300,00</Text>
+											</Flex>
+										</Grid>
+									</AccordionPanel>
+								</AccordionItem>
+							</Accordion>
+						</VStack>
+					</PopoverBody>
+				</PopoverContent>
+			</Portal>
+		</Popover>
+	);
+}
+
+function SearchSidebar() {
+	const [searchParams, setSearchParams] = useSearchParams();
+
+	const handleReset = () => {
+		setSearchParams({});
+	};
+
+	return (
+		<>
+			<Flex alignItems='center' justifyContent='space-between' mb='25px'>
+				<Text fontSize='24px' fontWeight='600'>
+					Filter
+				</Text>
+				<Button
+					fontSize='16px'
+					fontWeight='600px'
+					color='#2395FF'
+					variant='ghost'
+					onClick={handleReset}
+				>
+					Reset
+				</Button>
+			</Flex>
+
+			<Box bgColor='white' rounded='15px' p='30px'>
+				<VStack>
+					<FilterGroup label='Transit' items={TRANSIT_LIST} />
+					<FilterGroup label='Facilities' items={FACILITY_LIST} />
+					<FilterGroup label='Departure Time' items={DEPARTURE_TIME_LIST} />
+					<FilterGroup label='Arrival Time' items={ARRIVAL_TIME_LIST} />
+					<FilterGroup label='Airlines' items={AIRLINE_LIST} />
+					<Accordion w='100%' allowMultiple defaultIndex={[0, 1]}>
+						<AccordionItem border='0px'>
+							<h2>
+								<AccordionButton>
+									<Box
+										as='span'
+										flex='1'
+										textAlign='left'
+										fontWeight='600'
+										fontSize='16px'
+									>
+										Ticket Price
+									</Box>
+									<AccordionIcon color='#2395FF' />
+								</AccordionButton>
+							</h2>
+
+							<AccordionPanel>
+								<Grid gap='15px'>
+									<Flex
+										justifyContent='space-between'
+										color='#6B6B6B'
+										fontSize='12px'
+									>
+										<Text>Lowest</Text>
+										<Text>Highest</Text>
+									</Flex>
+									<RangeSlider
+										aria-label={['min', 'max']}
+										min={140}
+										max={300}
+										defaultValue={[160, 190]}
+										step={5}
+									>
+										<RangeSliderTrack>
+											<RangeSliderFilledTrack />
+										</RangeSliderTrack>
+										<RangeSliderThumb index={0} />
+										<RangeSliderThumb index={1} />
+									</RangeSlider>
+									<Flex
+										justifyContent='space-between'
+										color='#2395FF'
+										fontSize='16px'
+										fontWeight='600'
+									>
+										<Text>$ 145,00</Text>
+										<Text>$ 300,00</Text>
+									</Flex>
+								</Grid>
+							</AccordionPanel>
+						</AccordionItem>
+					</Accordion>
+				</VStack>
+			</Box>
+		</>
+	);
+}
+
 export default function BrowsePage() {
 	return (
-		<Box as='section' bgColor={{ base: 'white', md: '#F5F6FA' }} pb='44px'>
+		<Box
+			as='section'
+			bgColor={{ base: 'white', md: '#F5F6FA' }}
+			pb='44px'
+			fontFamily='Poppins'
+		>
 			<SearchHeader />
 			<Box mt='50px'>
 				<Container maxW='1226px' px='28px'>
 					<Flex gap='24px'>
-						<Box display={{ base: 'none', md: 'block' }} flexBasis='300px'>
-							<Flex
-								alignItems='center'
-								justifyContent='space-between'
-								mb='25px'
-							>
-								<Text fontSize='24px' fontWeight='600'>
-									Filter
-								</Text>
-								<Button
-									fontSize='16px'
-									fontWeight='600px'
-									color='#2395FF'
-									variant='ghost'
-								>
-									Reset
-								</Button>
-							</Flex>
-
-							<Box bgColor='white' rounded='15px' p='30px'>
-								<VStack>
-									<FilterGroup label='Transit' items={TRANSIT_LIST} />
-									<FilterGroup label='Facilities' items={FACILITY_LIST} />
-									<FilterGroup
-										label='Departure Time'
-										items={DEPARTURE_TIME_LIST}
-									/>
-									<FilterGroup label='Arrival Time' items={ARRIVAL_TIME_LIST} />
-									<FilterGroup label='Airlines' items={AIRLINE_LIST} />
-									<Accordion w='100%' allowMultiple defaultIndex={[0, 1]}>
-										<AccordionItem border='0px'>
-											<h2>
-												<AccordionButton>
-													<Box
-														as='span'
-														flex='1'
-														textAlign='left'
-														fontWeight='600'
-														fontSize='16px'
-													>
-														Ticket Price
-													</Box>
-													<AccordionIcon color='#2395FF' />
-												</AccordionButton>
-											</h2>
-
-											<AccordionPanel>
-												<Grid gap='15px'>
-													<Flex
-														justifyContent='space-between'
-														color='#6B6B6B'
-														fontSize='12px'
-													>
-														<Text>Lowest</Text>
-														<Text>Highest</Text>
-													</Flex>
-													<RangeSlider
-														aria-label={['min', 'max']}
-														defaultValue={[100, 300]}
-														step={1}
-													>
-														<RangeSliderTrack>
-															<RangeSliderFilledTrack />
-														</RangeSliderTrack>
-														<RangeSliderThumb index={0} />
-														<RangeSliderThumb index={1} />
-													</RangeSlider>
-													<Flex
-														justifyContent='space-between'
-														color='#2395FF'
-														fontSize='16px'
-														fontWeight='600'
-													>
-														<Text>$ 145,00</Text>
-														<Text>$ 300,00</Text>
-													</Flex>
-												</Grid>
-											</AccordionPanel>
-										</AccordionItem>
-									</Accordion>
-								</VStack>
-							</Box>
+						<Box display={{ base: 'none', lg: 'block' }} flexBasis='300px'>
+							<SearchSidebar />
 						</Box>
 						<Box flex='1'>
 							<Flex
@@ -639,15 +784,7 @@ export default function BrowsePage() {
 									</Text>
 								</Flex>
 								<Box display={{ base: 'block', md: 'none' }}>
-									<Button
-										rightIcon={<FilterIcon />}
-										variant='ghost'
-										fontSize='14px'
-										fontWeight='500'
-										justifyContent='space-between'
-									>
-										Filter
-									</Button>
+									<FilterListMobile />
 								</Box>
 								<Box display={{ base: 'none', md: 'block' }}>
 									<Button

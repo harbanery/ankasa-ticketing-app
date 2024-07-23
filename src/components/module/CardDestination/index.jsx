@@ -1,0 +1,69 @@
+import React from "react";
+import {
+  Card,
+  Stack,
+  CardHeader,
+  Box,
+  Flex,
+  Text,
+  CardFooter,
+  Button,
+} from "@chakra-ui/react";
+import { IoIosArrowForward } from "react-icons/io";
+import { Link } from "react-router-dom";
+
+const CardComponent = ({ backgroundImage, airlinesCount, city, country }) => {
+  return (
+    <Card backgroundImage={`url(${backgroundImage})`} w={"206px"} h={"262px"}>
+      <Stack spacing={75}>
+        <CardHeader>
+          <Box
+            px={"20px"}
+            py={"10px"}
+            w={"fit-content"}
+            color={"gray"}
+            backdropFilter="auto"
+            backdropContrast="60%"
+            rounded="full"
+          >
+            <Flex columnGap={2}>
+              <Text color={"white"} fontWeight={600}>
+                {airlinesCount}
+              </Text>
+              <Text color={"white"} fontWeight={300}>
+                {" "}
+                Airlines
+              </Text>
+            </Flex>
+          </Box>
+        </CardHeader>
+        <CardFooter>
+          <Flex justify={"space-between"} w={"full"} alignItems={"center"}>
+            <Box>
+              <Text fontSize={"base"} color={"white"}>
+                {city},
+              </Text>
+              <Text fontSize={"3xl"} color={"white"} fontWeight={600}>
+                {country}
+              </Text>
+            </Box>
+            <Link to="#">
+              <Box
+                color={"gray"}
+                backdropFilter="auto"
+                backdropContrast="40%"
+                rounded="full"
+                p={1}
+                h={"fit-content"}
+              >
+                <IoIosArrowForward color="white" />
+              </Box>
+            </Link>
+          </Flex>
+        </CardFooter>
+      </Stack>
+    </Card>
+  );
+};
+
+export default CardComponent;

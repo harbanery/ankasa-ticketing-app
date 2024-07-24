@@ -6,8 +6,6 @@ import {
 	AccordionPanel,
 	Box,
 	Button,
-	Checkbox,
-	CheckboxGroup,
 	Container,
 	Flex,
 	Grid,
@@ -47,6 +45,7 @@ import garudaIndonesiaLogo from '../../../assets/garuda-indonesia-logo.png';
 import airAsiaLogo from '../../../assets/air-asia-logo.png';
 import lionAirLogo from '../../../assets/lion-air-logo.png';
 import { CiCircleCheck } from 'react-icons/ci';
+import { FilterGroup } from '../../../components/module/Filter';
 
 function SearchDestinationItem({ label, destination, textAlign }) {
 	return (
@@ -469,73 +468,6 @@ function FlighList() {
 				return <FlightCard key={flight.id} flight={flight} />;
 			})}
 		</Grid>
-	);
-}
-
-function FilterItem({ item }) {
-	const { label, value } = item;
-	const [searchParams, setSearchParams] = useSearchParams();
-
-	const handleChange = value => {
-		setSearchParams(prev => {
-			console.log('prev > ', prev);
-			return [...prev.entries(), ['facilities', value]];
-		});
-	};
-
-	return (
-		<Checkbox
-			w='100%'
-			flexDir='row-reverse'
-			justifyContent='space-between'
-			value={value}
-			onChange={() => handleChange(value)}
-		>
-			{label}
-		</Checkbox>
-	);
-}
-
-function FilterList({ items }) {
-	return (
-		<List>
-			<ListItem>
-				<CheckboxGroup>
-					<VStack spacing='20px'>
-						{items.map(item => (
-							<FilterItem item={item} key={item.label} />
-						))}
-					</VStack>
-				</CheckboxGroup>
-			</ListItem>
-		</List>
-	);
-}
-
-function FilterGroup({ label, items }) {
-	return (
-		<Accordion w='100%' allowMultiple defaultIndex={[0, 1]}>
-			<AccordionItem borderTop='0px'>
-				<h2>
-					<AccordionButton>
-						<Box
-							as='span'
-							flex='1'
-							textAlign='left'
-							fontWeight='600'
-							fontSize='16px'
-						>
-							{label}
-						</Box>
-						<AccordionIcon color='#2395FF' />
-					</AccordionButton>
-				</h2>
-
-				<AccordionPanel>
-					<FilterList items={items} />
-				</AccordionPanel>
-			</AccordionItem>
-		</Accordion>
 	);
 }
 

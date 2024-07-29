@@ -132,6 +132,5 @@ const ResetPassword = () => {
     </Container>
   );
 };
-s;
 
 export default ResetPassword;

@@ -3,7 +3,7 @@ import { IoLocationOutline } from "react-icons/io5";
 
 const Footer = () => {
   return (
-    <Box w="100%" h={"400px"}>
+    <Box w="100%" h={"400px"} mt={24}>
       <Stack alignItems={"center"}>
         <Grid templateColumns="repeat(5, 1fr)" gap={6} w={"80%"}>
           <GridItem colSpan={2} w="100%" h="10">

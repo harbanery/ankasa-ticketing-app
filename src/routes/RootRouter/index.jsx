@@ -10,6 +10,7 @@ import FlightDetail from "../../pages/main/Flight";
 import BoardingPassPage from "../../pages/main/BoardingPass";
 import BrowsePage from "../../pages/main/Browse";
 import ResetPassword from "../../pages/auth/ResetPassword";
+import Profile from "../../pages/main/Profile";
 
 const RootRouter = () => {
   const router = createBrowserRouter([
@@ -30,6 +31,10 @@ const RootRouter = () => {
         {
           path: "my-booking/:id",
           element: <BoardingPassPage />,
+        },
+        {
+          path: "profile",
+          element: <Profile />,
         },
       ],
     },

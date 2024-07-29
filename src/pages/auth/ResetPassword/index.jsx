@@ -193,19 +193,4 @@ const ResetPassword = () => {
   );
 };
 
-export const resetPasswordLoader = ({ request }) => {
-  const url = new URL(request.url);
-  const params = new URLSearchParams(url.search);
-  const user_id = params.get("id");
-  const user_token = params.get("token");
-  // const params = url.search;
-  // console.log(params);
-
-  if (!user_token || !user_id) {
-    return redirect("/auth/login");
-  }
-
-  return { user_id, user_token };
-};
-
 export default ResetPassword;

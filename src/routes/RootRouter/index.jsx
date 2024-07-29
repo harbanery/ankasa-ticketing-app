@@ -1,17 +1,22 @@
 import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Explore from "../../pages/main/Explore";
-import Login, { verifyEmailLoader } from "../../pages/auth/Login";
+import Login from "../../pages/auth/Login";
 import ForgotPassword from "../../pages/auth/ForgotPassword";
 import Register from "../../pages/auth/Register";
-import LayoutMain, { mainLoader } from "../../pages/layout/LayoutMain";
-import LayoutAuth, { authLoader } from "../../pages/layout/LayoutAuth";
+import LayoutMain from "../../pages/layout/LayoutMain";
+import LayoutAuth from "../../pages/layout/LayoutAuth";
 import FlightDetail from "../../pages/main/Flight";
 import BoardingPassPage from "../../pages/main/BoardingPass";
 import BrowsePage from "../../pages/main/Browse";
-import ResetPassword, {
+import ResetPassword from "../../pages/auth/ResetPassword";
+import Profile from "../../pages/main/Profile";
+import {
+  authLoader,
+  mainLoader,
   resetPasswordLoader,
-} from "../../pages/auth/ResetPassword";
+  verifyEmailLoader,
+} from "../../utils/loaders";
 
 const RootRouter = () => {
   const router = createBrowserRouter([
@@ -32,6 +37,10 @@ const RootRouter = () => {
         {
           path: "my-booking/:id",
           element: <BoardingPassPage />,
+        },
+        {
+          path: "profile",
+          element: <Profile />,
         },
       ],
     },

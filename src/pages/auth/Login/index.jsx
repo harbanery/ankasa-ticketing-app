@@ -369,30 +369,4 @@ const Login = () => {
   );
 };
 
-export const verifyEmailLoader = async ({ request }) => {
-  const url = new URL(request.url);
-  const params = new URLSearchParams(url.search);
-  const user_id = params.get("id");
-  const user_token = params.get("token");
-
-  if (!user_token || !user_id) {
-    console.error("Unknown id or token from email verification.");
-    return redirect("/");
-  } else {
-    try {
-      await api.get(`verify`, {
-        params: {
-          id: user_id,
-          token: user_token,
-        },
-      });
-
-      return redirect("/auth/login");
-    } catch (error) {
-      console.error("Error fetching profile data", error);
-      return redirect("/");
-    }
-  }
-};
-
 export default Login;

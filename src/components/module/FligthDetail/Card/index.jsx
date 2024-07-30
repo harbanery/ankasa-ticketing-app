@@ -7,8 +7,6 @@ const CardFlightDetail = ({ w, h, children, ...props }) => {
       h={h}
       w={w}
       position={"absolute"}
-      // top={top}
-      // left={left}
       borderRadius={15}
       {...props}
     >

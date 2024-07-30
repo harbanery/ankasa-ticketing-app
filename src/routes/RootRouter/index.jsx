@@ -8,6 +8,7 @@ import LayoutMain, { mainLoader } from "../../pages/layout/LayoutMain";
 import LayoutAuth, { authLoader } from "../../pages/layout/LayoutAuth";
 import FlightDetail from "../../pages/main/Flight";
 import BoardingPassPage from "../../pages/main/BoardingPass";
+import { protectedRoute } from "../../utils/protectedRoute";
 
 const RootRouter = () => {
   const router = createBrowserRouter([
@@ -28,6 +29,7 @@ const RootRouter = () => {
         {
           path: "my-booking/:id",
           element: <BoardingPassPage />,
+          loader: protectedRoute,
         },
       ],
     },

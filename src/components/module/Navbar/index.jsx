@@ -2,36 +2,37 @@ import {
   Avatar,
   Box,
   Button,
+  Drawer,
+  DrawerBody,
+  DrawerCloseButton,
+  DrawerContent,
+  DrawerHeader,
+  DrawerOverlay,
   Flex,
-  IconButton,
   Image,
   Menu,
   MenuButton,
   MenuDivider,
-  MenuGroup,
   MenuItem,
   MenuList,
-  Stack,
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
-import React from "react";
+import React, { useRef } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { AiOutlineBell } from "react-icons/ai";
 import { HiOutlineEnvelope } from "react-icons/hi2";
 import { IoClose } from "react-icons/io5";
 import { FaBars } from "react-icons/fa6";
 import { auth } from "../../../services/firebase";
-import {
-  getTokenfromLocalStorage,
-  removeTokenfromLocalStorage,
-} from "../../../utils/localStorage";
+import { removeTokenfromLocalStorage } from "../../../utils/localStorage";
 import api from "../../../services/api";
 
 const Navbar = ({ data_user = {}, token = "" }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  // const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const btnRef = useRef();
 
   // const { token } = getTokenfromLocalStorage();
 
@@ -80,7 +81,7 @@ const Navbar = ({ data_user = {}, token = "" }) => {
       transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
     >
       <Flex justifyContent="space-between" alignItems="center" gap={"2rem"}>
-        {/* <Button
+        <Button
           display={{ base: "flex", lg: "none" }}
           aspectRatio={1}
           borderRadius="10px"
@@ -88,30 +89,37 @@ const Navbar = ({ data_user = {}, token = "" }) => {
           onClick={isOpen ? onClose : onOpen}
         >
           {isOpen ? <IoClose fontSize="20px" /> : <FaBars />}
-        </Button> */}
-        <Menu isLazy>
-          {({ isOpen }) => (
-            <>
-              <MenuButton
-                as={IconButton}
-                aria-label="Options"
-                icon={isOpen ? <IoClose fontSize="20px" /> : <FaBars />}
-                variant="outline"
-                borderRadius="10px"
-                display={{ base: "flex", lg: "none" }}
-              />
-              <MenuList
-                borderRadius="10px"
-                display={{ lg: "none" }}
-                boxShadow="0px 8px 10px 0px #dddfe24D"
-                transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+        </Button>
+        <Drawer
+          isOpen={isOpen}
+          placement="top"
+          size="sm"
+          onClose={onClose}
+          finalFocusRef={btnRef}
+        >
+          <DrawerOverlay display={{ base: "flex", lg: "none" }} />
+          <DrawerContent
+            display={{ base: "flex", lg: "none" }}
+            fontFamily="Poppins"
+          >
+            <DrawerCloseButton fontSize="16px" />
+            <DrawerHeader></DrawerHeader>
+
+            <DrawerBody mb={5}>
+              <Box
+                display={{ base: "flex" }}
+                fontWeight="500"
+                fontSize={{ base: "18px", xl: "20px" }}
+                justifyContent="center"
+                alignItems="center"
+                gap="5rem"
               >
                 {menu_lists.map((menu) => {
                   if (menu.required_token == true) {
                     {
                       return (
                         token && (
-                          <MenuBarDisclosure
+                          <MenuBar
                             key={menu.name}
                             menu={menu}
                             location={location}
@@ -121,7 +129,7 @@ const Navbar = ({ data_user = {}, token = "" }) => {
                     }
                   } else {
                     return (
-                      <MenuBarDisclosure
+                      <MenuBar
                         key={menu.name}
                         menu={menu}
                         location={location}
@@ -129,17 +137,10 @@ const Navbar = ({ data_user = {}, token = "" }) => {
                     );
                   }
                 })}
-              </MenuList>
-            </>
-          )}
-        </Menu>
-        {/* <IconButton
-          size={"md"}
-          icon={isOpen ? <IoClose fontSize={28} /> : <FaBars />}
-          aria-label={"Open Menu"}
-          display={{ md: "none" }}
-          onClick={isOpen ? onClose : onOpen}
-        /> */}
+              </Box>
+            </DrawerBody>
+          </DrawerContent>
+        </Drawer>
         <NavLink to={"/"}>
           <Image
             src="/src/assets/brandicon.png"
@@ -209,14 +210,6 @@ const Navbar = ({ data_user = {}, token = "" }) => {
               <Box display={{ base: "none", sm: "block" }}>
                 <AiOutlineBell color="#595959" fontSize="28px" />
               </Box>
-              {/* <Box
-                borderRadius="100%"
-                border="2px"
-                borderColor="#2395FF"
-                p="2px"
-              >
-                <Avatar name={data_user.username} src={data_user.image} />
-              </Box> */}
               <Menu>
                 <Box
                   borderRadius="100%"
@@ -237,7 +230,7 @@ const Navbar = ({ data_user = {}, token = "" }) => {
                   boxShadow="0px 8px 10px 0px #dddfe24D"
                   transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
                 >
-                  <NavLink to="/">
+                  <NavLink to="/profile">
                     <MenuItem>My Profile</MenuItem>
                   </NavLink>
                   <MenuItem onClick={handleLogout}>Logout</MenuItem>
@@ -260,43 +253,6 @@ const Navbar = ({ data_user = {}, token = "" }) => {
           )}
         </Flex>
       </Flex>
-      {/* {isOpen ? (
-        <Box
-          bg="gray.200"
-          position={"absolute"}
-          borderRadius="10px"
-          p="1rem"
-          display={{ base: "block", lg: "none" }}
-          boxShadow="0px 8px 10px 0px #dddfe24D"
-          transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
-        >
-          <Stack as={"nav"} spacing={4} direction={"column-reverse"}>
-            {menu_lists.map((menu) => {
-              if (menu.required_token == true) {
-                {
-                  return (
-                    token && (
-                      <MenuBarDisclosure
-                        key={menu.name}
-                        menu={menu}
-                        location={location}
-                      />
-                    )
-                  );
-                }
-              } else {
-                return (
-                  <MenuBarDisclosure
-                    key={menu.name}
-                    menu={menu}
-                    location={location}
-                  />
-                );
-              }
-            })}
-          </Stack>
-        </Box>
-      ) : null} */}
     </Box>
   );
 };
@@ -320,18 +276,6 @@ const MenuBar = ({ menu, location }) => {
       >
         {menu.name}
       </Text>
-    </NavLink>
-  );
-};
-
-const MenuBarDisclosure = ({ menu, location }) => {
-  return (
-    <NavLink to={menu.navigation}>
-      <MenuItem
-        fontWeight={location.pathname == menu.navigation ? "700" : "500"}
-      >
-        {menu.name}
-      </MenuItem>
     </NavLink>
   );
 };

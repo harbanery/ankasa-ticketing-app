@@ -4,12 +4,20 @@ import Explore from "../../pages/main/Explore";
 import Login from "../../pages/auth/Login";
 import ForgotPassword from "../../pages/auth/ForgotPassword";
 import Register from "../../pages/auth/Register";
-import LayoutMain, { mainLoader } from "../../pages/layout/LayoutMain";
-import LayoutAuth, { authLoader } from "../../pages/layout/LayoutAuth";
+import LayoutMain from "../../pages/layout/LayoutMain";
+import LayoutAuth from "../../pages/layout/LayoutAuth";
 import FlightDetail from "../../pages/main/Flight";
 import BoardingPassPage from "../../pages/main/BoardingPass";
 import { protectedRoute } from "../../utils/protectedRoute";
-
+import BrowsePage from "../../pages/main/Browse";
+import ResetPassword from "../../pages/auth/ResetPassword";
+import Profile from "../../pages/main/Profile";
+import {
+  authLoader,
+  mainLoader,
+  resetPasswordLoader,
+  verifyEmailLoader,
+} from "../../utils/loaders";
 const RootRouter = () => {
   const router = createBrowserRouter([
     {
@@ -20,7 +28,7 @@ const RootRouter = () => {
         { index: true, element: <Explore /> },
         {
           path: "browse",
-          element: <h1>Browse</h1>,
+          element: <BrowsePage />,
         },
         {
           path: "flight/:id",
@@ -30,6 +38,10 @@ const RootRouter = () => {
           path: "my-booking/:id",
           element: <BoardingPassPage />,
           loader: protectedRoute,
+        },
+        {
+          path: "profile",
+          element: <Profile />,
         },
       ],
     },
@@ -49,6 +61,15 @@ const RootRouter = () => {
         {
           path: "forgot-password",
           element: <ForgotPassword />,
+        },
+        {
+          path: "reset-password",
+          element: <ResetPassword />,
+          loader: resetPasswordLoader,
+        },
+        {
+          path: "email-verification",
+          loader: verifyEmailLoader,
         },
       ],
     },

@@ -45,34 +45,6 @@ const LayoutAuth = () => {
   );
 };
 
-export const authLoader = ({ request }) => {
-  const url = new URL(request.url);
-  const pathname = url.pathname;
-  const { token } = getTokenfromLocalStorage();
-  // const previousPage = document.referrer;
-  // console.log(`${previousPage}`);
-
-  if (pathname == "/auth") {
-    return redirect("/auth/register");
-  }
-
-  if (token) {
-    return redirect("/");
-    // const redirectTo =
-    //   document.referrer !== window.location.origin + "/"
-    //     ? "/"
-    //     : document.referrer;
-    // return { redirectTo };
-    // if (previousPage !== window.location.origin + "/") {
-    //   return redirect("/");
-    // } else {
-    //   return redirect(-1);
-    // }
-  }
-
-  return null;
-};
-
 // export const AuthWrapper = ({ children }) => {
 //   const loaderData = useLoaderData();
 

@@ -23,6 +23,7 @@ const ForgotPassword = () => {
     email: "",
   });
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
   const [messageVisible, setMessageVisible] = useState(false);
 
   const handleChange = (e) => {
@@ -39,6 +40,7 @@ const ForgotPassword = () => {
 
   const handleForgotPassword = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       await emailValidation.validate(form, { abortEarly: false });
 
@@ -54,6 +56,7 @@ const ForgotPassword = () => {
           status: "success",
           ...optionToast,
         });
+        setLoading(false);
         setMessageVisible(true);
       } catch (err) {
         console.log(err);
@@ -65,6 +68,7 @@ const ForgotPassword = () => {
           status: "error",
           ...optionToast,
         });
+        setLoading(false);
       }
     } catch (err) {
       if (err.inner) {
@@ -73,6 +77,7 @@ const ForgotPassword = () => {
         }, {});
         setErrors(formErrors);
       }
+      setLoading(false);
     }
   };
 
@@ -112,6 +117,7 @@ const ForgotPassword = () => {
               placeholder="Email"
               borderBottom="2px"
               borderBottomColor="#D2C2FFAD"
+              autoComplete="off"
               _focus={{
                 borderBottomColor: "#2395FF",
               }}
@@ -124,6 +130,8 @@ const ForgotPassword = () => {
           </FormControl>
         </Flex>
         <Button
+          isLoading={loading ? true : false}
+          loadingText="Loading"
           onClick={handleForgotPassword}
           bg="#2395FF"
           borderRadius="10px"
@@ -149,6 +157,7 @@ const ForgotPassword = () => {
           flexDirection="column"
           alignItems="center"
           fontFamily="Lato"
+          textColor="#595959"
           fontSize="16px"
           fontWeight="400"
         >

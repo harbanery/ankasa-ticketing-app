@@ -10,20 +10,28 @@ import {
   Heading,
   Image,
   Input,
+  InputGroup,
+  InputRightElement,
   Text,
   useToast,
 } from "@chakra-ui/react";
 import api from "../../../services/api";
-import { Link, redirect, useSearchParams } from "react-router-dom";
+import { Link, redirect, useLoaderData, useNavigate } from "react-router-dom";
+import { BsEye, BsEyeSlash } from "react-icons/bs";
+import { optionToast } from "../../../utils/constants";
 
 const ResetPassword = () => {
-  // const [searchParams] = useSearchParams();
-
+  const navigate = useNavigate();
+  const { user_id, user_token } = useLoaderData();
   const toast = useToast();
   const [form, setForm] = useState({
     password: "",
   });
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleShowPassword = () => setShowPassword(!showPassword);
 
   const handleChange = (e) => {
     setErrors({
@@ -37,18 +45,42 @@ const ResetPassword = () => {
     });
   };
 
-  const handleForgotPassword = async (e) => {
+  const handleResetPassword = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       await passwordValidation.validate(form, { abortEarly: false });
 
       try {
-        await api.post(`resetPassword`, {
-          password: form.password,
+        await api.put(
+          `resetPassword`,
+          {
+            password: form.password,
+          },
+          {
+            params: {
+              id: user_id,
+              token: user_token,
+            },
+          }
+        );
+        toast({
+          title: "Reset password successfully",
+          status: "success",
+          ...optionToast,
         });
+        setLoading(false);
+        navigate("/auth/login");
       } catch (err) {
         console.log(err);
         // setAlert({ status: "error", message: err?.response?.data?.message })
+
+        toast({
+          title: "Reset password failed",
+          status: "error",
+          ...optionToast,
+        });
+        setLoading(false);
       }
     } catch (err) {
       if (err.inner) {
@@ -57,6 +89,7 @@ const ResetPassword = () => {
         }, {});
         setErrors(formErrors);
       }
+      setLoading(false);
     }
   };
 
@@ -86,20 +119,45 @@ const ResetPassword = () => {
           fontWeight="400"
         >
           <FormControl isInvalid={errors.password ? true : false} isRequired>
-            <Input
-              type="password"
-              name="password"
-              value={form.password}
-              size="lg"
-              onChange={handleChange}
-              variant="flushed"
-              placeholder="Password"
-              borderBottom="2px"
-              borderBottomColor="#D2C2FFAD"
-              _focus={{
-                borderBottomColor: "#2395FF",
-              }}
-            />
+            <InputGroup size="lg">
+              <Input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                variant="flushed"
+                placeholder="Password"
+                borderBottom="2px"
+                borderBottomColor="#D2C2FFAD"
+                _focus={{
+                  borderBottomColor: "#2395FF",
+                }}
+              />
+              <InputRightElement width="4.5rem" justifyContent="flex-end">
+                <Button
+                  bg="transparent"
+                  _hover={{ bg: "transparent" }}
+                  _active={{ bg: "transparent" }}
+                  cursor="default"
+                >
+                  {!showPassword ? (
+                    <BsEye
+                      onClick={handleShowPassword}
+                      color="#2395FF"
+                      fontSize="24px"
+                      cursor="pointer"
+                    />
+                  ) : (
+                    <BsEyeSlash
+                      onClick={handleShowPassword}
+                      color="#2395FF"
+                      fontSize="24px"
+                      cursor="pointer"
+                    />
+                  )}
+                </Button>
+              </InputRightElement>
+            </InputGroup>
             <Collapse in={errors.password ? true : false} animateOpacity>
               <Text fontSize="14px" mt="8px" textColor="crimson">
                 {errors.password || "."}
@@ -108,7 +166,9 @@ const ResetPassword = () => {
           </FormControl>
         </Flex>
         <Button
-          onClick={handleForgotPassword}
+          isLoading={loading ? true : false}
+          loadingText="Loading"
+          onClick={handleResetPassword}
           bg="#2395FF"
           borderRadius="10px"
           color="white"
@@ -126,7 +186,7 @@ const ResetPassword = () => {
             boxShadow: "0px 8px 10px 0px #dddfe24D",
           }}
         >
-          Send
+          Change Password
         </Button>
       </Box>
     </Container>

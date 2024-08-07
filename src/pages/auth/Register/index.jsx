@@ -13,6 +13,8 @@ import {
   Heading,
   Image,
   Input,
+  InputGroup,
+  InputRightElement,
   Stack,
   Text,
   useToast,
@@ -23,6 +25,7 @@ import { registerValidation } from "../../../utils/validation";
 import AlertCustom from "../../../components/base/AlertCustom";
 import api from "../../../services/api";
 import { optionToast } from "../../../utils/constants";
+import { BsEye, BsEyeSlash } from "react-icons/bs";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -34,6 +37,10 @@ const Register = () => {
   });
   const [formAgreed, setFormAgreed] = useState(false);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleShowPassword = () => setShowPassword(!showPassword);
 
   const handleChange = (e) => {
     setErrors({
@@ -53,6 +60,7 @@ const Register = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       await registerValidation.validate(form, { abortEarly: false });
 
@@ -63,6 +71,7 @@ const Register = () => {
           status: "error",
           ...optionToast,
         });
+        setLoading(false);
       } else {
         try {
           const res = await api.post(`register`, {
@@ -75,10 +84,12 @@ const Register = () => {
           console.log(res.data.message);
           toast({
             title: "Register Successfully",
+            description: "Please check in your email to activate.",
             status: "success",
             ...optionToast,
           });
-          navigate("/");
+          setLoading(false);
+          navigate("/auth/login");
         } catch (err) {
           console.log(err);
           toast({
@@ -89,6 +100,7 @@ const Register = () => {
             status: "error",
             ...optionToast,
           });
+          setLoading(false);
         }
       }
     } catch (err) {
@@ -98,6 +110,7 @@ const Register = () => {
         }, {});
         setErrors(formErrors);
       }
+      setLoading(false);
     }
   };
 
@@ -148,6 +161,7 @@ const Register = () => {
               placeholder="Full Name"
               borderBottom="2px"
               borderBottomColor="#D2C2FFAD"
+              autoComplete="off"
               _focus={{
                 borderBottomColor: "#2395FF",
               }}
@@ -169,6 +183,7 @@ const Register = () => {
               placeholder="Email"
               borderBottom="2px"
               borderBottomColor="#D2C2FFAD"
+              autoComplete="off"
               _focus={{
                 borderBottomColor: "#2395FF",
               }}
@@ -180,20 +195,45 @@ const Register = () => {
             </Collapse>
           </FormControl>
           <FormControl isInvalid={errors.password ? true : false} isRequired>
-            <Input
-              type="password"
-              name="password"
-              value={form.password}
-              size="lg"
-              onChange={handleChange}
-              variant="flushed"
-              placeholder="Password"
-              borderBottom="2px"
-              borderBottomColor="#D2C2FFAD"
-              _focus={{
-                borderBottomColor: "#2395FF",
-              }}
-            />
+            <InputGroup size="lg">
+              <Input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                variant="flushed"
+                placeholder="Password"
+                borderBottom="2px"
+                borderBottomColor="#D2C2FFAD"
+                _focus={{
+                  borderBottomColor: "#2395FF",
+                }}
+              />
+              <InputRightElement width="4.5rem" justifyContent="flex-end">
+                <Button
+                  bg="transparent"
+                  _hover={{ bg: "transparent" }}
+                  _active={{ bg: "transparent" }}
+                  cursor="default"
+                >
+                  {!showPassword ? (
+                    <BsEye
+                      onClick={handleShowPassword}
+                      color="#2395FF"
+                      fontSize="24px"
+                      cursor="pointer"
+                    />
+                  ) : (
+                    <BsEyeSlash
+                      onClick={handleShowPassword}
+                      color="#2395FF"
+                      fontSize="24px"
+                      cursor="pointer"
+                    />
+                  )}
+                </Button>
+              </InputRightElement>
+            </InputGroup>
             <Collapse in={errors.password ? true : false} animateOpacity>
               <Text fontSize="14px" mt="8px" textColor="crimson">
                 {errors.password || "."}
@@ -201,7 +241,25 @@ const Register = () => {
             </Collapse>
           </FormControl>
         </Flex>
+        <Box
+          display="flex"
+          alignItems="center"
+          fontFamily="Lato"
+          fontSize="16px"
+          fontWeight="400"
+        >
+          <Checkbox
+            textColor="#595959"
+            border="#2395FF"
+            gap={3}
+            onChange={handleChangeCheckbox}
+          >
+            Accept terms and condition
+          </Checkbox>
+        </Box>
         <Button
+          isLoading={loading ? true : false}
+          loadingText="Loading"
           onClick={handleRegister}
           bg="#2395FF"
           borderRadius="10px"
@@ -222,17 +280,6 @@ const Register = () => {
         >
           Sign Up
         </Button>
-        <Box
-          display="flex"
-          alignItems="center"
-          fontFamily="Lato"
-          fontSize="16px"
-          fontWeight="400"
-        >
-          <Checkbox border="#2395FF" gap={3} onChange={handleChangeCheckbox}>
-            Accept terms and condition
-          </Checkbox>
-        </Box>
         <Box mt="8" mx="auto" bg="#D8D8D8" w="80%" h="1px" />
         <Box
           display="flex"
@@ -243,7 +290,7 @@ const Register = () => {
           fontWeight="400"
           gap="6"
         >
-          <Text>Already have an account?</Text>
+          <Text textColor="#595959">Already have an account?</Text>
           <Button
             onClick={() => navigate("/auth/login")}
             bg="white"

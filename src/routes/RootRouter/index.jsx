@@ -4,13 +4,19 @@ import Explore from "../../pages/main/Explore";
 import Login from "../../pages/auth/Login";
 import ForgotPassword from "../../pages/auth/ForgotPassword";
 import Register from "../../pages/auth/Register";
-import LayoutMain, { mainLoader } from "../../pages/layout/LayoutMain";
-import LayoutAuth, { authLoader } from "../../pages/layout/LayoutAuth";
+import LayoutMain from "../../pages/layout/LayoutMain";
+import LayoutAuth from "../../pages/layout/LayoutAuth";
 import FlightDetail from "../../pages/main/Flight";
 import BoardingPassPage from "../../pages/main/BoardingPass";
 import BrowsePage from "../../pages/main/Browse";
 import ResetPassword from "../../pages/auth/ResetPassword";
 import Profile from "../../pages/main/Profile";
+import {
+  authLoader,
+  mainLoader,
+  resetPasswordLoader,
+  verifyEmailLoader,
+} from "../../utils/loaders";
 
 const RootRouter = () => {
   const router = createBrowserRouter([
@@ -58,6 +64,11 @@ const RootRouter = () => {
         {
           path: "reset-password",
           element: <ResetPassword />,
+          loader: resetPasswordLoader,
+        },
+        {
+          path: "email-verification",
+          loader: verifyEmailLoader,
         },
       ],
     },

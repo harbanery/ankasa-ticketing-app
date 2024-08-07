@@ -14,11 +14,13 @@ import {
   Heading,
   Image,
   Input,
+  InputGroup,
+  InputRightElement,
   Stack,
   Text,
   useToast,
 } from "@chakra-ui/react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, redirect, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import api from "../../../services/api";
 import AlertCustom from "../../../components/base/AlertCustom";
@@ -27,18 +29,34 @@ import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../../../services/firebase";
 import { setTokentoLocalStorage } from "../../../utils/localStorage";
 import { optionToast } from "../../../utils/constants";
+import { BsEye, BsEyeSlash } from "react-icons/bs";
 
 const Login = () => {
   const navigate = useNavigate();
   const toast = useToast();
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
+  const [authState, setAuthState] = useState({
+    form: {
+      email: "",
+      password: "",
+    },
+    loading: false,
+    showPassword: false,
   });
   const [errors, setErrors] = useState({});
 
+  // Function
+  const handleShowPassword = () =>
+    setAuthState({
+      ...authState,
+      showPassword: !authState.showPassword,
+    });
+
   const handleLoginGoogle = async (e) => {
     e.preventDefault();
+    setAuthState({
+      ...authState,
+      loading: true,
+    });
     try {
       const response = await signInWithPopup(auth, provider);
       // const credential = GoogleAuthProvider.credentialFromResult(response);
@@ -60,6 +78,11 @@ const Login = () => {
           status: "success",
           ...optionToast,
         });
+        //
+        setAuthState({
+          ...authState,
+          loading: false,
+        });
         setTokentoLocalStorage(res.data);
         navigate("/");
       } catch (err) {
@@ -72,10 +95,18 @@ const Login = () => {
           status: "error",
           ...optionToast,
         });
+        setAuthState({
+          ...authState,
+          loading: false,
+        });
       }
     } catch (error) {
       // console.log(error.code);
       // console.log(error.message);
+      setAuthState({
+        ...authState,
+        loading: false,
+      });
     }
   };
 
@@ -85,21 +116,28 @@ const Login = () => {
       [e.target.name]: "",
     });
 
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
+    setAuthState({
+      ...authState,
+      form: {
+        ...authState.form,
+        [e.target.name]: e.target.value,
+      },
     });
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setAuthState({
+      ...authState,
+      loading: true,
+    });
     try {
-      await loginValidation.validate(form, { abortEarly: false });
+      await loginValidation.validate(authState.form, { abortEarly: false });
 
       try {
         const res = await api.post(`login`, {
-          email: form.email,
-          password: form.password,
+          email: authState.form.email,
+          password: authState.form.password,
           role: "customer",
         });
 
@@ -109,6 +147,11 @@ const Login = () => {
           status: "success",
           ...optionToast,
         });
+
+        setAuthState({
+          ...authState,
+          loading: false,
+        });
         setTokentoLocalStorage(res.data);
         navigate("/");
       } catch (err) {
@@ -116,10 +159,18 @@ const Login = () => {
         toast({
           title: "Login Failed",
           ...(err?.response?.data?.message
-            ? { description: "Email or password incorrectly." }
+            ? err.response.data.message ==
+              "User not verify. Please check in your email."
+              ? { description: "Check in your email for account verification." }
+              : { description: "Email or password incorrectly." }
             : {}),
           status: "error",
           ...optionToast,
+        });
+
+        setAuthState({
+          ...authState,
+          loading: false,
         });
       }
     } catch (err) {
@@ -128,7 +179,15 @@ const Login = () => {
           return { ...acc, [curr.path]: curr.message };
         }, {});
         setErrors(formErrors);
+        // setAuthState({
+        //   ...authState,
+        //   errors: formErrors,
+        // });
       }
+      setAuthState({
+        ...authState,
+        loading: false,
+      });
     }
   };
 
@@ -171,13 +230,14 @@ const Login = () => {
             <Input
               type="email"
               name="email"
-              value={form.email}
+              value={authState.form.email}
               size="lg"
               onChange={handleChange}
               variant="flushed"
               placeholder="Email"
               borderBottom="2px"
               borderBottomColor="#D2C2FFAD"
+              autoComplete="off"
               _focus={{
                 borderBottomColor: "#2395FF",
               }}
@@ -189,20 +249,45 @@ const Login = () => {
             </Collapse>
           </FormControl>
           <FormControl isInvalid={errors.password ? true : false} isRequired>
-            <Input
-              type="password"
-              name="password"
-              value={form.password}
-              size="lg"
-              onChange={handleChange}
-              variant="flushed"
-              placeholder="Password"
-              borderBottom="2px"
-              borderBottomColor="#D2C2FFAD"
-              _focus={{
-                borderBottomColor: "#2395FF",
-              }}
-            />
+            <InputGroup size="lg">
+              <Input
+                type={authState.showPassword ? "text" : "password"}
+                name="password"
+                value={authState.form.password}
+                onChange={handleChange}
+                variant="flushed"
+                placeholder="Password"
+                borderBottom="2px"
+                borderBottomColor="#D2C2FFAD"
+                _focus={{
+                  borderBottomColor: "#2395FF",
+                }}
+              />
+              <InputRightElement width="4.5rem" justifyContent="flex-end">
+                <Button
+                  bg="transparent"
+                  _hover={{ bg: "transparent" }}
+                  _active={{ bg: "transparent" }}
+                  cursor="default"
+                >
+                  {!authState.showPassword ? (
+                    <BsEye
+                      onClick={handleShowPassword}
+                      color="#2395FF"
+                      fontSize="24px"
+                      cursor="pointer"
+                    />
+                  ) : (
+                    <BsEyeSlash
+                      onClick={handleShowPassword}
+                      color="#2395FF"
+                      fontSize="24px"
+                      cursor="pointer"
+                    />
+                  )}
+                </Button>
+              </InputRightElement>
+            </InputGroup>
             <Collapse in={errors.password ? true : false} animateOpacity>
               <Text fontSize="14px" mt="8px" textColor="crimson">
                 {errors.password || "."}
@@ -211,6 +296,8 @@ const Login = () => {
           </FormControl>
         </Flex>
         <Button
+          isLoading={authState.loading ? true : false}
+          loadingText="Loading"
           onClick={handleLogin}
           bg="#2395FF"
           borderRadius="10px"
@@ -236,6 +323,7 @@ const Login = () => {
           flexDirection="column"
           alignItems="center"
           fontFamily="Lato"
+          textColor="#595959"
           fontSize="16px"
           fontWeight="400"
         >
@@ -254,7 +342,7 @@ const Login = () => {
           fontWeight="400"
           gap="4"
         >
-          <Text>or sign in with</Text>
+          <Text textColor="#595959">or sign in with</Text>
           <Flex gap="4">
             <Button
               onClick={handleLoginGoogle}

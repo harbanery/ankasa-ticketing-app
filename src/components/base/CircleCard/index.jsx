@@ -10,8 +10,8 @@ const CircleCard = ({ image, city }) => {
         color={"gray"}
         bg={"transparent"}
         rounded="full"
-        w={"150px"}
-        h={"150px"}
+        w={{base: "100px",lg: "150px"}}
+        h={{base: "100px",lg: "150px"}}
         border="5px solid"
         borderColor={"white"}
         mb={5}

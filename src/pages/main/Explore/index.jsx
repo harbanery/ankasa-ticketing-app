@@ -15,7 +15,10 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import React from "react";
+import React, { useRef } from "react";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import Slider from "react-slick";
 import { FaArrowRotateRight } from "react-icons/fa6";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { CgArrowLeft, CgArrowRight } from "react-icons/cg";
@@ -25,6 +28,8 @@ import CardComponent from "../../../components/module/CardDestination";
 import CircleCard from "../../../components/base/CircleCard";
 
 const Explore = () => {
+  const sliderRef = useRef(null);
+  const cardSliderRef = useRef(null);
   const [value, setValue] = React.useState("1");
   const cardData = [
     {
@@ -65,44 +70,110 @@ const Explore = () => {
     { image: "/src/assets/circle-cart-paris.png", city: "Paris" },
     { image: "/src/assets/circle-cart-paris.png", city: "Paris" },
   ];
+
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 5,
+    slidesToScroll: 1,
+    responsive: [
+      {
+        breakpoint: 768, // Breakpoint untuk perangkat kecil
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 1,
+        },
+      },
+    ],
+  };
+  const cardSettings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 5,
+    slidesToScroll: 1,
+    responsive: [
+      {
+        breakpoint: 769,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+        },
+      },
+    ],
+  };
   return (
     <Box minH={"100vh"} mb={32}>
       <Box position={"relative"}>
-        <Flex>
-          <Box w={"50%"} mt={"120px"}>
-            <Flex columnGap={5} justify={"center"}>
-              <Text fontSize={"6xl"} fontWeight={600}>
-                Find Your{" "}
-                <Text fontSize={"lg"} fontWeight={400} color={"gray"}>
-                  and explore the world with us
-                </Text>
+        <Stack
+          direction={{ lg: "row" }}
+          justifyContent={{ base: "center", lg: "space-between" }}
+        >
+          <Box w={{ base: "auto", lg: "50%" }} mt={{ base: 10, lg: "120px" }}>
+            <Flex
+              columnGap={{ base: 3, lg: 5 }}
+              justify={{ base: "space-between", lg: "center" }}
+            >
+              <Text fontSize={{ base: "5xl", lg: "6xl" }} fontWeight={600}>
+                Find Your
               </Text>
-              <Text fontSize={"6xl"} fontWeight={600} color={"#2395FF"}>
+              <Text
+                fontSize={{ base: "5xl", lg: "6xl" }}
+                fontWeight={600}
+                color={"#2395FF"}
+              >
                 Flight
               </Text>
             </Flex>
+            <Flex justify={{ base: "start", lg: "center" }}>
+              <Text fontSize={"18px"} fontWeight={400} color={"gray"}>
+                and explore the world with us
+              </Text>
+              <Text w={"190px"} display={{ base: "none", lg: "block" }}></Text>
+            </Flex>
           </Box>
-          <Box w={"50%"}>
-            <Image ml={"auto"} src="/src/assets/bg-landing-1.png" />
-          </Box>
-        </Flex>
-        <Box position={"absolute"} top={390}>
-          <Image src="/src/assets/bg-landing-2.png" />
+        </Stack>
+        <Box
+          position={"absolute"}
+          top={{ base: 150, lg: 20 }}
+          right={{ base: 0, lg: 0 }}
+          w={{ base: "30%", lg: "50%" }}
+          alignSelf={{ base: "end", lg: "none" }}
+        >
+          <Image
+            ml={{ base: "none", lg: "auto" }}
+            src="/src/assets/bg-landing-1.png"
+            width={{ lg: "auto" }}
+          />
         </Box>
-        <Box position={"absolute"} top={650} left={1100}>
-          <Image src="/src/assets/vector-landing-page.png" />
+        <Box position={"absolute"} top={{ base: 220, lg: 390 }}>
+          <Image
+            src="/src/assets/bg-landing-2.png"
+            width={{ base: "50%", lg: "auto" }}
+          />
+        </Box>
+        <Box
+          position={"absolute"}
+          top={{ base: 825, lg: 740 }}
+          right={{ base: 0, lg: 200 }}
+        >
+          <Image
+            src="/src/assets/vector-landing-page.png"
+            w={{ base: "110px", lg: "auto" }}
+          />
         </Box>
         <Box
           bg={"white"}
           position={"absolute"}
-          top={90}
-          left={750}
-          p={5}
+          top={190}
+          left={{ base: 55, md: 320, lg: 750 }}
+          p={{ base: 2, lg: 5 }}
           boxShadow={"dark-lg"}
           rounded={"xl"}
-          w={"400px"}
+          w={{ base: "319px", lg: "400px" }}
         >
-          <Grid gap={3} mb={5}>
+          <Grid gap={3} mb={{ base: 0, lg: 5 }} p={{ base: 2, lg: 0 }}>
             <Text fontWeight={"600"} align="left">
               Hey,
             </Text>
@@ -127,7 +198,7 @@ const Explore = () => {
             boxShadow="lg"
             rounded={"lg"}
             p={3}
-            width="319px"
+            width={{ base: "263px", lg: "319px" }}
             templateRows="repeat(3, 1fr)"
             templateColumns="repeat(3, 1fr)"
             alignItems={"center"}
@@ -184,7 +255,7 @@ const Explore = () => {
               Round Trip
             </Button>
           </Stack>
-          <Box mb={5}>
+          <Box mb={5} p={{ base: 2, lg: 0 }}>
             <Text color={"gray"} align={"left"}>
               Departure
             </Text>
@@ -195,7 +266,7 @@ const Explore = () => {
               </Flex>
             </Button>
           </Box>
-          <Box mb={5}>
+          <Box mb={5} p={{ base: 2, lg: 0 }}>
             <Text color={"gray"} align="left">
               How Many Person?
             </Text>
@@ -214,7 +285,7 @@ const Explore = () => {
               </Button>
             </Flex>
           </Box>
-          <Box mb={5}>
+          <Box mb={5} p={{ base: 2, lg: 0 }}>
             <Text color={"gray"} align="left">
               Which class do you want?
             </Text>
@@ -244,7 +315,7 @@ const Explore = () => {
           </Button>
         </Box>
       </Box>
-      <Box mt={490} w={"80%"} mx={"auto"}>
+      <Box mt={860} w={"80%"} mx={"auto"}>
         <Box>
           <Text fontSize={"base"} color={"#2395FF"}>
             Trending
@@ -260,17 +331,19 @@ const Explore = () => {
             </Text>
           </Link>
         </Flex>
-        <Flex columnGap={8}>
-          {cardData.map((card, index) => (
-            <CardComponent
-              key={index}
-              backgroundImage={card.backgroundImage}
-              airlinesCount={card.airlinesCount}
-              city={card.city}
-              country={card.country}
-            />
-          ))}
-        </Flex>
+        <Box mt={10} w={{ base: "80%", lg: "full" }} mx={"auto"}>
+          <Slider ref={cardSliderRef} {...cardSettings}>
+            {cardData.map((card, index) => (
+              <CardComponent
+                key={index}
+                backgroundImage={card.backgroundImage}
+                airlinesCount={card.airlinesCount}
+                city={card.city}
+                country={card.country}
+              />
+            ))}
+          </Slider>
+        </Box>
       </Box>
       <Box
         bgColor={"#2395FF"}
@@ -292,11 +365,13 @@ const Explore = () => {
             <Text fontWeight={600} fontSize={"2xl"}>
               Top 10 destinations
             </Text>
-            <Flex mt={10} columnGap={6}>
-              {circleCardData.map((data, index) => (
-                <CircleCard key={index} image={data.image} city={data.city} />
-              ))}
-            </Flex>
+            <Box mt={10} w={"full"}>
+              <Slider ref={sliderRef} {...settings}>
+                {circleCardData.map((data, index) => (
+                  <CircleCard key={index} image={data.image} city={data.city} />
+                ))}
+              </Slider>
+            </Box>
             <Flex columnGap={5}>
               <Button
                 _hover={{ bg: "#2395FF", color: "white" }}
@@ -306,6 +381,7 @@ const Explore = () => {
                 border="2px"
                 borderColor="white"
                 color="#2395FF"
+                onClick={() => sliderRef.current.slickPrev()}
               >
                 <IoIosArrowBack width={30} />
               </Button>
@@ -317,6 +393,7 @@ const Explore = () => {
                 border="2px"
                 borderColor="white"
                 color="#2395FF"
+                onClick={() => sliderRef.current.slickNext()}
               >
                 <IoIosArrowForward width={30} />
               </Button>

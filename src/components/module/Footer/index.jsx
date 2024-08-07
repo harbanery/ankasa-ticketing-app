@@ -1,62 +1,104 @@
-import { Box, Flex, Grid, GridItem, Image, Stack, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Grid,
+  GridItem,
+  Image,
+  Stack,
+  Text,
+  Flex,
+} from "@chakra-ui/react";
 import { IoLocationOutline } from "react-icons/io5";
 
 const Footer = () => {
   return (
-    <Box w="100%" h={"400px"} mt={24}>
-      <Stack alignItems={"center"}>
-        <Grid templateColumns="repeat(5, 1fr)" gap={6} w={"80%"}>
-          <GridItem colSpan={2} w="100%" h="10">
-            <Box mb={8}>
-              <Image src="/src/assets/brandicon.png" />
-            </Box>
-            <Box mb={52}>
-              <Text>Find your Flight and explore the</Text>
-              <Text w={96}>world with us. We will take care of the rest</Text>
-            </Box>
-            <Box mb={36}>© Ankasa. All Rights Reserved.</Box>
-          </GridItem>
-          <GridItem w="100%" h="10">
-            <Stack>
-              <Text mb={10} fontWeight={600} fontSize={16}>
-                Features
-              </Text>
-              <Text mb={5} fontWeight={300} fontSize={16}>
+    <Box w="100%" py={10}>
+      <Grid
+        templateColumns={{
+          base: "1fr",
+          md: "repeat(2, 1fr)",
+          lg: "repeat(4, 1fr)",
+        }}
+        gap={10}
+        w={"80%"}
+        mx={"auto"}
+      >
+        <GridItem>
+          <Stack spacing={4} align={{ base: "start", lg: "flex-start" }}>
+            <Image src="/src/assets/brandicon.png" />
+            <Text textAlign={{ base: "start", lg: "left" }}>
+              Find your Flight and explore the world with us. We will take care
+              of the rest
+            </Text>
+            <Text
+              mt={"150px"}
+              display={{ base: "none", lg: "block" }}
+              textAlign={{ base: "center", lg: "left" }}
+            >
+              © Ankasa. All Rights Reserved.
+            </Text>
+          </Stack>
+        </GridItem>
+
+        <GridItem>
+          <Stack spacing={4} align={{ base: "start", lg: "flex-start" }}>
+            <Text mb={3} fontWeight={600} fontSize={16}>
+              Features
+            </Text>
+            <Flex direction={{ base: "row", lg: "column" }} columnGap={3}>
+              <Text mb={3} fontWeight={300} fontSize={16}>
                 Find Ticket
               </Text>
-              <Text mb={5} fontWeight={300} fontSize={16}>
+              <Text mb={3} fontWeight={300} fontSize={16}>
                 My Booking
               </Text>
-              <Text mb={5} fontWeight={300} fontSize={16}>
+              <Text mb={3} fontWeight={300} fontSize={16}>
                 Chat
               </Text>
               <Text fontWeight={300} fontSize={16}>
                 Notification
               </Text>
-            </Stack>
-          </GridItem>
-          <GridItem w="100%" h="10">
-            <Stack spacing={10}>
-              <Text fontWeight={600} fontSize={16} w={"fit-content"}>
-                Download Ankasa App
-              </Text>
+            </Flex>
+          </Stack>
+        </GridItem>
+
+        <GridItem>
+          <Stack spacing={4} align={{ base: "start", lg: "flex-start" }}>
+            <Text fontWeight={600} fontSize={16}>
+              Download Ankasa App
+            </Text>
+            <Flex direction={"column"} rowGap={6}>
               <Image src="/src/assets/apple-store.png" w={164} />
               <Image src="/src/assets/play-store.png" w={164} />
-            </Stack>
-          </GridItem>
-          <GridItem w="100%" h="10">
-            <Text mb={10} fontWeight={600} fontSize={16}>
+            </Flex>
+          </Stack>
+        </GridItem>
+
+        <GridItem>
+          <Stack spacing={4} align={{ base: "start", lg: "flex-start" }}>
+            <Text fontWeight={600} fontSize={16}>
               Follow Us
             </Text>
-            <Image src="/src/assets/sosmed.png" w={164} mb={"236px"} />
-            <Flex alignItems={"center"}>
-            <IoLocationOutline />
-            <Text>Jakarta Indonesia</Text>
+            <Flex columnGap={4} justify={{ base: "start", lg: "flex-start" }}>
+              <Image src="/src/assets/sosmed.png" />
             </Flex>
-          </GridItem>
-          <GridItem w="100%" h="10" />
-        </Grid>
-      </Stack>
+            <Flex
+              mt={{ base: "30px", lg: "200px" }}
+              alignItems={"center"}
+              columnGap={2}
+              justify={{ base: "center", lg: "flex-start" }}
+            >
+              <IoLocationOutline />
+              <Text>Jakarta Indonesia</Text>
+            </Flex>
+            <Text
+              display={{ base: "block", lg: "none" }}
+              textAlign={{ base: "center", lg: "left" }}
+            >
+              © Ankasa. All Rights Reserved.
+            </Text>
+          </Stack>
+        </GridItem>
+      </Grid>
     </Box>
   );
 };

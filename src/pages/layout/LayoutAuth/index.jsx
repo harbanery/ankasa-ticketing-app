@@ -13,35 +13,35 @@ const LayoutAuth = () => {
   // }, []);
 
   return (
-    <Box h={{ md: "100vh" }}>
-      <Flex w="100%" h="100%">
-        <Box
-          display={{ base: "none", md: "flex" }}
-          alignItems="center"
-          justifyContent="center"
-          w={{ base: "70%", lg: "100%" }}
-          bg="#2395FF"
-        >
-          <Image
-            src={"/src/assets/illustration.png"}
-            alt="Ankasa Planes"
-            w="50%"
-          />
-        </Box>
-        <Box
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          alignItems="stretch"
-          w={{ base: "100%", xl: "70%" }}
-          bg="white"
-          position="relative"
-          pt={{ base: 28, md: 16 }}
-        >
-          <Outlet />
-        </Box>
-      </Flex>
-    </Box>
+    // <Box h={{ md: "100vh" }}>
+    <Flex w="100%" h="100vh">
+      <Box
+        display={{ base: "none", md: "flex" }}
+        alignItems="center"
+        justifyContent="center"
+        w={{ base: "70%", lg: "100%" }}
+        bg="#2395FF"
+      >
+        <Image
+          src={"/src/assets/illustration.png"}
+          alt="Ankasa Planes"
+          w="50%"
+        />
+      </Box>
+      <Box
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="stretch"
+        w={{ base: "100%", xl: "70%" }}
+        bg="white"
+        position="relative"
+        pt={{ base: 20, md: 16 }}
+      >
+        <Outlet />
+      </Box>
+    </Flex>
+    // </Box>
   );
 };
 

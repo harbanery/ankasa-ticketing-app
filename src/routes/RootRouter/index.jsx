@@ -1,5 +1,11 @@
 import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  authLoader,
+  mainLoader,
+  resetPasswordLoader,
+  verifyEmailLoader,
+} from "../../utils/loaders";
 import Explore from "../../pages/main/Explore";
 import Login from "../../pages/auth/Login";
 import ForgotPassword from "../../pages/auth/ForgotPassword";
@@ -11,12 +17,7 @@ import BoardingPassPage from "../../pages/main/BoardingPass";
 import BrowsePage from "../../pages/main/Browse";
 import ResetPassword from "../../pages/auth/ResetPassword";
 import Profile from "../../pages/main/Profile";
-import {
-  authLoader,
-  mainLoader,
-  resetPasswordLoader,
-  verifyEmailLoader,
-} from "../../utils/loaders";
+import Chat from "../../pages/main/Chat";
 
 const RootRouter = () => {
   const router = createBrowserRouter([
@@ -41,6 +42,10 @@ const RootRouter = () => {
         {
           path: "profile",
           element: <Profile />,
+        },
+        {
+          path: "chat",
+          element: <Chat />,
         },
       ],
     },

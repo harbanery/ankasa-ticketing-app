@@ -22,6 +22,7 @@ import {
 } from "@chakra-ui/react";
 import { Link, redirect, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
+import { FaFacebook } from "react-icons/fa";
 import api from "../../../services/api";
 import AlertCustom from "../../../components/base/AlertCustom";
 import { loginValidation } from "../../../utils/validation";
@@ -192,180 +193,209 @@ const Login = () => {
   };
 
   return (
-    <Container my="5%" maxW="sm">
-      <Link to={"/"}>
-        <Image
-          // display={{ base: "none", md: "flex" }}
-          position={"absolute"}
-          top={10}
-          src="/src/assets/brandicon.png"
-          alt="Logo"
-          w="158px"
-          h="36px"
-        />
-      </Link>
-      <Box display="flex" flexDirection="column" h="100%" gap="4">
-        {/* <Link to={"/"}>
-          <Image
-            display={{ base: "flex", md: "none" }}
-            src="/src/assets/brandicon.png"
-            alt="Logo"
-            w="158px"
-            h="36px"
-            mb="3rem"
+    <>
+      <Heading fontFamily="Poppins" fontWeight="600">
+        Login
+      </Heading>
+      <Flex
+        direction="column"
+        my="5"
+        gap="7"
+        fontFamily="Lato"
+        fontSize="16px"
+        fontWeight="400"
+      >
+        <FormControl isInvalid={errors.email ? true : false} isRequired>
+          <Input
+            type="email"
+            name="email"
+            value={authState.form.email}
+            size="lg"
+            onChange={handleChange}
+            variant="flushed"
+            placeholder="Email"
+            borderBottom="2px"
+            borderBottomColor="#D2C2FFAD"
+            autoComplete="off"
+            _focus={{
+              borderBottomColor: "#2395FF",
+            }}
           />
-        </Link> */}
-        <Heading fontFamily="Poppins" fontWeight="600">
-          Login
-        </Heading>
-        <Flex
-          direction="column"
-          my="5"
-          gap="7"
-          fontFamily="Lato"
-          fontSize="16px"
-          fontWeight="400"
-        >
-          <FormControl isInvalid={errors.email ? true : false} isRequired>
+          <Collapse in={errors.email ? true : false} animateOpacity>
+            <Text fontSize="14px" mt="8px" textColor="crimson">
+              {errors.email || "."}
+            </Text>
+          </Collapse>
+        </FormControl>
+        <FormControl isInvalid={errors.password ? true : false} isRequired>
+          <InputGroup size="lg">
             <Input
-              type="email"
-              name="email"
-              value={authState.form.email}
-              size="lg"
+              type={authState.showPassword ? "text" : "password"}
+              name="password"
+              value={authState.form.password}
               onChange={handleChange}
               variant="flushed"
-              placeholder="Email"
+              placeholder="Password"
               borderBottom="2px"
               borderBottomColor="#D2C2FFAD"
-              autoComplete="off"
               _focus={{
                 borderBottomColor: "#2395FF",
               }}
             />
-            <Collapse in={errors.email ? true : false} animateOpacity>
-              <Text fontSize="14px" mt="8px" textColor="crimson">
-                {errors.email || "."}
-              </Text>
-            </Collapse>
-          </FormControl>
-          <FormControl isInvalid={errors.password ? true : false} isRequired>
-            <InputGroup size="lg">
-              <Input
-                type={authState.showPassword ? "text" : "password"}
-                name="password"
-                value={authState.form.password}
-                onChange={handleChange}
-                variant="flushed"
-                placeholder="Password"
-                borderBottom="2px"
-                borderBottomColor="#D2C2FFAD"
-                _focus={{
-                  borderBottomColor: "#2395FF",
-                }}
-              />
-              <InputRightElement width="4.5rem" justifyContent="flex-end">
-                <Button
-                  bg="transparent"
-                  _hover={{ bg: "transparent" }}
-                  _active={{ bg: "transparent" }}
-                  cursor="default"
-                >
-                  {!authState.showPassword ? (
-                    <BsEye
-                      onClick={handleShowPassword}
-                      color="#2395FF"
-                      fontSize="24px"
-                      cursor="pointer"
-                    />
-                  ) : (
-                    <BsEyeSlash
-                      onClick={handleShowPassword}
-                      color="#2395FF"
-                      fontSize="24px"
-                      cursor="pointer"
-                    />
-                  )}
-                </Button>
-              </InputRightElement>
-            </InputGroup>
-            <Collapse in={errors.password ? true : false} animateOpacity>
-              <Text fontSize="14px" mt="8px" textColor="crimson">
-                {errors.password || "."}
-              </Text>
-            </Collapse>
-          </FormControl>
+            <InputRightElement width="4.5rem" justifyContent="flex-end">
+              <Button
+                bg="transparent"
+                _hover={{ bg: "transparent" }}
+                _active={{ bg: "transparent" }}
+                cursor="default"
+              >
+                {!authState.showPassword ? (
+                  <BsEye
+                    onClick={handleShowPassword}
+                    color="#2395FF"
+                    fontSize="24px"
+                    cursor="pointer"
+                  />
+                ) : (
+                  <BsEyeSlash
+                    onClick={handleShowPassword}
+                    color="#2395FF"
+                    fontSize="24px"
+                    cursor="pointer"
+                  />
+                )}
+              </Button>
+            </InputRightElement>
+          </InputGroup>
+          <Collapse in={errors.password ? true : false} animateOpacity>
+            <Text fontSize="14px" mt="8px" textColor="crimson">
+              {errors.password || "."}
+            </Text>
+          </Collapse>
+        </FormControl>
+      </Flex>
+      <Button
+        isLoading={authState.loading ? true : false}
+        loadingText="Loading"
+        onClick={handleLogin}
+        bg="#2395FF"
+        borderRadius="10px"
+        color="white"
+        size="lg"
+        w="100%"
+        h="57px"
+        fontFamily="Poppins"
+        fontSize="18px"
+        fontWeight="700"
+        transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+        boxShadow="0px 8px 10px 0px #2395FF4D"
+        _hover={{ bg: "#1971c2" }}
+        _active={{
+          bg: "#dddfe2",
+          boxShadow: "0px 8px 10px 0px #dddfe24D",
+        }}
+      >
+        Sign In
+      </Button>
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        fontFamily="Lato"
+        textColor="#595959"
+        fontSize="16px"
+        fontWeight="400"
+      >
+        <Text>Did You Forgot Your Password?</Text>
+        <Text borderBottom="1px" color="#2395FF">
+          <Link to={"/auth/forgot-password"}>Tap here for reset</Link>
+        </Text>
+      </Box>
+      <Box mt="4" mx="auto" bg="#D8D8D8" w="80%" h="1px" />
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        fontFamily="Lato"
+        fontSize="16px"
+        fontWeight="400"
+        gap="4"
+      >
+        <Text textColor="#595959">or sign in with</Text>
+        <Flex gap="4">
+          <Button
+            onClick={handleLoginGoogle}
+            bg="white"
+            borderRadius="10px"
+            color="white"
+            border="1px"
+            borderColor="#2395FF"
+            size="lg"
+            w="100%"
+            h="52px"
+            transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+            _active={{
+              bg: "#2395FF",
+              boxShadow: "0px 8px 10px 0px #2395FF4D",
+            }}
+          >
+            <FcGoogle fontSize="24px" />
+          </Button>
+          <Button
+            bg="white"
+            borderRadius="10px"
+            color="#4175DF"
+            border="1px"
+            borderColor="#2395FF"
+            size="lg"
+            w="100%"
+            h="52px"
+            transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+            _active={{
+              bg: "#2395FF",
+              boxShadow: "0px 8px 10px 0px #2395FF4D",
+            }}
+          >
+            <FaFacebook fontSize="24px" />
+          </Button>
         </Flex>
+      </Box>
+
+      <Box mt="4" mx="auto" bg="#D8D8D8" w="80%" h="1px" />
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        fontFamily="Lato"
+        fontSize="16px"
+        fontWeight="400"
+        gap="6"
+      >
+        <Text textColor="#595959">Didn't have an account?</Text>
         <Button
-          isLoading={authState.loading ? true : false}
-          loadingText="Loading"
-          onClick={handleLogin}
-          bg="#2395FF"
+          onClick={() => navigate("/auth/register")}
+          bg="white"
           borderRadius="10px"
-          color="white"
+          color="#2395FF"
+          border="1px"
+          borderColor="#2395FF"
+          fontFamily="Poppins"
+          fontWeight="700"
+          fontSize="18px"
           size="lg"
           w="100%"
-          h="57px"
-          fontFamily="Poppins"
-          fontSize="18px"
-          fontWeight="700"
+          h="52px"
           transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
-          boxShadow="0px 8px 10px 0px #2395FF4D"
-          _hover={{ bg: "#1971c2" }}
           _active={{
-            bg: "#dddfe2",
-            boxShadow: "0px 8px 10px 0px #dddfe24D",
+            bg: "#2395FF",
+            color: "white",
+            boxShadow: "0px 8px 10px 0px #2395FF4D",
           }}
         >
-          Sign In
+          Sign Up
         </Button>
-        <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          fontFamily="Lato"
-          textColor="#595959"
-          fontSize="16px"
-          fontWeight="400"
-        >
-          <Text>Did You Forgot Your Password?</Text>
-          <Text borderBottom="1px" color="#2395FF">
-            <Link to={"/auth/forgot-password"}>Tap here for reset</Link>
-          </Text>
-        </Box>
-        <Box mt="8" mx="auto" bg="#D8D8D8" w="80%" h="1px" />
-        <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          fontFamily="Lato"
-          fontSize="16px"
-          fontWeight="400"
-          gap="4"
-        >
-          <Text textColor="#595959">or sign in with</Text>
-          <Flex gap="4">
-            <Button
-              onClick={handleLoginGoogle}
-              bg="white"
-              borderRadius="10px"
-              color="white"
-              border="1px"
-              borderColor="#2395FF"
-              size="lg"
-              w="100%"
-              h="52px"
-              transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
-              _active={{
-                bg: "#2395FF",
-                boxShadow: "0px 8px 10px 0px #2395FF4D",
-              }}
-            >
-              <FcGoogle fontSize="24px" />
-            </Button>
-          </Flex>
-        </Box>
       </Box>
-    </Container>
+    </>
   );
 };
 

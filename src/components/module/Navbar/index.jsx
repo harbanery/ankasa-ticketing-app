@@ -405,7 +405,7 @@ const ChatBar = ({ location }) => {
 
   return (
     <Popover
-      placement={"bottom"}
+      placement={"bottom-end"}
       isOpen={isOpen}
       onOpen={onOpen}
       onClose={onClose}

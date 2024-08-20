@@ -10,16 +10,25 @@ const CircleCard = ({ image, city }) => {
         color={"gray"}
         bg={"transparent"}
         rounded="full"
-        w={{base: "100px",lg: "150px"}}
-        h={{base: "100px",lg: "150px"}}
+        w={{ base: "200px", sm: "180px", md: "130px", lg: "150px" }}
+        h={{ base: "200px", sm: "180px", md: "130px", lg: "150px" }}
         border="5px solid"
         borderColor={"white"}
         mb={5}
       >
-        <Image src={image} />
+        <Image
+          w="full"
+          h="full"
+          rounded="full"
+          objectFit="cover"
+          objectPosition="top"
+          src={image}
+        />
       </Box>
       <Box>
-        <Text fontWeight={400} fontSize={18}>{city}</Text>
+        <Text fontWeight={400} fontSize={18} textTransform="uppercase">
+          {city}
+        </Text>
       </Box>
     </Stack>
   );

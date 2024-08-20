@@ -114,22 +114,6 @@ const LayoutAuth = () => {
                 </Icon>
               </MotionBox>
             </Box>
-
-            {/* <svg
-              width="100%"
-              height="auto"
-              viewBox="0 0 384 408"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fill-rule="evenodd"
-                clip-rule="evenodd"
-                d="M125.906 3.54591C216.659 -18.1687 265.246 72.7661 312.194 140.026C356.831 203.973 416.584 277.887 362.441 342.415C302.841 413.445 189.591 421.423 102.072 390.447C25.3405 363.289 -3.62464 289.463 0.993983 214.487C6.24862 129.186 31.1652 26.2146 125.906 3.54591Z"
-                fill="white"
-                fill-opacity="0.25"
-              />
-            </svg> */}
           </Box>
         </Stack>
       </Box>

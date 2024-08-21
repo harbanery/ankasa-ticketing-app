@@ -84,8 +84,8 @@ const CardNotification = () => {
         h="400px"
         overflowY="scroll"
         style={{
-          "::-webkit-scrollbar": { display: "none" },
-          "-ms-overflow-style": "none",
+          "::WebkitScrollbar": { display: "none" },
+          msOverflowStyle: "none",
           scrollbarWidth: "none",
         }}
       >

@@ -164,6 +164,7 @@ const CardChat = () => {
                   fontSize="16px"
                   fontWeight={600}
                   lineHeight="24px"
+                  noOfLines={1}
                 >
                   {chat.receiver}
                 </Heading>

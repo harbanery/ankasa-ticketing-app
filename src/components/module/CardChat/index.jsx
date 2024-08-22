@@ -17,8 +17,10 @@ import {
 import React from "react";
 import { PiCheck, PiChecks } from "react-icons/pi";
 import { formatChat } from "../../../utils/date";
+import { useNavigate } from "react-router-dom";
 
 const CardChat = () => {
+  const navigate = useNavigate();
   // status: none, sent, unread, read, reply
   // const chats = [];
   const chats = [
@@ -86,7 +88,7 @@ const CardChat = () => {
 
   return (
     <>
-      <Flex justifyContent="space-between" alignItems="flex-end">
+      <Flex justifyContent="space-between" alignItems="flex-end" maxH="625px">
         <Box mb="50px">
           <Text
             fontFamily={"Poppins"}
@@ -130,11 +132,19 @@ const CardChat = () => {
         divider={<StackDivider borderColor="#E6E6E6" />}
         spacing={0.5}
         fontFamily="Lato"
+        maxH="404px"
+        overflowY="scroll"
+        style={{
+          "::WebkitScrollbar": { display: "none" },
+          msOverflowStyle: "none",
+          scrollbarWidth: "none",
+        }}
       >
         {chats && chats.length !== 0 ? (
           chats.map((chat) => (
             <Box
               key={chat.id}
+              onClick={() => navigate(`/chat/${chat.id}`, { replace: true })}
               py="12px"
               px="4px"
               borderRadius="10px"
@@ -227,87 +237,14 @@ const CardChat = () => {
             </Box>
           ))
         ) : (
-          // <Box display="flex" gap="30px" justifyContent="space-between">
-          //   <Avatar
-          //     src="https://s3-alpha-sig.figma.com/img/73a0/4afb/da4073a0e634cc12a6a69a7f71a9585c?Expires=1723420800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=EBQUL4xF~0~nuM01vvg8WUm7Z2CEuAf0~XqVZFTsnW~6utyNxEA36OUuu4~8cueshMql973aOeGIbIB1H5JyYTpDI0ijR4eOPQFbfWy5IDGZqaao2eGY9cESG0sHUKRQDPrEO-CfjUhvnQzyFKlPoQrH9q-OLM873SC0VZosqPnVi7C4TytIsmP8MrXSiRX8IYqhlpnI~CWKRYfC0v3h2vdJFywA4USyUW8cv~nAgaW~BktjAIi8S~UOXR9AtkCqsq7WFDqxwjKovzWKHykElErHLndMl0L~uUgpWns9--DmKXBZ4R9gITra9eaVP8u8W4QeBDZgNR2B0dAHeA4Spg__"
-          //     borderRadius="15px"
-          //     borderWidth="0.5px"
-          //     borderColor="#0E3F6C30"
-          //   >
-          //     <AvatarBadge boxSize="20px" borderWidth="4px" bg="#2395FF" />
-          //   </Avatar>
-          //   <Stack w="100%">
-          //     <Heading
-          //       fontFamily="Poppins"
-          //       fontSize="16px"
-          //       fontWeight={600}
-          //       lineHeight="24px"
-          //     >
-          //       Soham Henry
-          //     </Heading>
-          //     <Text
-          //       fontFamily="Lato"
-          //       fontSize="14px"
-          //       fontWeight={400}
-          //       lineHeight="16.8px"
-          //       color="#6B6B6B"
-          //     >
-          //       me: bro just f off
-          //     </Text>
-          //   </Stack>
-          //   <Flex
-          //     direction="column"
-          //     justifyContent="space-between"
-          //     alignItems="flex-end"
-          //   >
-          //     <Text
-          //       fontFamily="Lato"
-          //       fontSize="12px"
-          //       fontWeight={400}
-          //       lineHeight="18px"
-          //       color="#979797"
-          //     >
-          //       5:30
-          //     </Text>
-          //     <PiChecks fontSize="20px" color="#C4C4C4" />
-          //   </Flex>
-          // </Box>
-          // chats.map((chat) => (
-          //   <></>
-          //   // <Box
-          //   //   key={notif.id}
-          //   //   as="Button"
-          //   //   textAlign="left"
-          //   //   px="25px"
-          //   //   py="16px"
-          //   //   borderRadius="13px"
-          //   //   border={`1px solid ${
-          //   //     notif.read_status == "false" ? `#2395FF` : `#D7D7D7`
-          //   //   }`}
-          //   //   bgColor={notif.read_status == "false" && "#F6FBFF"}
-          //   // >
-          //   //   <Heading
-          //   //     fontWeight="600"
-          //   //     fontSize="16px"
-          //   //     lineHeight="19.2px"
-          //   //     color={notif.read_status == "false" && "#2395FF"}
-          //   //     mb="10px"
-          //   //   >
-          //   //     {notif.title}
-          //   //   </Heading>
-          //   //   <Text
-          //   //     fontWeight="400"
-          //   //     fontSize="14px"
-          //   //     lineHeight="18px"
-          //   //     color="#6B6B6B"
-          //   //     mb="20px"
-          //   //     noOfLines={2}
-          //   //   >
-          //   //     {notif.description}
-          //   //   </Text>
-          //   // </Box>
-          // ))
-          <Box textAlign="center" py={8}>
+          <Box
+            py={8}
+            minW="319px"
+            minH="319px"
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+          >
             <Heading fontSize="20px" fontFamily="Poppins" fontWeight="600">
               No Chat Today
             </Heading>

@@ -18,6 +18,7 @@ import BrowsePage from "../../pages/main/Browse";
 import ResetPassword from "../../pages/auth/ResetPassword";
 import Profile from "../../pages/main/Profile";
 import Chat from "../../pages/main/Chat";
+import ChatDetail from "../../pages/main/ChatDetail";
 
 const RootRouter = () => {
   const router = createBrowserRouter([
@@ -46,6 +47,12 @@ const RootRouter = () => {
         {
           path: "chat",
           element: <Chat />,
+          children: [
+            {
+              path: ":id",
+              element: <ChatDetail />,
+            },
+          ],
         },
       ],
     },

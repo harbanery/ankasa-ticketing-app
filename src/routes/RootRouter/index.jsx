@@ -18,6 +18,8 @@ import {
   resetPasswordLoader,
   verifyEmailLoader,
 } from "../../utils/loaders";
+import MyProfile from "../../pages/main/Profile/myProfile";
+import MyBooking from "../../pages/main/Profile/myBooking";
 const RootRouter = () => {
   const router = createBrowserRouter([
     {
@@ -42,6 +44,17 @@ const RootRouter = () => {
         {
           path: "profile",
           element: <Profile />,
+          loader: protectedRoute,
+          children: [
+            {
+              path: "my-profile",
+              element: <MyProfile />,
+            },
+            {
+              path: "my-booking",
+              element: <MyBooking />,
+            },
+          ],
         },
       ],
     },

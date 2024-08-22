@@ -66,7 +66,7 @@ const Navbar = ({ data_user = {}, token = "" }) => {
     },
     {
       name: "My Booking",
-      navigation: "/my-booking",
+      navigation: "/profile/my-booking",
       required_token: true,
     },
   ];
@@ -230,7 +230,7 @@ const Navbar = ({ data_user = {}, token = "" }) => {
                   boxShadow="0px 8px 10px 0px #dddfe24D"
                   transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
                 >
-                  <NavLink to="/profile">
+                  <NavLink to="/profile/my-profile">
                     <MenuItem>My Profile</MenuItem>
                   </NavLink>
                   <MenuItem onClick={handleLogout}>Logout</MenuItem>

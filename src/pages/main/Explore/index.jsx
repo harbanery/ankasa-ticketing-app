@@ -19,7 +19,7 @@ import React, { useRef } from "react";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
-import { FaArrowRotateRight } from "react-icons/fa6";
+import { FaArrowRightArrowLeft, FaArrowRotateRight } from "react-icons/fa6";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { CgArrowLeft, CgArrowRight } from "react-icons/cg";
 import { FaPlaneDeparture } from "react-icons/fa";
@@ -198,16 +198,20 @@ const Explore = () => {
     ],
   };
   return (
-    <Box minH={"100vh"} mb={32}>
+    <Box minH={"100vh"} mb={32} fontFamily={"Poppins"}>
       <Box position={"relative"}>
         <Stack
           direction={{ lg: "row" }}
           justifyContent={{ base: "center", lg: "space-between" }}
         >
-          <Box w={{ base: "auto", lg: "50%" }} mt={{ base: 10, lg: "120px" }}>
+          <Box
+            w={{ base: "auto", lg: "50%" }}
+            mt={{ base: 10, lg: "120px" }}
+            ml={{ base: "0", lg: "5%", xl: "130px" }}
+          >
             <Flex
               columnGap={{ base: 3, lg: 5 }}
-              justify={{ base: "space-between", lg: "center" }}
+              justify={{ base: "space-between", lg: "start" }}
             >
               <Text
                 fontSize={{ base: "4xl", md: "5xl", lg: "6xl" }}
@@ -223,11 +227,10 @@ const Explore = () => {
                 Flight
               </Text>
             </Flex>
-            <Flex justify={{ base: "start", lg: "center" }}>
+            <Flex justify={{ base: "start" }}>
               <Text fontSize={"18px"} fontWeight={400} color={"gray"}>
                 and explore the world with us
               </Text>
-              <Text w={"190px"} display={{ base: "none", lg: "block" }}></Text>
             </Flex>
           </Box>
         </Stack>
@@ -242,6 +245,7 @@ const Explore = () => {
             ml={{ base: "none", lg: "auto" }}
             src="/src/assets/bg-landing-1.png"
             width={{ lg: "auto" }}
+            // background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.81) 100%);
           />
         </Box>
         <Box position={"absolute"} top={{ base: 800, md: 700, lg: 390 }}>
@@ -271,10 +275,10 @@ const Explore = () => {
           w={{ base: "319px", lg: "400px" }}
         >
           <Grid gap={3} mb={{ base: 0, lg: 5 }} p={{ base: 2, lg: 0 }}>
-            <Text fontWeight={"600"} align="left">
+            <Text fontWeight={"500"} align="left">
               Hey,
             </Text>
-            <Text fontWeight={"600"} fontSize="2xl" align="left">
+            <Text fontWeight={"500"} fontSize="2xl" align="left">
               Where you want to go?
             </Text>
             <Link to="#">
@@ -301,17 +305,39 @@ const Explore = () => {
             alignItems={"center"}
             mb={5}
           >
-            <GridItem>from</GridItem>
-            <GridItem />
-            <GridItem>to</GridItem>
-            <GridItem fontSize="2xl">Medan</GridItem>
-            <GridItem mx={"auto"} color={"#2395FF"}>
-              {<CgArrowLeft />} {<CgArrowRight />}
+            <GridItem fontFamily="Lato" color="#979797" fontSize="small">
+              From
             </GridItem>
-            <GridItem fontSize="2xl">Tokyo</GridItem>
-            <GridItem>indonesia</GridItem>
             <GridItem />
-            <GridItem>japan</GridItem>
+            <GridItem fontFamily="Lato" color="#979797" fontSize="small">
+              To
+            </GridItem>
+            <GridItem fontSize="2xl" fontWeight={600}>
+              Medan
+            </GridItem>
+            <GridItem mx={"auto"} color={"#2395FF"}>
+              <FaArrowRightArrowLeft fontSize="17px" />
+            </GridItem>
+            <GridItem fontSize="2xl" fontWeight={600}>
+              Tokyo
+            </GridItem>
+            <GridItem
+              alignSelf="start"
+              fontFamily="Lato"
+              fontWeight={500}
+              fontSize="14px"
+            >
+              Indonesia
+            </GridItem>
+            <GridItem />
+            <GridItem
+              alignSelf="start"
+              fontFamily="Lato"
+              fontWeight={500}
+              fontSize="14px"
+            >
+              Japan
+            </GridItem>
           </Grid>
 
           <Stack
@@ -414,12 +440,17 @@ const Explore = () => {
       </Box>
       <Box mt={860} w={"80%"} mx={"auto"}>
         <Box>
-          <Text fontSize={"base"} color={"#2395FF"}>
+          <Text
+            fontSize={"base"}
+            color={"#2395FF"}
+            letterSpacing={5}
+            textTransform="uppercase"
+          >
             Trending
           </Text>
         </Box>
         <Flex justify={"space-between"} mb={"40px"}>
-          <Text fontSize={"xl"} fontWeight={600}>
+          <Text fontSize={"xl"} fontWeight={600} textTransform="capitalize">
             Trending Destinations
           </Text>
           <Link to="#">
@@ -462,8 +493,10 @@ const Explore = () => {
         />
         <Box position={"relative"}>
           <Stack alignItems={"center"} py={"auto"} color={"white"}>
-            <Text fontWeight={500}>TOP 10</Text>
-            <Text fontWeight={600} fontSize={"2xl"}>
+            <Text fontWeight={500} letterSpacing={5} textTransform="uppercase">
+              TOP 10
+            </Text>
+            <Text fontWeight={600} fontSize={"2xl"} textTransform="capitalize">
               Top 10 destinations
             </Text>
             <Box mt={10} w={"full"}>

@@ -26,9 +26,10 @@ const CardComponent = ({ backgroundImage, airlinesCount, city, country }) => {
       bgSize="cover"
     >
       <Stack
-        spacing={68}
+        h="full"
         bgGradient="linear(to-b, transparent, black)"
         rounded="20px"
+        justifyContent="space-between"
       >
         <CardHeader>
           <Box
@@ -56,7 +57,7 @@ const CardComponent = ({ backgroundImage, airlinesCount, city, country }) => {
               <Text fontSize={"base"} color={"white"}>
                 {city},
               </Text>
-              <Text fontSize={"3xl"} color={"white"} fontWeight={600}>
+              <Text fontSize={"2xl"} color={"white"} fontWeight={600}>
                 {country}
               </Text>
             </Box>

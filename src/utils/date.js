@@ -56,3 +56,11 @@ export const formatChat = (datetime) => {
     return format(date, "H:mm");
   }
 };
+
+export const formatTime = (datetime) => {
+  if (!datetime) {
+    return "Invalid date";
+  }
+
+  return format(datetime, "H:mm");
+};

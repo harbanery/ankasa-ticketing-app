@@ -57,7 +57,7 @@ const Chat = () => {
             <Flex
               mx="auto"
               justifyContent={{ base: "center", md: "flex-start" }}
-              minW={{ base: "319px" }}
+              minW={{ base: "auto", md: "319px" }}
               w="full"
               h="full"
               bg="white"

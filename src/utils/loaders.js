@@ -33,6 +33,22 @@ export const authLoader = ({ request }) => {
   return null;
 };
 
+export const profileLoader = ({ request }) => {
+  const url = new URL(request.url);
+  const pathname = url.pathname;
+  const { token } = getTokenfromLocalStorage();
+
+  if (pathname == "/profile") {
+    return redirect("/profile/my-profile");
+  }
+
+  if (!token) {
+    return redirect("/");
+  }
+
+  return null;
+};
+
 export const mainLoader = async ({ request }) => {
   const url = new URL(request.url);
   const pathname = url.pathname;

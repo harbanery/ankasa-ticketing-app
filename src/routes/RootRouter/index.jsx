@@ -1,5 +1,12 @@
 import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  authLoader,
+  mainLoader,
+  profileLoader,
+  resetPasswordLoader,
+  verifyEmailLoader,
+} from "../../utils/loaders";
 import Explore from "../../pages/main/Explore";
 import Login from "../../pages/auth/Login";
 import ForgotPassword from "../../pages/auth/ForgotPassword";
@@ -12,12 +19,7 @@ import { protectedRoute } from "../../utils/protectedRoute";
 import BrowsePage from "../../pages/main/Browse";
 import ResetPassword from "../../pages/auth/ResetPassword";
 import Profile from "../../pages/main/Profile";
-import {
-  authLoader,
-  mainLoader,
-  resetPasswordLoader,
-  verifyEmailLoader,
-} from "../../utils/loaders";
+import Chat from "../../pages/main/Chat";
 import MyProfile from "../../pages/main/Profile/myProfile";
 import MyBooking from "../../pages/main/Profile/myBooking";
 const RootRouter = () => {
@@ -44,7 +46,7 @@ const RootRouter = () => {
         {
           path: "profile",
           element: <Profile />,
-          loader: protectedRoute,
+          loader: profileLoader,
           children: [
             {
               path: "my-profile",
@@ -55,6 +57,14 @@ const RootRouter = () => {
               element: <MyBooking />,
             },
           ],
+        },
+        {
+          path: "chat",
+          element: <Chat />,
+        },
+        {
+          path: "chat",
+          element: <Chat />,
         },
       ],
     },

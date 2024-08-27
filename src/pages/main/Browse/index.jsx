@@ -23,7 +23,7 @@ import {
 import { Link as ReactRouterLink, useSearchParams } from 'react-router-dom';
 import {
 	FilterIcon,
-	FlighIcon,
+	FlightIcon,
 	InFlightMealIcon,
 	LuggageIcon,
 	WifiIcon,
@@ -377,7 +377,7 @@ function FlightCard({ flight }) {
 						</Text>
 					</Box>
 					<Box mt='4px'>
-						<FlighIcon />
+						<FlightIcon />
 					</Box>
 					<Box>
 						<Text
@@ -412,7 +412,7 @@ function FlightCard({ flight }) {
 					>
 						{facilities.map(({ label, icon }) => {
 							return (
-								<ListItem key={label}>
+								<ListItem key={label} color='#979797'>
 									<VisuallyHidden>{label}</VisuallyHidden>
 									{icon}
 								</ListItem>

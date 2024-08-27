@@ -5,22 +5,33 @@ import {
   Box,
   Button,
   Checkbox,
+  Collapse,
   Container,
   Flex,
+  FormControl,
+  FormErrorMessage,
   Heading,
   Image,
   Input,
+  InputGroup,
+  InputRightElement,
   Stack,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerValidation } from "../../../utils/validation";
 import AlertCustom from "../../../components/base/AlertCustom";
 import api from "../../../services/api";
+import { optionToast } from "../../../utils/constants";
+import { BsEye, BsEyeSlash } from "react-icons/bs";
+import { FcGoogle } from "react-icons/fc";
+import { FaFacebook } from "react-icons/fa";
 
 const Register = () => {
   const navigate = useNavigate();
+  const toast = useToast();
   const [form, setForm] = useState({
     username: "",
     email: "",
@@ -28,14 +39,10 @@ const Register = () => {
   });
   const [formAgreed, setFormAgreed] = useState(false);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  // Alert
-  const [alert, setAlert] = useState({
-    status: "idle",
-    message: "",
-  });
-  const [alertKey, setAlertKey] = useState(0);
-  // Alert
+  const handleShowPassword = () => setShowPassword(!showPassword);
 
   const handleChange = (e) => {
     setErrors({
@@ -55,15 +62,18 @@ const Register = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       await registerValidation.validate(form, { abortEarly: false });
 
       if (!formAgreed) {
-        setAlert({
+        toast({
+          title: "Register Failed",
+          description: "You should agree terms & conditions!",
           status: "error",
-          message: "You should agree terms & conditions!",
+          ...optionToast,
         });
-        setAlertKey(alertKey + 1);
+        setLoading(false);
       } else {
         try {
           const res = await api.post(`register`, {
@@ -74,13 +84,25 @@ const Register = () => {
           });
 
           console.log(res.data.message);
-          setAlert({ status: "success" });
-          setAlertKey(alertKey + 1);
-          navigate("/");
+          toast({
+            title: "Register Successfully",
+            description: "Please check in your email to activate.",
+            status: "success",
+            ...optionToast,
+          });
+          setLoading(false);
+          navigate("/auth/login");
         } catch (err) {
           console.log(err);
-          setAlert({ status: "error", message: err?.response?.data?.message });
-          setAlertKey(alertKey + 1);
+          toast({
+            title: "Register Failed",
+            ...(err?.response?.data?.message
+              ? { description: err?.response?.data?.message }
+              : {}),
+            status: "error",
+            ...optionToast,
+          });
+          setLoading(false);
         }
       }
     } catch (err) {
@@ -90,211 +112,225 @@ const Register = () => {
         }, {});
         setErrors(formErrors);
       }
+      setLoading(false);
     }
   };
 
   return (
-    <Container my="5%" maxW="sm">
-      <AlertCustom alertState={alert} count={alertKey} />
-      <Link to={"/"}>
-        <Image
-          // display={{ base: "none", md: "flex" }}
-          position={"absolute"}
-          top={10}
-          src="/src/assets/brandicon.png"
-          alt="Logo"
-          w="158px"
-          h="36px"
-        />
-      </Link>
-      <Box display="flex" flexDirection="column" h="100%" gap="4">
-        {/* <Link to={"/"}>
-          <Image
-            display={{ base: "flex", md: "none" }}
-            src="/src/assets/brandicon.png"
-            alt="Logo"
-            w="158px"
-            h="36px"
-            mb="3rem"
-            mx="auto"
+    <>
+      <Heading fontFamily="Poppins" fontWeight="600">
+        Register
+      </Heading>
+      <Flex
+        direction="column"
+        my="5"
+        gap="7"
+        fontFamily="Lato"
+        fontSize="16px"
+        fontWeight="400"
+      >
+        <FormControl isInvalid={errors.username ? true : false} isRequired>
+          <Input
+            type="text"
+            name="username"
+            value={form.username}
+            size="lg"
+            onChange={handleChange}
+            variant="flushed"
+            placeholder="Full Name"
+            borderBottom="2px"
+            borderBottomColor="#D2C2FFAD"
+            autoComplete="off"
+            _focus={{
+              borderBottomColor: "#2395FF",
+            }}
           />
-        </Link> */}
-        <Heading fontFamily="Poppins" fontWeight="600">
-          Register
-        </Heading>
-        <Flex
-          direction="column"
-          my="5"
-          gap="7"
-          fontFamily="Lato"
-          fontSize="16px"
-          fontWeight="400"
-        >
-          <Stack spacing={1}>
+          <Collapse in={errors.username ? true : false} animateOpacity>
+            <Text fontSize="14px" mt="8px" textColor="crimson">
+              {errors.username || "."}
+            </Text>
+          </Collapse>
+        </FormControl>
+        <FormControl isInvalid={errors.email ? true : false} isRequired>
+          <Input
+            type="email"
+            name="email"
+            value={form.email}
+            size="lg"
+            onChange={handleChange}
+            variant="flushed"
+            placeholder="Email"
+            borderBottom="2px"
+            borderBottomColor="#D2C2FFAD"
+            autoComplete="off"
+            _focus={{
+              borderBottomColor: "#2395FF",
+            }}
+          />
+          <Collapse in={errors.email ? true : false} animateOpacity>
+            <Text fontSize="14px" mt="8px" textColor="crimson">
+              {errors.email || "."}
+            </Text>
+          </Collapse>
+        </FormControl>
+        <FormControl isInvalid={errors.password ? true : false} isRequired>
+          <InputGroup size="lg">
             <Input
-              isInvalid={errors.username ? true : false}
-              type="text"
-              name="username"
-              value={form.username}
-              onChange={handleChange}
-              size="lg"
-              variant="flushed"
-              placeholder="Full Name"
-              borderBottom="2px"
-              borderBottomColor="#D2C2FFAD"
-              errorBorderColor="crimson"
-              _focus={{
-                borderBottomColor: "#2395FF",
-              }}
-            />
-            <Alert
-              px="2"
-              py="1"
-              h="auto"
-              fontSize="14"
-              display={errors.username ? "flex" : "none"}
-              status="error"
-              variant="subtle"
-              transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
-              rounded="10px"
-            >
-              <AlertIcon w="4" h="4" />
-              <AlertTitle>{errors.username}</AlertTitle>
-            </Alert>
-          </Stack>
-          <Stack spacing={1}>
-            <Input
-              isInvalid={errors.email ? true : false}
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              type="email"
-              size="lg"
-              variant="flushed"
-              placeholder="Email"
-              borderBottom="2px"
-              borderBottomColor="#D2C2FFAD"
-              errorBorderColor="crimson"
-              _focus={{
-                borderBottomColor: "#2395FF",
-              }}
-            />
-            <Alert
-              px="2"
-              py="1"
-              h="auto"
-              fontSize="14"
-              display={errors.email ? "flex" : "none"}
-              status="error"
-              variant="subtle"
-              transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
-              rounded="10px"
-            >
-              <AlertIcon w="4" h="4" />
-              <AlertTitle>{errors.email}</AlertTitle>
-            </Alert>
-          </Stack>
-          <Stack spacing={1}>
-            <Input
-              isInvalid={errors.password ? true : false}
+              type={showPassword ? "text" : "password"}
               name="password"
               value={form.password}
               onChange={handleChange}
-              type="password"
-              size="lg"
               variant="flushed"
               placeholder="Password"
               borderBottom="2px"
               borderBottomColor="#D2C2FFAD"
-              errorBorderColor="crimson"
               _focus={{
                 borderBottomColor: "#2395FF",
               }}
             />
-            <Alert
-              px="2"
-              py="1"
-              h="auto"
-              fontSize="14"
-              display={errors.password ? "flex" : "none"}
-              status="error"
-              variant="subtle"
-              transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
-              rounded="10px"
-            >
-              <AlertIcon w="4" h="4" />
-              <AlertTitle>{errors.password}</AlertTitle>
-            </Alert>
-          </Stack>
-        </Flex>
+            <InputRightElement width="4.5rem" justifyContent="flex-end">
+              <Button
+                bg="transparent"
+                _hover={{ bg: "transparent" }}
+                _active={{ bg: "transparent" }}
+                cursor="default"
+              >
+                {!showPassword ? (
+                  <BsEye
+                    onClick={handleShowPassword}
+                    color="#2395FF"
+                    fontSize="24px"
+                    cursor="pointer"
+                  />
+                ) : (
+                  <BsEyeSlash
+                    onClick={handleShowPassword}
+                    color="#2395FF"
+                    fontSize="24px"
+                    cursor="pointer"
+                  />
+                )}
+              </Button>
+            </InputRightElement>
+          </InputGroup>
+          <Collapse in={errors.password ? true : false} animateOpacity>
+            <Text fontSize="14px" mt="8px" textColor="crimson">
+              {errors.password || "."}
+            </Text>
+          </Collapse>
+        </FormControl>
+      </Flex>
+      <Box
+        display="flex"
+        alignItems="center"
+        fontFamily="Lato"
+        fontSize="16px"
+        fontWeight="400"
+      >
+        <Checkbox
+          textColor="#595959"
+          border="#2395FF"
+          gap={3}
+          onChange={handleChangeCheckbox}
+        >
+          Accept terms and condition
+        </Checkbox>
+      </Box>
+      <Button
+        isLoading={loading ? true : false}
+        loadingText="Loading"
+        onClick={handleRegister}
+        bg="#2395FF"
+        borderRadius="10px"
+        color="white"
+        size="lg"
+        w="100%"
+        h="57px"
+        fontFamily="Poppins"
+        fontSize="18px"
+        fontWeight="700"
+        transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+        boxShadow="0px 8px 10px 0px #2395FF4D"
+        _hover={{ bg: "#1971c2" }}
+        _active={{
+          bg: "#dddfe2",
+          boxShadow: "0px 8px 10px 0px #dddfe24D",
+        }}
+      >
+        Sign Up
+      </Button>
+      <Box mt="8" mx="auto" bg="#D8D8D8" w="80%" h="1px" />
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        fontFamily="Lato"
+        fontSize="16px"
+        fontWeight="400"
+        gap="4"
+      >
+        <Text textColor="#595959">Already have an account?</Text>
         <Button
-          onClick={handleRegister}
-          bg="#2395FF"
+          onClick={() => navigate("/auth/login")}
+          bg="white"
           borderRadius="10px"
-          color="white"
+          color="#2395FF"
+          border="1px"
+          borderColor="#2395FF"
+          fontFamily="Poppins"
+          fontWeight="700"
+          fontSize="18px"
           size="lg"
           w="100%"
-          h="57px"
-          fontFamily="Poppins"
-          fontSize="18px"
-          fontWeight="700"
+          h="52px"
           transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
-          boxShadow="0px 8px 10px 0px #2395FF4D"
-          _hover={{ bg: "#1971c2" }}
           _active={{
-            bg: "#dddfe2",
-            boxShadow: "0px 8px 10px 0px #dddfe24D",
+            bg: "#2395FF",
+            color: "white",
+            boxShadow: "0px 8px 10px 0px #2395FF4D",
           }}
         >
-          Sign Up
+          Sign In
         </Button>
-        <Box
-          display="flex"
-          alignItems="center"
-          fontFamily="Lato"
-          fontSize="16px"
-          fontWeight="400"
-        >
-          <Checkbox border="#2395FF" gap={3} onChange={handleChangeCheckbox}>
-            Accept terms and condition
-          </Checkbox>
-        </Box>
-        <Box mt="8" mx="auto" bg="#D8D8D8" w="80%" h="1px" />
-        <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          fontFamily="Lato"
-          fontSize="16px"
-          fontWeight="400"
-          gap="6"
-        >
-          <Text>Already have an account?</Text>
+        <Text textColor="#595959">or</Text>
+        <Flex gap="4">
           <Button
-            onClick={() => navigate("/auth/login")}
             bg="white"
             borderRadius="10px"
-            color="#2395FF"
+            color="white"
             border="1px"
             borderColor="#2395FF"
-            fontFamily="Poppins"
-            fontWeight="700"
-            fontSize="18px"
             size="lg"
             w="100%"
             h="52px"
             transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
             _active={{
               bg: "#2395FF",
-              color: "white",
               boxShadow: "0px 8px 10px 0px #2395FF4D",
             }}
           >
-            Sign In
+            <FcGoogle fontSize="24px" />
           </Button>
-        </Box>
+          <Button
+            bg="white"
+            borderRadius="10px"
+            color="#4175DF"
+            border="1px"
+            borderColor="#2395FF"
+            size="lg"
+            w="100%"
+            h="52px"
+            transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+            _active={{
+              bg: "#2395FF",
+              boxShadow: "0px 8px 10px 0px #2395FF4D",
+            }}
+          >
+            <FaFacebook fontSize="24px" />
+          </Button>
+        </Flex>
       </Box>
-    </Container>
+    </>
   );
 };
 

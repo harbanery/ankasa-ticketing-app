@@ -7,10 +7,12 @@ import {
   Image,
   Stack,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { IoMdArrowBack } from "react-icons/io";
 import QRCode from "react-qr-code";
-import { useNavigate } from "react-router-dom";
+import { redirect, useNavigate } from "react-router-dom";
+import { getTokenfromLocalStorage } from "../../../utils/localStorage";
 
 const BoardingPass = ({ checkout }) => {
   const navigate = useNavigate();
@@ -60,8 +62,12 @@ const BoardingPass = ({ checkout }) => {
           <Text fontSize={24} fontWeight={600}>
             Booking Pass
           </Text>
-          <Button variant="unstyled" onClick={() => navigate("/")}>
-            <IoMdArrowBack size={20} color="#2395FF" />
+          <Button
+            variant="unstyled"
+            onClick={() => navigate("/")}
+            transform={{ base: "", md: "rotate(180deg)", lg: "rotate(180deg)" }}
+          >
+            <IoMdArrowBack size={20} strokeWidth={100} color="#2395FF" />
           </Button>
         </Flex>
         <Flex
@@ -110,10 +116,7 @@ const BoardingPass = ({ checkout }) => {
                     ?.map((item) => item?.seats)
                     .join(", ")}
                 />
-                <InfoItem
-                  label="Class"
-                  value={checkout[0]?.tickets[0]?.class}
-                />
+                <InfoItem label="Clas" value={checkout[0]?.tickets[0]?.class} />
                 <InfoItem
                   label="Passengers"
                   value={checkout[0]?.total_passegers}

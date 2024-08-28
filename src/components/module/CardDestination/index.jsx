@@ -14,8 +14,23 @@ import { Link } from "react-router-dom";
 
 const CardComponent = ({ backgroundImage, airlinesCount, city, country }) => {
   return (
-    <Card backgroundImage={`url(${backgroundImage})`} w={"206px"} h={"262px"}>
-      <Stack spacing={75}>
+    <Card
+      backgroundImage={`url(${backgroundImage})`}
+      w={{ base: "206px" }}
+      h={{ base: "262px" }}
+      mx="auto"
+      rounded="20px"
+      bgRepeat="no-repeat"
+      bgAttachment="fixed"
+      bgPosition="center"
+      bgSize="cover"
+    >
+      <Stack
+        h="full"
+        bgGradient="linear(to-b, transparent, black)"
+        rounded="20px"
+        justifyContent="space-between"
+      >
         <CardHeader>
           <Box
             px={"20px"}
@@ -31,7 +46,6 @@ const CardComponent = ({ backgroundImage, airlinesCount, city, country }) => {
                 {airlinesCount}
               </Text>
               <Text color={"white"} fontWeight={300}>
-                {" "}
                 Airlines
               </Text>
             </Flex>
@@ -43,7 +57,7 @@ const CardComponent = ({ backgroundImage, airlinesCount, city, country }) => {
               <Text fontSize={"base"} color={"white"}>
                 {city},
               </Text>
-              <Text fontSize={"3xl"} color={"white"} fontWeight={600}>
+              <Text fontSize={"2xl"} color={"white"} fontWeight={600}>
                 {country}
               </Text>
             </Box>

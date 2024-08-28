@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 
 const LayoutAuth = () => {
   const MotionBox = motion(Box);
+  const MotionStack = motion(Stack);
   // const navigate = useNavigate();
   // const token = localStorage.getItem("token");
   // useEffect(() => {
@@ -21,17 +22,32 @@ const LayoutAuth = () => {
         display={{ base: "none", md: "block" }}
         w={{ base: "70%", lg: "100%" }}
       >
-        <Stack
+        <MotionStack
           w={{ base: "100%" }}
           maxW={{ base: "0%", md: "40%", lg: "50%", xl: "60%" }}
           h="100vh"
-          bg="#2395FF"
+          // bgGradient="linear(to-bl, #41A4FF, #2395FF)"
           position={{ base: "fixed" }}
           display={{ base: "none", md: "flex" }}
           top={0}
           left={0}
           alignItems="center"
           justifyContent="center"
+          initial={{ background: "linear-gradient(90deg, #41A4FF, #2395FF)" }}
+          animate={{
+            background: [
+              "linear-gradient(135deg, #41A4FF, #2395FF)",
+              "linear-gradient(135deg, #2395FF, #41A4FF)",
+              "linear-gradient(135deg, #41A4FF, #9DD0FF)",
+              "linear-gradient(135deg, #9DD0FF, #41A4FF)",
+              "linear-gradient(135deg, #41A4FF, #2395FF)",
+            ],
+          }}
+          transition={{
+            duration: 7,
+            repeat: Infinity,
+            repeatType: "mirror",
+          }}
         >
           <Box w="50%" aspectRatio={1} position="relative">
             <Stack w="full" h="full" position="absolute">
@@ -115,7 +131,7 @@ const LayoutAuth = () => {
               </MotionBox>
             </Box>
           </Box>
-        </Stack>
+        </MotionStack>
       </Box>
       <Box
         display="flex"

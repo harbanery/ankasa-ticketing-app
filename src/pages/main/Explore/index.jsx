@@ -79,9 +79,9 @@ const Explore = () => {
     slidesToScroll: 1,
     responsive: [
       {
-        breakpoint: 768, // Breakpoint untuk perangkat kecil
+        breakpoint: 769, // Breakpoint untuk perangkat kecil
         settings: {
-          slidesToShow: 2,
+          slidesToShow: 3,
           slidesToScroll: 1,
         },
       },
@@ -95,9 +95,16 @@ const Explore = () => {
     slidesToScroll: 1,
     responsive: [
       {
-        breakpoint: 769,
+        breakpoint: 426,
         settings: {
           slidesToShow: 1,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 769,
+        settings: {
+          slidesToShow: 2,
           slidesToScroll: 1,
         },
       },
@@ -331,7 +338,7 @@ const Explore = () => {
             </Text>
           </Link>
         </Flex>
-        <Box mt={10} w={{ base: "80%", lg: "full" }} mx={"auto"}>
+        <Box mt={10} w={{ base: "60%", md: "80%", lg: "full" }} mx={"auto"}>
           <Slider ref={cardSliderRef} {...cardSettings}>
             {cardData.map((card, index) => (
               <CardComponent

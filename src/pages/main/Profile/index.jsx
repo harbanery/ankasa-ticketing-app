@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import {
   Avatar,
   Box,
@@ -41,6 +42,7 @@ const Profile = () => {
       columnGap={5}
       p={10}
       justify={"center"}
+      direction={{base: "column", md: "row"}}
     >
       <Box bgColor={"white"} w={"325px"} h={"710px"} rounded={15} p={8}>
         <Box
@@ -50,7 +52,7 @@ const Profile = () => {
           rowGap={8}
         >
           <Box borderRadius="full" border="4px" borderColor="#2395FF" p={2}>
-            <Image boxSize="150px" as={Avatar} alt="Dan Abramov" />
+            <Image boxSize={{base: "100px",lg: "150px"}} src={profile.image} alt="Dan Abramov" rounded="full" />
           </Box>
           <Button
             w={"150px"}
@@ -74,6 +76,7 @@ const Profile = () => {
               fontWeight={600}
               fontSize={"20px"}
               fontFamily={"poppins"}
+              textTransform={"capitalize"}
             >
               {profile.username}
             </Text>
@@ -83,12 +86,13 @@ const Profile = () => {
               fontFamily={"lato"}
               color={"#6B6B6B"}
               lineHeight={"22px"}
+              textAlign={"center"}
             >
               Surakarta Indonesia
             </Text>
           </Box>
         </Box>
-        <Flex justify={"space-between"} mt={5}>
+        <Flex justify={"space-between"} mt={5} alignItems={"center"}>
           <Text
             fontFamily={"poppins"}
             fontWeight={600}
@@ -110,7 +114,7 @@ const Profile = () => {
           </Button>
         </Flex>
         <Box
-          w={"267px"}
+          w={{base: "260px",lg: "267px"}}
           h={"68px"}
           rounded={"10px"}
           bgColor={"#2395FF"}
@@ -240,7 +244,7 @@ const Profile = () => {
           </GridItem>
         </Grid>
       </Box>
-      <Box bgColor={"white"} w={"876px"} h={"650px"} rounded={15} py={8} px={6}>
+      <Box bgColor={"white"} w={{lg: "876px"}} h={{lg: "650px"}} rounded={15} py={{base: 0,md: 8}} px={{base: 0,md: 6}}>
         <Box>
           <Text
             font-family={"poppins"}
@@ -262,8 +266,8 @@ const Profile = () => {
             Profile
           </Text>
         </Box>
-        <Flex mt={5}>
-          <Box>
+        <Flex mt={5} direction={{base:"column", lg:"row"}}>
+          <Box mb={9}>
             <Text
               fontFamily={"poppins"}
               fontWeight={600}
@@ -272,7 +276,7 @@ const Profile = () => {
             >
               Contact
             </Text>
-            <Stack mt={4} p={3}>
+            <Stack mt={4} p={{base: 0,lg: 3}}>
               <Text
                 fontFamily={"lato"}
                 fontWeight={400}
@@ -286,13 +290,13 @@ const Profile = () => {
                 type="email"
                 variant="flushed"
                 placeholder="Enter your email here"
-                w={"397px"}
+                w={{base: 300,lg: "397px"}}
                 borderBottom="2px"
                 borderBottomColor={"#D2C2FFAD"}
                 pl={3}
               />
             </Stack>
-            <Stack mt={4} p={3}>
+            <Stack mt={4} p={{base: 0,lg: 3}}>
               <Text
                 fontFamily={"lato"}
                 fontWeight={400}
@@ -306,7 +310,7 @@ const Profile = () => {
                 type="tel"
                 variant="flushed"
                 placeholder="Enter your phone number here"
-                w={"397px"}
+                w={{base: 300,lg: "397px"}}
                 borderBottom="2px"
                 borderBottomColor={"#D2C2FFAD"}
                 pl={3}
@@ -316,7 +320,7 @@ const Profile = () => {
               display={"flex"}
               direction={"row"}
               alignItems={"center"}
-              justify={"end"}
+              justify={{base: "start",lg: "end"}}
               columnGap={8}
               mt={5}
             >
@@ -343,7 +347,7 @@ const Profile = () => {
             >
               Biodata
             </Text>
-            <Stack mt={4} p={3}>
+            <Stack mt={4} p={{base: 0,lg: 3}}>
               <Text
                 fontFamily={"lato"}
                 fontWeight={400}
@@ -357,13 +361,13 @@ const Profile = () => {
                 type="text"
                 variant="flushed"
                 placeholder="Enter your username here"
-                w={"397px"}
+                w={{base: 300,lg: "397px"}}
                 borderBottom="2px"
                 borderBottomColor={"#D2C2FFAD"}
                 pl={3}
               />
             </Stack>
-            <Stack mt={4} p={3}>
+            <Stack mt={4} p={{base: 0,lg: 3}}>
               <Text
                 fontFamily={"lato"}
                 fontWeight={400}
@@ -377,13 +381,13 @@ const Profile = () => {
                 type="tel"
                 variant="flushed"
                 placeholder="Enter your here"
-                w={"397px"}
+                w={{base: 300,lg: "397px"}}
                 borderBottom="2px"
                 borderBottomColor={"#D2C2FFAD"}
                 pl={3}
               />
             </Stack>
-            <Stack mt={4} p={3}>
+            <Stack mt={4} p={{base: 0,lg: 3}}>
               <Text
                 fontFamily={"lato"}
                 fontWeight={400}
@@ -397,13 +401,13 @@ const Profile = () => {
                 type="text"
                 variant="flushed"
                 placeholder="Enter your address here"
-                w={"397px"}
+                w={{base: 300,lg: "397px"}}
                 borderBottom="2px"
                 borderBottomColor={"#D2C2FFAD"}
                 pl={3}
               />
             </Stack>
-            <Stack mt={4} p={3}>
+            <Stack mt={4} p={{base: 0,lg: 3}}>
               <Text
                 fontFamily={"lato"}
                 fontWeight={400}
@@ -417,13 +421,13 @@ const Profile = () => {
                 type="text"
                 variant="flushed"
                 placeholder="Enter your post code here"
-                w={"397px"}
+                w={{base: 300,lg: "397px"}}
                 borderBottom="2px"
                 borderBottomColor={"#D2C2FFAD"}
                 pl={3}
               />
             </Stack>
-            <Stack display={"flex"} direction={"row"} justify={"end"}>
+            <Stack display={"flex"} direction={"row"} justify={{base: "start",lg: "end"}}>
               <Button
                 mt={5}
                 mr={3}

@@ -1,14 +1,9 @@
 import {
   Box,
   Button,
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
   Flex,
   Grid,
   GridItem,
-  Heading,
   Image,
   Radio,
   RadioGroup,
@@ -235,28 +230,68 @@ const Explore = () => {
           </Box>
         </Stack>
         <Box
-          position={"absolute"}
+          position="absolute"
           top={{ base: 150, lg: 20 }}
-          right={{ base: 0, lg: 0 }}
-          w={{ base: "30%", lg: "50%" }}
-          alignSelf={{ base: "end", lg: "none" }}
+          right={0}
+          w={{ base: "30%", xl: "full" }}
+          h={{ base: "300px", lg: "500px" }}
+          maxW={{ base: "490px", "2xl": "420px" }}
+          maxH="500px"
+          overflow="hidden"
+          roundedLeft="60px"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
         >
           <Image
-            ml={{ base: "none", lg: "auto" }}
-            src="/src/assets/bg-landing-1.png"
-            width={{ lg: "auto" }}
-            // background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.81) 100%);
+            src="https://s3-alpha-sig.figma.com/img/d80b/8091/3097cdde4bed0635ba416301c724bea9?Expires=1725840000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=YEBJOYqlt3i4br~uC3JdqRhQlafZYIL1rXPObbBqQE8jO7MtitUWdrhTqIAc6vOgL45-SlOym2JJmLSI2zyvJZKfg~VD08VuYyUYLWg5bJC59ErAccX~sWj5FSvfYEwvQoGBd5TPzMe4zjEadbQ9lELbPc0EGkrqcmb1gg-UmOv6-Vv2hrDFqrEeowtrLK30AYMt2geWZSt3Cc3ciolQuk~4UuDyyZxOYAAFx~20scP-RfW7vsaCftoxFsbUGM82AzrCKB5gyWc7lsUFSF9eVBESnDqfEwSgF3SD49nwPMM544RrlsyI5ksmiJ09Hk-CSeG3YZ1rEnVDjlVgJ0Z6tw__"
+            w="full"
+            h="full"
+            objectFit="cover"
+            objectPosition="left center"
+          />
+          <Box
+            position="absolute"
+            top="0"
+            left="0"
+            w="full"
+            h="full"
+            bgGradient="linear(to-b, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.81) 100%)"
           />
         </Box>
-        <Box position={"absolute"} top={{ base: 800, md: 700, lg: 390 }}>
+        <Box
+          position="absolute"
+          top={{ base: 450, lg: 350 }}
+          left={{ base: -200, lg: -300 }}
+          w={{ base: "80%", lg: "full" }}
+          h="500px"
+          maxW="1094px"
+          maxH="500px"
+          overflow="hidden"
+          rounded="60px"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
           <Image
-            src="/src/assets/bg-landing-2.png"
-            width={{ base: "50%", lg: "auto" }}
+            src="https://s3-alpha-sig.figma.com/img/d80b/8091/3097cdde4bed0635ba416301c724bea9?Expires=1725840000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=YEBJOYqlt3i4br~uC3JdqRhQlafZYIL1rXPObbBqQE8jO7MtitUWdrhTqIAc6vOgL45-SlOym2JJmLSI2zyvJZKfg~VD08VuYyUYLWg5bJC59ErAccX~sWj5FSvfYEwvQoGBd5TPzMe4zjEadbQ9lELbPc0EGkrqcmb1gg-UmOv6-Vv2hrDFqrEeowtrLK30AYMt2geWZSt3Cc3ciolQuk~4UuDyyZxOYAAFx~20scP-RfW7vsaCftoxFsbUGM82AzrCKB5gyWc7lsUFSF9eVBESnDqfEwSgF3SD49nwPMM544RrlsyI5ksmiJ09Hk-CSeG3YZ1rEnVDjlVgJ0Z6tw__"
+            w="full"
+            h="full"
+            objectFit="cover"
+            objectPosition="center"
+          />
+          <Box
+            position="absolute"
+            top="0"
+            left="0"
+            w="full"
+            h="full"
+            bgGradient="linear(to-b, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.81) 100%)"
           />
         </Box>
         <Box
           position={"absolute"}
-          top={{ base: 825, lg: 810, xl: 740 }}
+          top={{ base: 840, lg: 750, xl: 650, "2xl": 680 }}
           right={{ base: 0, md: 75, lg: 25, xl: 200 }}
         >
           <Image
@@ -267,7 +302,7 @@ const Explore = () => {
         <Box
           bg={"white"}
           position={"absolute"}
-          top={190}
+          top={{ base: 190, lg: 135 }}
           right={{ base: "7%", md: "16%", lg: "7%", xl: "23%", "2xl": "30%" }}
           p={{ base: 2, lg: 5 }}
           boxShadow={"dark-lg"}

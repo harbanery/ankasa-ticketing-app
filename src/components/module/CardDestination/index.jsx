@@ -16,7 +16,7 @@ const CardComponent = ({ backgroundImage, airlinesCount, city, country }) => {
   return (
     <Card
       backgroundImage={`url(${backgroundImage})`}
-      w={{ base: "206px" }}
+      w={{ base: "90%" }}
       h={{ base: "262px" }}
       mx="auto"
       rounded="20px"

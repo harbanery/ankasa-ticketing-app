@@ -60,8 +60,18 @@ export const mainLoader = async ({ request }) => {
 
   if (token) {
     try {
-      const response = await api.get(`customer/profile`);
-      return { data: response.data, token: token };
+      const [responseProfile, responseChat] = await Promise.all([
+        api.get(`customer/profile`),
+        api.get("chats"),
+      ]);
+
+      return {
+        data: {
+          profile: responseProfile.data,
+          chats: responseChat.data,
+        },
+        token: token,
+      };
     } catch (error) {
       console.error("Error fetching profile data", error);
       removeTokenfromLocalStorage();

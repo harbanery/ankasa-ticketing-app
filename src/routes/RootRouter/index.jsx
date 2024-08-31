@@ -63,10 +63,6 @@ const RootRouter = () => {
         {
           path: "chat",
           element: <Chat />,
-        },
-        {
-          path: "chat",
-          element: <Chat />,
           children: [
             {
               path: ":id",

@@ -12,15 +12,41 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BiSolidSend } from "react-icons/bi";
 import { useParams } from "react-router-dom";
 import { formatTime } from "../../../utils/date";
+import api from "../../../services/api";
 
 const ChatDetail = () => {
   let { id } = useParams();
 
-  const user_id = "1";
+  const [chats, setChats] = useState({
+    room: {},
+    user: {},
+  });
+
+  const getChatRoom = async (chat_id) => {
+    try {
+      const [responseProfile, responseChat] = await Promise.all([
+        api.get(`customer/profile`),
+        api.get(`chats/${chat_id}`),
+      ]);
+
+      setChats({
+        room: responseChat?.data?.data,
+        user: responseProfile?.data?.data,
+      });
+    } catch (error) {
+      console.error("Error fetching profile data", error);
+    }
+  };
+
+  useEffect(() => {
+    getChatRoom(id);
+  }, []);
+
+  // console.log(chats);
 
   const messages = [
     {
@@ -222,12 +248,12 @@ const ChatDetail = () => {
       flexDirection="column"
       roundedRight="inherit"
     >
-      <ChatRoom id={id} data={messages} />
+      <ChatRoom id={id} data={chats.room} user={chats.user} />
     </Box>
   );
 };
 
-const ChatRoom = ({ id, data }) => {
+const ChatRoom = ({ id, data = {}, user = {} }) => {
   const [message, setMessage] = useState("");
 
   const user_id = "1";
@@ -260,14 +286,14 @@ const ChatRoom = ({ id, data }) => {
         p="10px"
       >
         <Avatar
-          src={
-            "https://res.cloudinary.com/duo95jmu4/image/upload/w_1000,ar_1:1,c_fill,g_auto,e_art:hokusai/v1719669342/1719669341_ludovic-migneault-EZ4TYgXPNWk-unsplash.jpg"
-          }
+          src={data?.members?.[0]?.image || ""}
           borderRadius="15px"
           borderWidth="0.5px"
           borderColor="#E6E6E6"
         >
+          {/* {chat.receiver_status == "online" && (
           <AvatarBadge boxSize="14px" borderWidth="2px" bg="#2395FF" />
+        )} */}
         </Avatar>
 
         <Flex direction="column">
@@ -279,9 +305,9 @@ const ChatRoom = ({ id, data }) => {
             lineHeight="24px"
             noOfLines={1}
           >
-            Soham Henry
+            {data?.members?.[0]?.username || ""}
           </Heading>
-          <Text
+          {/* <Text
             fontFamily="Lato"
             fontSize="14px"
             fontWeight={400}
@@ -290,7 +316,7 @@ const ChatRoom = ({ id, data }) => {
             noOfLines={1}
           >
             Online
-          </Text>
+          </Text> */}
         </Flex>
       </Box>
 
@@ -323,34 +349,36 @@ const ChatRoom = ({ id, data }) => {
             </Text>
           </Box>
         </Flex> */}
-        {data
-          .filter((msg) => msg.id_chat == id)
-          .reverse()
-          .map((msg) => (
+        {data &&
+          data.length !== 0 &&
+          data?.messages?.map((msg) => (
             <Flex
+              key={msg.id}
               w="full"
               justifyContent={
-                msg.id_user === user_id ? "flex-end" : "flex-start"
+                msg.user_id === user?.user_id ? "flex-end" : "flex-start"
               }
             >
               <Box
                 w="auto"
                 h="auto"
                 display="flex"
-                flexDirection={msg.id_user === user_id ? "row-reverse" : "row"}
+                flexDirection={
+                  msg.user_id === user?.user_id ? "row-reverse" : "row"
+                }
                 justifyContent={
-                  msg.id_user === user_id ? "flex-end" : "flex-start"
+                  msg.user_id === user?.user_id ? "flex-end" : "flex-start"
                 }
                 alignItems="end"
                 gap={3}
                 p="10px"
                 maxW="80%"
-                bg={msg.id_user === user_id ? "#2395FF" : "gray.500"}
+                bg={msg.user_id === user?.user_id ? "#2395FF" : "gray.500"}
                 rounded="15px"
               >
                 {/* <Heading fontSize="large">You</Heading> */}
                 <Text fontSize="medium" textColor="white">
-                  {msg.text}
+                  {msg.body}
                 </Text>
                 <Text fontSize="small" textColor="gray.200">
                   {formatTime(msg.created_at)}

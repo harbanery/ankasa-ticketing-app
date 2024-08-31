@@ -8,19 +8,42 @@ import {
   Flex,
   Heading,
   Image,
+  Input,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Stack,
   StackDivider,
   Tag,
   TagLabel,
   Text,
+  useDisclosure,
 } from "@chakra-ui/react";
-import React from "react";
+import React, { useState } from "react";
 import { PiCheck, PiChecks } from "react-icons/pi";
 import { formatChat } from "../../../utils/date";
 import { useNavigate } from "react-router-dom";
 
-const CardChat = () => {
+const CardChat = ({ data = [], user = {} }) => {
   const navigate = useNavigate();
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [username, setUsername] = useState("");
+
+  const handleSearch = () => {
+    if (username) {
+      // console.log(`Message is: ${message}`);
+    }
+  };
+
+  const handleChange = (e) => {
+    setUsername(e.target.value);
+  };
+
   // status: none, sent, unread, read, reply
   // const chats = [];
   const chats = [
@@ -111,20 +134,86 @@ const CardChat = () => {
             Chats
           </Text>
         </Box>
-        {chats && chats.length !== 0 && (
-          <Button
-            bg="transparent"
-            py="0px"
-            px="0.5em"
-            h="auto"
-            mb="50px"
-            fontWeight={600}
-            fontSize={"16px"}
-            lineHeight={"24px"}
-            color={"#2395FF"}
-          >
-            Filter
-          </Button>
+        {data && data.length !== 0 && (
+          <>
+            <Button
+              onClick={onOpen}
+              bg="transparent"
+              py="0px"
+              px="0.5em"
+              h="auto"
+              mb="50px"
+              fontWeight={600}
+              fontSize={"16px"}
+              lineHeight={"24px"}
+              color={"#2395FF"}
+              fontFamily={"Poppins"}
+            >
+              Add Room
+            </Button>
+
+            <Modal isOpen={isOpen} onClose={onClose}>
+              <ModalOverlay />
+              <ModalContent fontFamily={"Poppins"}>
+                <ModalHeader>Find your new friend or customer!</ModalHeader>
+                <ModalBody>
+                  <Input
+                    onChange={handleChange}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleSearch();
+                    }}
+                    fontFamily={"Lato"}
+                    type="search"
+                    name="username"
+                    value={username}
+                    placeholder="Search username"
+                    autoComplete="off"
+                  />
+
+                  <Box
+                    mt={3}
+                    py="12px"
+                    px="4px"
+                    minW={{ lg: "319px" }}
+                    borderRadius="10px"
+                    display="flex"
+                    gap="30px"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    userSelect="none"
+                    cursor="pointer"
+                    transition="all 0.2s"
+                    _hover={{
+                      bg: "#E6E6E6",
+                    }}
+                  >
+                    <Avatar
+                      src={""}
+                      bg="gray.400"
+                      borderRadius="15px"
+                      borderWidth="0.5px"
+                      borderColor="#E6E6E6"
+                    ></Avatar>
+                    <Stack textAlign="left" w="100%">
+                      <Heading
+                        fontFamily="Poppins"
+                        fontSize="16px"
+                        fontWeight={600}
+                        lineHeight="24px"
+                        noOfLines={1}
+                      >
+                        {"Qarun Mustafa"}
+                      </Heading>
+                    </Stack>
+                  </Box>
+                </ModalBody>
+
+                <ModalFooter>
+                  <Button onClick={onClose}>Cancel</Button>
+                </ModalFooter>
+              </ModalContent>
+            </Modal>
+          </>
         )}
       </Flex>
 
@@ -140,13 +229,14 @@ const CardChat = () => {
           scrollbarWidth: "none",
         }}
       >
-        {chats && chats.length !== 0 ? (
-          chats.map((chat) => (
+        {data && data.length !== 0 ? (
+          data.map((chat) => (
             <Box
               key={chat.id}
               onClick={() => navigate(`/chat/${chat.id}`, { replace: true })}
               py="12px"
               px="4px"
+              minW={{ lg: "319px" }}
               borderRadius="10px"
               display="flex"
               gap="30px"
@@ -159,14 +249,15 @@ const CardChat = () => {
               }}
             >
               <Avatar
-                src={chat.receiver_image}
+                src={chat.members[0].image}
+                bg="gray.400"
                 borderRadius="15px"
                 borderWidth="0.5px"
                 borderColor="#E6E6E6"
               >
-                {chat.receiver_status == "online" && (
+                {/* {chat.receiver_status == "online" && (
                   <AvatarBadge boxSize="20px" borderWidth="4px" bg="#2395FF" />
-                )}
+                )} */}
               </Avatar>
               <Stack textAlign="left" w="100%">
                 <Heading
@@ -176,20 +267,18 @@ const CardChat = () => {
                   lineHeight="24px"
                   noOfLines={1}
                 >
-                  {chat.receiver}
+                  {chat.members[0].username}
                 </Heading>
                 <Text
                   fontFamily="Lato"
                   fontSize="14px"
                   fontWeight={400}
                   lineHeight="16.8px"
-                  color={
-                    chat.receiver_chat_status == "reply" ? "#2395FF" : "#6B6B6B"
-                  }
+                  color={chat.status == "reply" ? "#2395FF" : "#6B6B6B"}
                   noOfLines={1}
                 >
-                  {chat.last_messenger == chat.sender && "Me: "}
-                  {chat.last_message}
+                  {chat.last_message.username == user.username && "Me: "}
+                  {chat.last_message.body}
                 </Text>
               </Stack>
               <Flex
@@ -204,9 +293,9 @@ const CardChat = () => {
                   lineHeight="18px"
                   color="#979797"
                 >
-                  {formatChat(chat.date_time)}
+                  {formatChat(chat.last_message.created_at)}
                 </Text>
-                {(chat.receiver_chat_status == "read" ||
+                {/* {(chat.receiver_chat_status == "read" ||
                   chat.receiver_chat_status == "unread") && (
                   <PiChecks
                     fontSize="20px"
@@ -232,7 +321,7 @@ const CardChat = () => {
                   >
                     <TagLabel>{chat.reply_count}</TagLabel>
                   </Tag>
-                )}
+                )} */}
               </Flex>
             </Box>
           ))

@@ -44,7 +44,7 @@ import { IoMdSettings } from "react-icons/io";
 import { FaRegUserCircle } from "react-icons/fa";
 import { RiLogoutBoxRLine } from "react-icons/ri";
 
-const Navbar = ({ data_user = {}, token = "" }) => {
+const Navbar = ({ data_user = {}, data_chat = [], token = "" }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -159,7 +159,7 @@ const Navbar = ({ data_user = {}, token = "" }) => {
             </Button>
           ) : (
             <>
-              <ChatBar location={location} />
+              <ChatBar data={data_chat} user={data_user} location={location} />
 
               <NotificationBar />
 
@@ -399,7 +399,7 @@ const NotificationBar = () => {
   );
 };
 
-const ChatBar = ({ location }) => {
+const ChatBar = ({ data = [], user = {}, location }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const isPath = location.pathname == "/chat";
 
@@ -482,7 +482,7 @@ const ChatBar = ({ location }) => {
           mx={{ base: "16px", md: "28px" }}
           my={{ base: "20px", md: "40px" }}
         >
-          <CardChat />
+          <CardChat data={data} user={user} />
         </PopoverBody>
       </PopoverContent>
     </Popover>

@@ -13,14 +13,42 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CardChat from "../../../components/module/CardChat";
 import { BiSolidSend } from "react-icons/bi";
 import { Outlet, useParams } from "react-router-dom";
+import api from "../../../services/api";
 
 const Chat = () => {
   let { id } = useParams();
   // console.log(id);
+
+  const [chats, setChats] = useState({
+    rooms: [],
+    user: {},
+  });
+
+  const getChatRooms = async () => {
+    try {
+      const [responseProfile, responseChat] = await Promise.all([
+        api.get(`customer/profile`),
+        api.get("chats"),
+      ]);
+
+      setChats({
+        rooms: responseChat?.data?.data,
+        user: responseProfile?.data?.data,
+      });
+    } catch (error) {
+      console.error("Error fetching profile data", error);
+    }
+  };
+
+  useEffect(() => {
+    getChatRooms();
+  }, []);
+
+  // console.log(chats);
 
   return (
     <Box bg={"gray.200"} minH={{ base: "800px" }}>
@@ -69,7 +97,7 @@ const Chat = () => {
                 mx={{ base: "28px" }}
                 my={{ base: "40px" }}
               >
-                <CardChat />
+                <CardChat data={chats.rooms} user={chats.user} />
               </Box>
 
               {!id ? (

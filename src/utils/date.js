@@ -91,3 +91,11 @@ export const formatTimeFull = (datetime) => {
 
   return format(datetime, "HH:mm");
 };
+
+export const formatScheduleDate = (datetime) => {
+  if (!datetime) {
+    return "Invalid date";
+  }
+
+  return format(datetime, "EEEE, i MMMM y");
+};

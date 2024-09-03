@@ -39,6 +39,7 @@ const RootRouter = () => {
         {
           path: "flight/:id",
           element: <FlightDetail />,
+          loader: protectedRoute,
         },
         {
           path: "my-booking/:id",

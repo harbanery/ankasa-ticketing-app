@@ -4,6 +4,13 @@ import {
   AccordionIcon,
   AccordionItem,
   AccordionPanel,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogCloseButton,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
   Box,
   Button,
   Checkbox,
@@ -18,6 +25,13 @@ import {
   Input,
   List,
   ListItem,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Select,
   Stack,
   Switch,
@@ -28,10 +42,11 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import FlightDetailHeader from "../../../components/module/FligthDetail/Header";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IoIosWarning } from "react-icons/io";
 import CardFlightDetail from "../../../components/module/FligthDetail/Card";
 import { CiCircleCheck } from "react-icons/ci";
+import { RiLuggageDepositFill } from "react-icons/ri";
 import { FaChevronDown, FaChevronUp, FaTrashAlt } from "react-icons/fa";
 import {
   FlightIcon,
@@ -51,6 +66,7 @@ import { rupiah } from "../../../utils/currency";
 function CardFlightHeading({ children, ...props }) {
   return (
     <Heading
+      fontFamily="Poppins"
       fontSize={{ base: "1.125rem", md: "24px" }}
       fontWeight="600"
       {...props}
@@ -80,11 +96,30 @@ const FlightDetail = () => {
         readOnly: false,
       },
     ],
+    costs: {
+      price: 0,
+      tax: 0,
+      service_fee: 0,
+      travel_insurance: 0,
+      total_price: 0,
+    },
   });
 
   const [passengerIdCounter, setPassengerIdCounter] = useState(2);
+  const [insurance, setInsurance] = useState(false);
   //   const [countryCode, setCountryCode] = useState("+62");
-  const { isOpen, onToggle } = useDisclosure();
+  const { isOpen: isOpenAccordion, onToggle } = useDisclosure();
+  const {
+    isOpen: isOpenModal,
+    onOpen: onOpenModal,
+    onClose: onCloseModal,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenAlertDialog,
+    onOpen: onOpenAlertDialog,
+    onClose: onCloseAlertDialog,
+  } = useDisclosure();
+  const cancelRef = useRef();
   const FORM_CONTACTPERSON = [
     {
       label: "Full Name",
@@ -179,6 +214,45 @@ const FlightDetail = () => {
     // handleChangePassenger(1, "readOnly", isChecked);
   };
 
+  const handleChangeTravelInsurance = (e) => {
+    const isChecked = e.target.checked;
+
+    setInsurance(isChecked);
+  };
+
+  const getCosts = () => {
+    const passengerCount = data?.passengers?.length;
+    const ticketPrice = data?.ticket?.price || 0;
+
+    const tax = 0.125 * ticketPrice;
+
+    const serviceFee =
+      ((data?.ticket?.is_luggage && 1) +
+        (data?.ticket?.is_inflight_meal && 1) +
+        (data?.ticket?.is_wifi && 1)) *
+      0.03 *
+      ticketPrice;
+
+    const travelInsurance = 0.02 * passengerCount * ticketPrice + 10000;
+
+    const totalPayment =
+      passengerCount * ticketPrice +
+      tax +
+      serviceFee +
+      (insurance && travelInsurance);
+
+    setData({
+      ...data,
+      costs: {
+        price: ticketPrice,
+        tax,
+        service_fee: serviceFee,
+        travel_insurance: travelInsurance,
+        total_price: totalPayment,
+      },
+    });
+  };
+
   const getTickets = async (ticket_id) => {
     try {
       const [responseProfile, responseTicket] = await Promise.all([
@@ -204,7 +278,13 @@ const FlightDetail = () => {
     getTickets(id);
   }, []);
 
-  //   console.log(data);
+  useEffect(() => {
+    if (data?.ticket && Object.keys(data.ticket).length > 0) {
+      getCosts();
+    }
+  }, [data.ticket, data.passengers.length, insurance]);
+
+  // console.log(data);
   return (
     <Box bg={"gray.200"} fontFamily="Poppins" pb="35px">
       <FlightDetailHeader />
@@ -224,7 +304,7 @@ const FlightDetail = () => {
           >
             <Box as="section">
               <Box mb="25px">
-                <CardFlightHeading fontFamily="Poppins" color="white">
+                <CardFlightHeading color="white">
                   Contact Person Details
                 </CardFlightHeading>
               </Box>
@@ -302,13 +382,15 @@ const FlightDetail = () => {
             </Box>
             <Box as="section">
               <Box mb="25px">
-                <CardFlightHeading fontFamily="Poppins" color="black">
+                <CardFlightHeading color="black">
                   Passenger Details
                 </CardFlightHeading>
               </Box>
               <CardFlightDetail px={10} py={8}>
                 <Flex
-                  alignItems="center"
+                  flexDirection={{ base: "column", md: "row" }}
+                  alignItems={{ base: "stretch", md: "center" }}
+                  gap={{ base: "6px", md: 0 }}
                   justifyContent="space-between"
                   mb="30px"
                   rounded="10px"
@@ -326,13 +408,25 @@ const FlightDetail = () => {
                       ).length
                     } Adult${
                       data?.passengers?.filter(
+                        (passenger) => passenger.type === "adult"
+                      ).length > 1
+                        ? "s"
+                        : ""
+                    }${
+                      data?.passengers?.filter(
                         (passenger) => passenger.type === "child"
                       ).length > 0
                         ? `, ${
                             data?.passengers?.filter(
                               (passenger) => passenger.type === "child"
                             ).length
-                          } Child`
+                          } Child${
+                            data?.passengers?.filter(
+                              (passenger) => passenger.type === "child"
+                            ).length > 1
+                              ? "s"
+                              : ""
+                          }`
                         : ""
                     }`}
                   </Text>
@@ -451,22 +545,26 @@ const FlightDetail = () => {
                                   <option value="child">Child</option>
                                 </Select>
                               </Box>
-                              <Box mb="30px">
-                                <FormLabel color={"gray.500"}>Title</FormLabel>
-                                <Select
-                                  variant="flushed"
-                                  onChange={(e) =>
-                                    handleChangePassenger(
-                                      passenger.id,
-                                      "title",
-                                      e.target.value
-                                    )
-                                  }
-                                >
-                                  <option value="Mr.">Mr.</option>
-                                  <option value="Mrs.">Mrs.</option>
-                                </Select>
-                              </Box>
+                              {passenger?.type === "adult" && (
+                                <Box mb="30px">
+                                  <FormLabel color={"gray.500"}>
+                                    Title
+                                  </FormLabel>
+                                  <Select
+                                    variant="flushed"
+                                    onChange={(e) =>
+                                      handleChangePassenger(
+                                        passenger.id,
+                                        "title",
+                                        e.target.value
+                                      )
+                                    }
+                                  >
+                                    <option value="Mr.">Mr.</option>
+                                    <option value="Mrs.">Mrs.</option>
+                                  </Select>
+                                </Box>
+                              )}
                               <Box mb="30px">
                                 <FormLabel color={"gray.500"}>
                                   Full Name
@@ -532,15 +630,21 @@ const FlightDetail = () => {
                   borderBottom="1px solid #E6E6E6"
                 >
                   <Checkbox
-                    gap="15px"
-                    fontSize="18px"
+                    gap={{ base: 0, md: "15px" }}
+                    fontSize={{ base: "10px", md: "18px" }}
                     fontWeight="600"
                     color="black"
+                    onChange={handleChangeTravelInsurance}
+                    value={insurance}
                   >
                     Travel Insurance
                   </Checkbox>
-                  <Text fontSize="18px" fontWeight="700" color="#2395FF">
-                    {rupiah(0.04 * data?.ticket?.price)}
+                  <Text
+                    fontSize={{ base: "17px", md: "18px" }}
+                    fontWeight="700"
+                    color="#2395FF"
+                  >
+                    {rupiah(data?.costs?.travel_insurance)}
                     <Text
                       as="span"
                       fontSize="14px"
@@ -553,7 +657,7 @@ const FlightDetail = () => {
                 </Flex>
                 <Box px="28px" pb="34px" pt="20px">
                   <Text fontSize="14px" color="black">
-                    Get travel compensation up to $ 10.000,00
+                    Get travel compensation up to {rupiah(10000)}
                   </Text>
                 </Box>
               </CardFlightDetail>
@@ -564,14 +668,22 @@ const FlightDetail = () => {
               display={{ base: "none", lg: "flex" }}
             >
               <Button
-                type="button"
-                colorScheme="blue"
+                onClick={onOpenAlertDialog}
+                type="submit"
+                bg="#2395FF"
+                borderRadius="10px"
                 py="28px"
                 px="60px"
                 fontSize="18px"
                 fontWeight="700"
                 color="white"
+                transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
                 boxShadow="0px 8px 10px 0px #2395FF4D"
+                _hover={{ bg: "#1971c2" }}
+                _active={{
+                  bg: "#dddfe2",
+                  boxShadow: "0px 8px 10px 0px #dddfe24D",
+                }}
               >
                 Proceed to Payment
               </Button>
@@ -588,10 +700,7 @@ const FlightDetail = () => {
                 justifyContent="space-between"
                 mb="25px"
               >
-                <CardFlightHeading
-                  fontFamily="Poppins"
-                  color={{ base: "black", lg: "white" }}
-                >
+                <CardFlightHeading color={{ base: "black", lg: "white" }}>
                   Flight Details
                 </CardFlightHeading>
               </Flex>
@@ -652,6 +761,45 @@ const FlightDetail = () => {
                       {formatTimeFull(data?.ticket?.departure_schedule)} -{" "}
                       {formatTimeFull(data?.ticket?.arrival_schedule)}
                     </Text>
+                  </Flex>
+                  <Flex
+                    fontFamily="Poppins"
+                    gap="28px"
+                    justifyContent="flex-start"
+                    mt="1rem"
+                  >
+                    {/* <Box fontFamily="Lato">
+                    <Text fontSize="0.75rem" color="#A5A5A5">
+                      Code
+                    </Text>
+                    <Text fontSize="0.875rem" fontWeight="500" color="#595959">
+                      AB-221
+                    </Text>
+                  </Box> */}
+                    <Box>
+                      <Text fontSize="0.8rem" color="#A5A5A5">
+                        Class
+                      </Text>
+                      <Text fontSize="1rem" fontWeight="500" color="#595959">
+                        {data?.ticket?.class}
+                      </Text>
+                    </Box>
+                    {/* <Box fontFamily="Lato">
+                    <Text fontSize="0.75rem" color="#A5A5A5">
+                      Terminal
+                    </Text>
+                    <Text fontSize="0.875rem" fontWeight="500" color="#595959">
+                      A
+                    </Text>
+                  </Box> */}
+                    <Box>
+                      <Text fontSize="0.8rem" color="#A5A5A5">
+                        Gate
+                      </Text>
+                      <Text fontSize="1rem" fontWeight="500" color="#595959">
+                        {data?.ticket?.gate}
+                      </Text>
+                    </Box>
                   </Flex>
                   <Box
                     color={"#2395FF"}
@@ -749,11 +897,11 @@ const FlightDetail = () => {
                       alignItems="center"
                       gap="1rem"
                     >
-                      <Text fontWeight={600} fontSize="14px" color={"#2395FF"}>
+                      <Text fontWeight={600} fontSize="17px" color={"#2395FF"}>
                         {/* $ 149,90 */}
-                        {rupiah(data?.passengers?.length * data?.ticket?.price)}
+                        {rupiah(data?.costs?.total_price)}
                       </Text>
-                      {isOpen ? (
+                      {isOpenAccordion ? (
                         <FaChevronUp color="#2395FF" size={20} />
                       ) : (
                         <FaChevronDown color="#2395FF" size={20} />
@@ -761,7 +909,7 @@ const FlightDetail = () => {
                     </Button>
                   </Flex>
                 </Flex>
-                <Collapse in={isOpen} animateOpacity>
+                <Collapse in={isOpenAccordion} animateOpacity>
                   <Box px={10} fontFamily={"Poppins"}>
                     <Flex
                       alignItems={"flex-start"}
@@ -775,7 +923,7 @@ const FlightDetail = () => {
                         Ticket amount per 1 ticket
                       </Text>
                       <Text fontWeight={400} fontSize={14}>
-                        {rupiah(data?.ticket?.price)}
+                        {rupiah(data?.costs?.price)}
                       </Text>
                     </Flex>
                     <Flex
@@ -797,6 +945,12 @@ const FlightDetail = () => {
                           ).length
                         } Adult${
                           data?.passengers?.filter(
+                            (passenger) => passenger.type === "adult"
+                          ).length > 1
+                            ? "s"
+                            : ""
+                        }${
+                          data?.passengers?.filter(
                             (passenger) => passenger.type === "child"
                           ).length > 0
                             ? `, ${
@@ -804,6 +958,12 @@ const FlightDetail = () => {
                                   (passenger) => passenger.type === "child"
                                 ).length
                               } Child`
+                            : ""
+                        }${
+                          data?.passengers?.filter(
+                            (passenger) => passenger.type === "child"
+                          ).length > 1
+                            ? "s"
                             : ""
                         }`}
                       </Text>
@@ -821,7 +981,7 @@ const FlightDetail = () => {
                         Tax
                       </Text>
                       <Text fontWeight={400} fontSize={14}>
-                        {rupiah(0.03 * data?.ticket?.price)}
+                        {rupiah(data?.costs?.tax)}
                       </Text>
                     </Flex>
                     <Flex
@@ -837,25 +997,27 @@ const FlightDetail = () => {
                         Service fee
                       </Text>
                       <Text fontWeight={400} fontSize={14}>
-                        {rupiah(3 * 0.009 * data?.ticket?.price)}
+                        {rupiah(data?.costs?.service_fee)}
                       </Text>
                     </Flex>
-                    <Flex
-                      alignItems={"flex-start"}
-                      gap={3}
-                      w={"full"}
-                      justifyContent={"space-between"}
-                      color={"gray.500"}
-                      pr={"20px"}
-                      mt={2}
-                    >
-                      <Text fontWeight={500} fontSize={14} maxW="130px">
-                        Travel Insurance
-                      </Text>
-                      <Text fontWeight={400} fontSize={14}>
-                        {rupiah(0.04 * data?.ticket?.price)}
-                      </Text>
-                    </Flex>
+                    {insurance && (
+                      <Flex
+                        alignItems={"flex-start"}
+                        gap={3}
+                        w={"full"}
+                        justifyContent={"space-between"}
+                        color={"gray.500"}
+                        pr={"20px"}
+                        mt={2}
+                      >
+                        <Text fontWeight={500} fontSize={14} maxW="130px">
+                          Travel Insurance
+                        </Text>
+                        <Text fontWeight={400} fontSize={14}>
+                          {rupiah(data?.costs?.travel_insurance)}
+                        </Text>
+                      </Flex>
+                    )}
                     <Text
                       as={"small"}
                       color={"red.400"}
@@ -885,57 +1047,228 @@ const FlightDetail = () => {
               >
                 Flight Details
               </Heading>
-              {/* <Text fontSize="1rem">View Details</Text> */}
+              <Text
+                userSelect="none"
+                pointerEvents="auto"
+                onClick={onOpenModal}
+                fontSize="1rem"
+              >
+                View Details
+              </Text>
+              <Modal isOpen={isOpenModal} onClose={onCloseModal}>
+                <ModalOverlay />
+                <ModalContent pt="1rem" mx="1rem">
+                  <ModalCloseButton />
+                  <ModalBody>
+                    <Box px={2} fontFamily={"Poppins"}>
+                      <Flex
+                        alignItems={"flex-start"}
+                        gap={3}
+                        w={"full"}
+                        justifyContent={"space-between"}
+                        color={"gray.500"}
+                        pr={"20px"}
+                      >
+                        <Text fontWeight={500} fontSize={14} maxW="130px">
+                          Ticket amount per 1 ticket
+                        </Text>
+                        <Text fontWeight={400} fontSize={14}>
+                          {rupiah(data?.costs?.price)}
+                        </Text>
+                      </Flex>
+                      <Flex
+                        alignItems={"flex-start"}
+                        gap={3}
+                        w={"full"}
+                        justifyContent={"space-between"}
+                        color={"gray.500"}
+                        pr={"20px"}
+                        mt={2}
+                      >
+                        <Text fontWeight={500} fontSize={14} maxW="130px">
+                          Total Passenger(s)
+                        </Text>
+                        <Text fontWeight={400} fontSize={14}>
+                          {`${
+                            data?.passengers?.filter(
+                              (passenger) => passenger.type === "adult"
+                            ).length
+                          } Adult${
+                            data?.passengers?.filter(
+                              (passenger) => passenger.type === "adult"
+                            ).length > 1
+                              ? "s"
+                              : ""
+                          }${
+                            data?.passengers?.filter(
+                              (passenger) => passenger.type === "child"
+                            ).length > 0
+                              ? `, ${
+                                  data?.passengers?.filter(
+                                    (passenger) => passenger.type === "child"
+                                  ).length
+                                } Child`
+                              : ""
+                          }${
+                            data?.passengers?.filter(
+                              (passenger) => passenger.type === "child"
+                            ).length > 1
+                              ? "s"
+                              : ""
+                          }`}
+                        </Text>
+                      </Flex>
+                      <Flex
+                        alignItems={"flex-start"}
+                        gap={3}
+                        w={"full"}
+                        justifyContent={"space-between"}
+                        color={"gray.500"}
+                        pr={"20px"}
+                        mt={2}
+                      >
+                        <Text fontWeight={500} fontSize={14} maxW="130px">
+                          Tax
+                        </Text>
+                        <Text fontWeight={400} fontSize={14}>
+                          {rupiah(data?.costs?.tax)}
+                        </Text>
+                      </Flex>
+                      <Flex
+                        alignItems={"flex-start"}
+                        gap={3}
+                        w={"full"}
+                        justifyContent={"space-between"}
+                        color={"gray.500"}
+                        pr={"20px"}
+                        mt={2}
+                      >
+                        <Text fontWeight={500} fontSize={14} maxW="130px">
+                          Service fee
+                        </Text>
+                        <Text fontWeight={400} fontSize={14}>
+                          {rupiah(data?.costs?.service_fee)}
+                        </Text>
+                      </Flex>
+                      {insurance && (
+                        <Flex
+                          alignItems={"flex-start"}
+                          gap={3}
+                          w={"full"}
+                          justifyContent={"space-between"}
+                          color={"gray.500"}
+                          pr={"20px"}
+                          mt={2}
+                        >
+                          <Text fontWeight={500} fontSize={14} maxW="130px">
+                            Travel Insurance
+                          </Text>
+                          <Text fontWeight={400} fontSize={14}>
+                            {rupiah(data?.costs?.travel_insurance)}
+                          </Text>
+                        </Flex>
+                      )}
+                      <Text
+                        as={"small"}
+                        color={"red.400"}
+                        my={4}
+                        display={"inline-block"}
+                      >
+                        *The ticket price for both adults and childrens remains
+                        charged at 1 ticket per seat
+                      </Text>
+                    </Box>
+                  </ModalBody>
+                </ModalContent>
+              </Modal>
             </Flex>
             <Box bgColor="white" rounded="0.5rem" overflow="hidden">
               <Box px="1.25rem" py="2.5rem" borderBottom="1px solid #E6E6E6">
                 <Flex justifyContent="space-between" mb="1.5rem">
                   <Box>
-                    <Text fontSize="1.75rem" fontWeight="500" color="black">
-                      IDN
+                    <Text fontSize="16px" fontWeight="500" color="black">
+                      {data?.ticket?.departure_city} (
+                      {data?.ticket?.departure_country_code})
                     </Text>
                     <Text fontSize="0.75rem" color="#6B6B6B">
-                      12:33
+                      {formatTimeFull(data?.ticket?.departure_schedule)}
                     </Text>
                   </Box>
-                  <Box mt="0.75rem">
+                  <Box mt="0.15rem">
                     <FlightIcon />
                   </Box>
                   <Box textAlign="right">
-                    <Text fontSize="1.75rem" fontWeight="500" color="black">
-                      JPN
+                    <Text fontSize="16px" fontWeight="500" color="black">
+                      {data?.ticket?.arrival_city} (
+                      {data?.ticket?.arrival_country_code})
                     </Text>
                     <Text fontSize="0.75rem" color="#6B6B6B">
-                      12:33
+                      {formatTimeFull(data?.ticket?.arrival_schedule)}
                     </Text>
                   </Box>
                 </Flex>
                 <Flex
                   alignItems="center"
                   justifyContent="space-between"
+                  gap={5}
                   mb="1.875rem"
+                  fontFamily="Poppins"
                 >
-                  <Box>
-                    <Image src={garudaIndonesiaLogo} alt="Garuda Indonesia" />
+                  <Box w="75px">
+                    <Image
+                      w="full"
+                      src={data?.ticket?.merchant_image}
+                      alt={data?.ticket?.merchant_name}
+                    />
                   </Box>
-                  <Box>
-                    <Flex alignItems="center" gap="0.375rem" mb="0.75rem">
+                  <Box display="flex" flexDirection="column" gap="10px">
+                    {data?.ticket?.is_refund && (
+                      <Flex
+                        alignItems={"center"}
+                        gap={2}
+                        justifyContent="flex-end"
+                      >
+                        <Text fontWeight={400}>Refundable</Text>
+                        <CiCircleCheck color="#2395FF" size={20} />
+                      </Flex>
+                    )}
+                    {data?.ticket?.is_reschedule && (
+                      <Flex
+                        alignItems={"center"}
+                        gap={2}
+                        justifyContent="flex-end"
+                      >
+                        <Text align="right" fontWeight={400}>
+                          Can reschedule
+                        </Text>
+                        <CiCircleCheck color="#2395FF" size={20} />
+                      </Flex>
+                    )}
+                    {/* <Flex alignItems="center" gap="0.375rem" mb="0.75rem">
                       <StarIcon />
                       <StarIcon />
                       <StarIcon />
                       <StarIcon />
                       <StarIcon />
                     </Flex>
-                    <Text>120k review</Text>
+                    <Text>120k review</Text> */}
                   </Box>
                 </Flex>
                 <Flex gap="20px" justifyContent="space-between">
-                  <Box fontFamily="Lato">
+                  {/* <Box fontFamily="Lato">
                     <Text fontSize="0.75rem" color="#A5A5A5">
                       Code
                     </Text>
                     <Text fontSize="0.875rem" fontWeight="500" color="#595959">
                       AB-221
+                    </Text>
+                  </Box> */}
+                  <Box fontFamily="Lato" maxW="50%">
+                    <Text fontSize="0.75rem" color="#A5A5A5">
+                      Schedule
+                    </Text>
+                    <Text fontSize="0.875rem" fontWeight="500" color="#595959">
+                      {formatScheduleDate(data?.ticket?.departure_schedule)}
                     </Text>
                   </Box>
                   <Box fontFamily="Lato">
@@ -943,23 +1276,23 @@ const FlightDetail = () => {
                       Class
                     </Text>
                     <Text fontSize="0.875rem" fontWeight="500" color="#595959">
-                      Economy
+                      {data?.ticket?.class}
                     </Text>
                   </Box>
-                  <Box fontFamily="Lato">
+                  {/* <Box fontFamily="Lato">
                     <Text fontSize="0.75rem" color="#A5A5A5">
                       Terminal
                     </Text>
                     <Text fontSize="0.875rem" fontWeight="500" color="#595959">
                       A
                     </Text>
-                  </Box>
+                  </Box> */}
                   <Box fontFamily="Lato">
                     <Text fontSize="0.75rem" color="#A5A5A5">
                       Gate
                     </Text>
                     <Text fontSize="0.875rem" fontWeight="500" color="#595959">
-                      221
+                      {data?.ticket?.gate}
                     </Text>
                   </Box>
                 </Flex>
@@ -970,7 +1303,51 @@ const FlightDetail = () => {
                 pb="1.875rem"
                 shadow="0px 8px 27px 0px #0E3F6C30"
               >
-                <Flex alignItems="center" justifyContent="space-between">
+                <Flex
+                  alignItems="center"
+                  justifyContent={
+                    data?.passengers?.filter(
+                      (passenger) => passenger.type === "child"
+                    ).length > 0
+                      ? "space-between"
+                      : "flex-end"
+                  }
+                >
+                  {data?.passengers?.filter(
+                    (passenger) => passenger.type === "child"
+                  ).length > 0 && (
+                    <Flex alignItems="center" gap="16px">
+                      <Text
+                        as="span"
+                        fontWeight="700"
+                        fontSize="1.125rem"
+                        w="36px"
+                        aspectRatio="1/1"
+                        color="#2395FF"
+                        bgColor="#2395FF2E"
+                        rounded="100%"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                      >
+                        {
+                          data?.passengers?.filter(
+                            (passenger) => passenger.type === "child"
+                          ).length
+                        }
+                      </Text>
+                      <Text fontSize="0.875rem" color="#979797">
+                        Child
+                        {`${
+                          data?.passengers?.filter(
+                            (passenger) => passenger.type === "child"
+                          ).length > 1
+                            ? "s"
+                            : ""
+                        }`}
+                      </Text>
+                    </Flex>
+                  )}
                   <Flex alignItems="center" gap="16px">
                     <Text
                       as="span"
@@ -985,30 +1362,21 @@ const FlightDetail = () => {
                       alignItems="center"
                       justifyContent="center"
                     >
-                      2
-                    </Text>
-                    <Text fontSize="0.875rem" color="#979797">
-                      Child
-                    </Text>
-                  </Flex>
-                  <Flex alignItems="center" gap="16px">
-                    <Text
-                      as="span"
-                      fontWeight="700"
-                      fontSize="1.125rem"
-                      w="36px"
-                      aspectRatio="1/1"
-                      color="#2395FF"
-                      bgColor="#2395FF2E"
-                      rounded="100%"
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      4
+                      {
+                        data?.passengers?.filter(
+                          (passenger) => passenger.type === "adult"
+                        ).length
+                      }
                     </Text>
                     <Text fontSize="0.875rem" color="#979797">
                       Adult
+                      {`${
+                        data?.passengers?.filter(
+                          (passenger) => passenger.type === "adult"
+                        ).length > 1
+                          ? "s"
+                          : ""
+                      }`}
                     </Text>
                   </Flex>
                 </Flex>
@@ -1031,51 +1399,57 @@ const FlightDetail = () => {
               gap="0.75rem"
               flexWrap="wrap"
             >
-              <ListItem
-                px="1.25rem"
-                py="1rem"
-                bgColor="#6DDA6B"
-                rounded="0.625rem"
-                display="flex"
-                alignItems="center"
-                gap="20px"
-                color="white"
-              >
-                <HamburgerIcon />
-                <Text fontSize="0.875rem" fontWeight="600">
-                  Snack
-                </Text>
-              </ListItem>
-              <ListItem
-                px="1.25rem"
-                py="1rem"
-                bgColor="#7861D7"
-                rounded="0.625rem"
-                display="flex"
-                alignItems="center"
-                gap="20px"
-                color="white"
-              >
-                <WifiIcon />
-                <Text fontSize="0.875rem" fontWeight="600">
-                  Snack
-                </Text>
-              </ListItem>
-              <ListItem
-                px="1.25rem"
-                py="1rem"
-                bgColor="#E45D32"
-                rounded="0.625rem"
-                display="flex"
-                alignItems="center"
-                gap="20px"
-                color="white"
-              >
-                <RestroomIcon />
-                <Text fontSize="0.875rem" fontWeight="600">
-                  Snack
-                </Text>
-              </ListItem>
+              {data?.ticket?.is_luggage && (
+                <ListItem
+                  px="1.25rem"
+                  py="1rem"
+                  bgColor="#E45D32"
+                  rounded="0.625rem"
+                  display="flex"
+                  alignItems="center"
+                  gap="20px"
+                  color="white"
+                >
+                  <RiLuggageDepositFill size={22} />
+                  <Text fontSize="0.875rem" fontWeight="600">
+                    Luggage
+                  </Text>
+                </ListItem>
+              )}
+              {data?.ticket?.is_inflight_meal && (
+                <ListItem
+                  px="1.25rem"
+                  py="1rem"
+                  bgColor="#7861D7"
+                  rounded="0.625rem"
+                  display="flex"
+                  alignItems="center"
+                  gap="20px"
+                  color="white"
+                >
+                  <HamburgerIcon />
+                  <Text fontSize="0.875rem" fontWeight="600">
+                    Meal
+                  </Text>
+                </ListItem>
+              )}
+              {data?.ticket?.is_wifi && (
+                <ListItem
+                  px="1.25rem"
+                  py="1rem"
+                  bgColor="#6DDA6B"
+                  rounded="0.625rem"
+                  display="flex"
+                  alignItems="center"
+                  gap="20px"
+                  color="white"
+                >
+                  <WifiIcon />
+                  <Text fontSize="0.875rem" fontWeight="600">
+                    Wi-Fi
+                  </Text>
+                </ListItem>
+              )}
             </List>
           </Box>
           <Box display={{ base: "block", lg: "none" }} gridColumn="1/-1">
@@ -1084,23 +1458,60 @@ const FlightDetail = () => {
                 Total you'll pay
               </Text>
               <Text fontSize="1.5rem" fontWeight="600" color="#2395FF">
-                $ 145,00
+                {rupiah(data?.costs?.total_price)}
               </Text>
             </Flex>
             <Flex>
               <Button
+                onClick={onOpenAlertDialog}
                 type="submit"
-                colorScheme="blue"
+                bg="#2395FF"
+                borderRadius="10px"
                 py="28px"
                 px="60px"
                 fontSize="18px"
                 fontWeight="700"
                 color="white"
+                transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
                 boxShadow="0px 8px 10px 0px #2395FF4D"
                 width="100%"
+                _hover={{ bg: "#1971c2" }}
+                _active={{
+                  bg: "#dddfe2",
+                  boxShadow: "0px 8px 10px 0px #dddfe24D",
+                }}
               >
-                Book Flight
+                Proceed to Payment
               </Button>
+              <AlertDialog
+                motionPreset="slideInBottom"
+                leastDestructiveRef={cancelRef}
+                onClose={onCloseAlertDialog}
+                isOpen={isOpenAlertDialog}
+                isCentered
+              >
+                <AlertDialogOverlay />
+
+                <AlertDialogContent pt="1rem" mx="1rem" fontFamily="Poppins">
+                  <AlertDialogHeader>Confirm to proceed?</AlertDialogHeader>
+                  <AlertDialogCloseButton />
+                  <AlertDialogBody>
+                    Are you sure to proceed the payment?.
+                  </AlertDialogBody>
+                  <AlertDialogFooter>
+                    <Button
+                      ref={cancelRef}
+                      onClick={onCloseAlertDialog}
+                      variant="solid"
+                    >
+                      No, Let me check again!
+                    </Button>
+                    <Button bg="#2395FF" color="white" ml={3}>
+                      Yes
+                    </Button>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </Flex>
           </Box>
         </Grid>

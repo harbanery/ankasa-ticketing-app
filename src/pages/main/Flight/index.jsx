@@ -21,6 +21,7 @@ import {
   FormLabel,
   Grid,
   Heading,
+  IconButton,
   Image,
   Input,
   List,
@@ -47,6 +48,7 @@ import { IoIosWarning } from "react-icons/io";
 import CardFlightDetail from "../../../components/module/FligthDetail/Card";
 import { CiCircleCheck } from "react-icons/ci";
 import { RiLuggageDepositFill } from "react-icons/ri";
+import { PiArmchair, PiArmchairDuotone } from "react-icons/pi";
 import { FaChevronDown, FaChevronUp, FaTrashAlt } from "react-icons/fa";
 import {
   FlightIcon,
@@ -284,7 +286,7 @@ const FlightDetail = () => {
     }
   }, [data.ticket, data.passengers.length, insurance]);
 
-  // console.log(data);
+  console.log(data?.ticket?.seats);
   return (
     <Box bg={"gray.200"} fontFamily="Poppins" pb="35px">
       <FlightDetailHeader />
@@ -1032,7 +1034,131 @@ const FlightDetail = () => {
               </CardFlightDetail>
             </Box>
             {/* ui buat seat */}
+            <CardFlightDetail w="full" p="12px">
+              <Flex justifyContent="flex-end" alignItems="center">
+                <Stack alignItems="center">
+                  <Text fontSize={22} fontWeight={600} mr={5}>
+                    1
+                  </Text>
+                  <Text fontSize={22} fontWeight={600} mr={5}>
+                    2
+                  </Text>
+                </Stack>
+                <Box
+                  w="80%"
+                  p="12px"
+                  bg="white"
+                  borderLeft="4px solid #C4C4C4"
+                  borderRight="4px solid #C4C4C4"
+                >
+                  <Grid templateColumns="repeat(5, 1fr)" gap={2}>
+                    <Tooltip
+                      fontFamily="Poppins"
+                      label="Seat: 1-A"
+                      placement="top"
+                      openDelay={200}
+                      bg="#979797"
+                      rounded="10px"
+                    >
+                      <IconButton
+                        aria-label="Seat"
+                        icon={<PiArmchairDuotone size={40} />}
+                        variant="unstyled"
+                        color={"#6B6B6B"}
+                        _focus={{ boxShadow: "none" }}
+                        _hover={{
+                          color: "#2395FF",
+                        }}
+                      />
+                    </Tooltip>
+                    <Tooltip
+                      fontFamily="Poppins"
+                      label="Seat: 1-B"
+                      placement="top"
+                      openDelay={200}
+                      bg="#979797"
+                      rounded="10px"
+                      isDisabled
+                    >
+                      <IconButton
+                        aria-label="Seat"
+                        icon={<PiArmchairDuotone size={40} />}
+                        variant="unstyled"
+                        color={"#C4C4C4"}
+                        _focus={{ boxShadow: "none" }}
+                        disabled
+                      />
+                    </Tooltip>
+                    <Stack _focus={{ boxShadow: "none" }} />
+                    <IconButton
+                      aria-label="Seat"
+                      icon={<PiArmchairDuotone size={40} />}
+                      variant="unstyled"
+                      color={"#C4C4C4"}
+                      _focus={{ boxShadow: "none" }}
+                    />
+                    <IconButton
+                      aria-label="Seat"
+                      icon={<PiArmchairDuotone size={40} />}
+                      variant="unstyled"
+                      color={"#C4C4C4"}
+                      _focus={{ boxShadow: "none" }}
+                    />
+                  </Grid>
+                  <Grid templateColumns="repeat(5, 1fr)" gap={2}>
+                    <Tooltip
+                      fontFamily="Poppins"
+                      label="Seat: 2-A"
+                      placement="top"
+                      openDelay={200}
+                      bg="#979797"
+                      rounded="10px"
+                    >
+                      <IconButton
+                        aria-label="Seat"
+                        icon={<PiArmchairDuotone size={40} />}
+                        variant="unstyled"
+                        color={"#C4C4C4"}
+                        _focus={{ boxShadow: "none" }}
+                      />
+                    </Tooltip>
+                    <Tooltip
+                      fontFamily="Poppins"
+                      label="Seat: 2-B"
+                      placement="top"
+                      openDelay={200}
+                      bg="#979797"
+                      rounded="10px"
+                    >
+                      <IconButton
+                        aria-label="Seat"
+                        icon={<PiArmchairDuotone size={40} />}
+                        variant="unstyled"
+                        color={"#C4C4C4"}
+                        _focus={{ boxShadow: "none" }}
+                      />
+                    </Tooltip>
+                    <Stack _focus={{ boxShadow: "none" }} />
+                    <IconButton
+                      aria-label="Seat"
+                      icon={<PiArmchairDuotone size={40} />}
+                      variant="unstyled"
+                      color={"#C4C4C4"}
+                      _focus={{ boxShadow: "none" }}
+                    />
+                    <IconButton
+                      aria-label="Seat"
+                      icon={<PiArmchairDuotone size={40} />}
+                      variant="unstyled"
+                      color={"#C4C4C4"}
+                      _focus={{ boxShadow: "none" }}
+                    />
+                  </Grid>
+                </Box>
+              </Flex>
+            </CardFlightDetail>
           </Box>
+
           <Box display={{ base: "block", lg: "none" }} gridColumn="1/-1">
             <Flex
               alignItems="center"

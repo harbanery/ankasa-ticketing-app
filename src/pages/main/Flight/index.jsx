@@ -105,12 +105,12 @@ const FlightDetail = () => {
       travel_insurance: 0,
       total_price: 0,
     },
+    selected_seats: [],
   });
 
   const [passengerIdCounter, setPassengerIdCounter] = useState(2);
   const [insurance, setInsurance] = useState(false);
   //   const [countryCode, setCountryCode] = useState("+62");
-  const { isOpen: isOpenAccordion, onToggle } = useDisclosure();
   const {
     isOpen: isOpenModal,
     onOpen: onOpenModal,
@@ -286,7 +286,7 @@ const FlightDetail = () => {
     }
   }, [data.ticket, data.passengers.length, insurance]);
 
-  console.log(data?.ticket?.seats);
+  console.log(data?.ticket);
   return (
     <Box bg={"gray.200"} fontFamily="Poppins" pb="35px">
       <FlightDetailHeader />
@@ -304,84 +304,10 @@ const FlightDetail = () => {
             flexShrink="0"
             gridColumn={{ base: "1/span 12", lg: "1/span 8" }}
           >
-            <Box as="section">
-              <Box mb="25px">
-                <CardFlightHeading color="white">
-                  Contact Person Details
-                </CardFlightHeading>
-              </Box>
-              <CardFlightDetail px={10} py={8}>
-                <FormControl spacing={3} fontFamily={"Lato"} isRequired>
-                  {FORM_CONTACTPERSON?.map((item, i) => (
-                    <Box key={i} mb={5}>
-                      <FormLabel color={"gray.500"}>{item?.label}</FormLabel>
-                      <Input
-                        variant="flushed"
-                        value={item?.value}
-                        focusBorderColor="gray.400"
-                        type={item?.type}
-                        name={item?.name}
-                        onChange={(e) => handleChangeContactPerson(e)}
-                        readOnly={item?.readOnly}
-                        placeholder={item?.placeholder}
-                      />
-                    </Box>
-                  ))}
-                  {/* <Flex
-                    alignItems={"end"}
-                    gap={3}
-                    borderBottom={"1px solid"}
-                    borderColor={"gray.400"}
-                  >
-                    <Box>
-                      <FormLabel color={"gray.500"}>Phone</FormLabel>
-                      <Select
-                        variant="flushed"
-                        w={70}
-                        fontSize={14}
-                        focusBorderColor="transparent"
-                        onChange={(e) => setCountryCode(e.target.value)}
-                      >
-                        <option value="+62">+62</option>
-                        <option value="+63">+63</option>
-                        <option value="+64">+64</option>
-                      </Select>
-                    </Box>
-                    <Stack h={8} w={"2px"} bg={"gray.300"}></Stack>
-                    <Input
-                      py={2}
-                      variant="unstyled"
-                      placeholder="Phone number"
-                      focusBorderColor="transparent"
-                      type="text"
-                      border={"none"}
-                      borderColor="transparent"
-                      value={form?.phone}
-                      name="phone"
-                      onChange={(e) => handleChange(e)}
-                    />
-                  </Flex> */}
-                </FormControl>
-                <Flex
-                  bg={"#F245451A"}
-                  w={"full"}
-                  py={{ base: 4 }}
-                  px={{ base: 4, lg: 8 }}
-                  mt={5}
-                  borderRadius={10}
-                  gap={5}
-                  alignItems="center"
-                  fontFamily="Lato"
-                >
-                  <Stack w="24px">
-                    <IoIosWarning color="red" size={24} />
-                  </Stack>
-                  <Text as="p" fontSize="14px">
-                    Make sure the customer data is correct.
-                  </Text>
-                </Flex>
-              </CardFlightDetail>
-            </Box>
+            <ContactPersonDetails
+              form={FORM_CONTACTPERSON}
+              callback={(e) => handleChangeContactPerson(e)}
+            />
             <Box as="section">
               <Box mb="25px">
                 <CardFlightHeading color="black">
@@ -696,467 +622,155 @@ const FlightDetail = () => {
             display={{ base: "none", lg: "grid" }}
             gridColumn={{ base: "1/span 12", lg: "9/span 4" }}
           >
-            <Box mb="50px">
+            <FlightDetails
+              ticket={data?.ticket}
+              passengers={data?.passengers}
+              cost={data?.costs}
+              insurance={insurance}
+            />
+            {/* ui buat seat */}
+            <Box>
               <Flex
                 alignItems="center"
                 justifyContent="space-between"
                 mb="25px"
               >
-                <CardFlightHeading color={{ base: "black", lg: "white" }}>
-                  Flight Details
+                <CardFlightHeading color="black">
+                  Seat Details
                 </CardFlightHeading>
               </Flex>
-              <CardFlightDetail>
-                <Box p="1.75rem" borderBottom="1px solid #E6E6E6">
-                  <Flex
-                    alignItems={"center"}
-                    gap={"12px"}
-                    justifyContent="space-between"
-                    fontFamily={"Poppins"}
-                  >
-                    <Image maxW="100px" src={data?.ticket?.merchant_image} />
-                    <Text as={"p"} fontWeight={500}>
-                      {data?.ticket?.merchant_name}
+              <CardFlightDetail w="full" p="12px">
+                <Flex justifyContent="flex-end" alignItems="center">
+                  {/* <Stack alignItems="center">
+                    <Text fontSize={22} fontWeight={600} mr={5}>
+                      1
                     </Text>
-                  </Flex>
-                  <Flex
-                    fontFamily={"Poppins"}
-                    fontSize={18}
-                    gap={"20px"}
-                    mt="1.875rem"
-                    alignItems="flex-start"
-                    justifyContent="space-between"
-                  >
-                    <Text fontWeight={500}>
-                      {data?.ticket?.departure_city} (
-                      {data?.ticket?.departure_country_code})
+                    <Text fontSize={22} fontWeight={600} mr={5}>
+                      2
                     </Text>
-                    {/* <Image src="/src/assets/flight.svg" /> */}
-
-                    <Box mt="4px">
-                      <FlightIcon />
-                    </Box>
-                    <Text fontWeight={500} align="right">
-                      {data?.ticket?.arrival_city} (
-                      {data?.ticket?.arrival_country_code})
-                    </Text>
-                  </Flex>
-                  <Flex
-                    fontFamily={"Poppins"}
-                    alignItems={"center"}
-                    justifyContent="flex-start"
-                    fontSize={14}
-                    gap={"20px"}
-                    mt="1.25rem"
-                    color={"#6B6B6B"}
-                  >
-                    <Text fontWeight={400} maxW="140px">
-                      {formatScheduleDate(data?.ticket?.departure_schedule)}
-                    </Text>
-                    <Box
-                      bg={"gray.500"}
-                      h={2}
-                      w={2}
-                      borderRadius={"full"}
-                    ></Box>
-                    <Text fontWeight={400}>
-                      {formatTimeFull(data?.ticket?.departure_schedule)} -{" "}
-                      {formatTimeFull(data?.ticket?.arrival_schedule)}
-                    </Text>
-                  </Flex>
-                  <Flex
-                    fontFamily="Poppins"
-                    gap="28px"
-                    justifyContent="flex-start"
-                    mt="1rem"
-                  >
-                    {/* <Box fontFamily="Lato">
-                    <Text fontSize="0.75rem" color="#A5A5A5">
-                      Code
-                    </Text>
-                    <Text fontSize="0.875rem" fontWeight="500" color="#595959">
-                      AB-221
-                    </Text>
-                  </Box> */}
-                    <Box>
-                      <Text fontSize="0.8rem" color="#A5A5A5">
-                        Class
-                      </Text>
-                      <Text fontSize="1rem" fontWeight="500" color="#595959">
-                        {data?.ticket?.class}
-                      </Text>
-                    </Box>
-                    {/* <Box fontFamily="Lato">
-                    <Text fontSize="0.75rem" color="#A5A5A5">
-                      Terminal
-                    </Text>
-                    <Text fontSize="0.875rem" fontWeight="500" color="#595959">
-                      A
-                    </Text>
-                  </Box> */}
-                    <Box>
-                      <Text fontSize="0.8rem" color="#A5A5A5">
-                        Gate
-                      </Text>
-                      <Text fontSize="1rem" fontWeight="500" color="#595959">
-                        {data?.ticket?.gate}
-                      </Text>
-                    </Box>
-                  </Flex>
+                  </Stack> */}
                   <Box
-                    color={"#2395FF"}
-                    fontWeight={500}
-                    fontFamily={"Poppins"}
-                    mt="1.875rem"
-                    display="flex"
-                    justifyContent="space-between"
-                    gap="1rem"
+                    maxW="85%"
+                    w="auto"
+                    p="12px"
+                    bg="white"
+                    borderLeft="4px solid #C4C4C4"
+                    borderRight="4px solid #C4C4C4"
                   >
-                    <Flex flexDirection="column" gap="1rem">
-                      {data?.ticket?.is_refund && (
-                        <Flex alignItems={"center"} gap={2}>
-                          <CiCircleCheck color="#2395FF" size={24} />
-                          <Text fontWeight={400}>Refundable</Text>
-                        </Flex>
-                      )}
-                      {data?.ticket?.is_reschedule && (
-                        <Flex alignItems={"center"} gap={2}>
-                          <CiCircleCheck color="#2395FF" size={24} />
-                          <Text fontWeight={400}>Can reschedule</Text>
-                        </Flex>
-                      )}
-                    </Flex>
-                    <List
-                      display={{ base: "none", md: "flex" }}
-                      justifyContent="flex-end"
-                      alignItems="flex-end"
-                      gap="12px"
-                      minW="100px"
-                    >
-                      {data?.ticket?.is_luggage && (
+                    <SeatsFlight
+                      count_row={data?.ticket?.row_seats}
+                      seats={data?.ticket?.seats}
+                    />
+                    {/* <Grid templateColumns="repeat(5, 1fr)" gap={2}>
+                      {data?.ticket?.seats?.map((seat, index) => (
                         <Tooltip
+                          key={seat?.id}
                           fontFamily="Poppins"
-                          label="Luggage"
+                          label={seat?.code}
                           placement="top"
-                          openDelay={500}
+                          openDelay={200}
                           bg="#979797"
                           rounded="10px"
                         >
-                          <ListItem color="#979797">
-                            <VisuallyHidden>Luggage</VisuallyHidden>
-                            <LuggageIcon />
-                          </ListItem>
+                          <IconButton
+                            aria-label="Seat"
+                            icon={<PiArmchairDuotone size={40} />}
+                            variant="unstyled"
+                            color={"#6B6B6B"}
+                            _focus={{ boxShadow: "none" }}
+                            _hover={{
+                              color: "#2395FF",
+                            }}
+                          />
                         </Tooltip>
-                      )}
-                      {data?.ticket?.is_inflight_meal && (
-                        <Tooltip
-                          fontFamily="Poppins"
-                          label="Meal"
-                          placement="top"
-                          openDelay={500}
-                          bg="#979797"
-                          rounded="10px"
-                        >
-                          <ListItem color="#979797">
-                            <VisuallyHidden>Meal</VisuallyHidden>
-                            <InFlightMealIcon />
-                          </ListItem>
-                        </Tooltip>
-                      )}
-                      {data?.ticket?.is_wifi && (
-                        <Tooltip
-                          fontFamily="Poppins"
-                          label="Wi-Fi"
-                          placement="top"
-                          openDelay={500}
-                          bg="#979797"
-                          rounded="10px"
-                        >
-                          <ListItem color="#979797">
-                            <VisuallyHidden>Wi-Fi</VisuallyHidden>
-                            <WifiIcon />
-                          </ListItem>
-                        </Tooltip>
-                      )}
-                    </List>
-                  </Box>
-                </Box>
-                <Flex
-                  alignItems={"center"}
-                  justifyContent={"space-between"}
-                  fontFamily={"Poppins"}
-                  px="1.75rem"
-                  py="1.25rem"
-                >
-                  <Text fontWeight={600} fontSize="14px">
-                    Total Payment
-                  </Text>
-                  <Flex alignItems={"center"} gap={2}>
-                    <Button
-                      variant={"unstyled"}
-                      onClick={onToggle}
-                      display="flex"
-                      alignItems="center"
-                      gap="1rem"
-                    >
-                      <Text fontWeight={600} fontSize="17px" color={"#2395FF"}>
-                        {/* $ 149,90 */}
-                        {rupiah(data?.costs?.total_price)}
-                      </Text>
-                      {isOpenAccordion ? (
-                        <FaChevronUp color="#2395FF" size={20} />
-                      ) : (
-                        <FaChevronDown color="#2395FF" size={20} />
-                      )}
-                    </Button>
-                  </Flex>
-                </Flex>
-                <Collapse in={isOpenAccordion} animateOpacity>
-                  <Box px={10} fontFamily={"Poppins"}>
-                    <Flex
-                      alignItems={"flex-start"}
-                      gap={3}
-                      w={"full"}
-                      justifyContent={"space-between"}
-                      color={"gray.500"}
-                      pr={"20px"}
-                    >
-                      <Text fontWeight={500} fontSize={14} maxW="130px">
-                        Ticket amount per 1 ticket
-                      </Text>
-                      <Text fontWeight={400} fontSize={14}>
-                        {rupiah(data?.costs?.price)}
-                      </Text>
-                    </Flex>
-                    <Flex
-                      alignItems={"flex-start"}
-                      gap={3}
-                      w={"full"}
-                      justifyContent={"space-between"}
-                      color={"gray.500"}
-                      pr={"20px"}
-                      mt={2}
-                    >
-                      <Text fontWeight={500} fontSize={14} maxW="130px">
-                        Total Passenger(s)
-                      </Text>
-                      <Text fontWeight={400} fontSize={14}>
-                        {`${
-                          data?.passengers?.filter(
-                            (passenger) => passenger.type === "adult"
-                          ).length
-                        } Adult${
-                          data?.passengers?.filter(
-                            (passenger) => passenger.type === "adult"
-                          ).length > 1
-                            ? "s"
-                            : ""
-                        }${
-                          data?.passengers?.filter(
-                            (passenger) => passenger.type === "child"
-                          ).length > 0
-                            ? `, ${
-                                data?.passengers?.filter(
-                                  (passenger) => passenger.type === "child"
-                                ).length
-                              } Child`
-                            : ""
-                        }${
-                          data?.passengers?.filter(
-                            (passenger) => passenger.type === "child"
-                          ).length > 1
-                            ? "s"
-                            : ""
-                        }`}
-                      </Text>
-                    </Flex>
-                    <Flex
-                      alignItems={"flex-start"}
-                      gap={3}
-                      w={"full"}
-                      justifyContent={"space-between"}
-                      color={"gray.500"}
-                      pr={"20px"}
-                      mt={2}
-                    >
-                      <Text fontWeight={500} fontSize={14} maxW="130px">
-                        Tax
-                      </Text>
-                      <Text fontWeight={400} fontSize={14}>
-                        {rupiah(data?.costs?.tax)}
-                      </Text>
-                    </Flex>
-                    <Flex
-                      alignItems={"flex-start"}
-                      gap={3}
-                      w={"full"}
-                      justifyContent={"space-between"}
-                      color={"gray.500"}
-                      pr={"20px"}
-                      mt={2}
-                    >
-                      <Text fontWeight={500} fontSize={14} maxW="130px">
-                        Service fee
-                      </Text>
-                      <Text fontWeight={400} fontSize={14}>
-                        {rupiah(data?.costs?.service_fee)}
-                      </Text>
-                    </Flex>
-                    {insurance && (
-                      <Flex
-                        alignItems={"flex-start"}
-                        gap={3}
-                        w={"full"}
-                        justifyContent={"space-between"}
-                        color={"gray.500"}
-                        pr={"20px"}
-                        mt={2}
+                      ))}
+                      <Tooltip
+                        fontFamily="Poppins"
+                        label="Seat: 1-B"
+                        placement="top"
+                        openDelay={200}
+                        bg="#979797"
+                        rounded="10px"
+                        isDisabled
                       >
-                        <Text fontWeight={500} fontSize={14} maxW="130px">
-                          Travel Insurance
-                        </Text>
-                        <Text fontWeight={400} fontSize={14}>
-                          {rupiah(data?.costs?.travel_insurance)}
-                        </Text>
-                      </Flex>
-                    )}
-                    <Text
-                      as={"small"}
-                      color={"red.400"}
-                      my={4}
-                      display={"inline-block"}
-                    >
-                      *The ticket price for both adults and childrens remains
-                      charged at 1 ticket per seat
-                    </Text>
+                        <IconButton
+                          aria-label="Seat"
+                          icon={<PiArmchairDuotone size={40} />}
+                          variant="unstyled"
+                          color={"#C4C4C4"}
+                          _focus={{ boxShadow: "none" }}
+                          disabled
+                        />
+                      </Tooltip>
+                      <Stack />
+                      <IconButton
+                        aria-label="Seat"
+                        icon={<PiArmchairDuotone size={40} />}
+                        variant="unstyled"
+                        color={"#C4C4C4"}
+                        _focus={{ boxShadow: "none" }}
+                      />
+                      <IconButton
+                        aria-label="Seat"
+                        icon={<PiArmchairDuotone size={40} />}
+                        variant="unstyled"
+                        color={"#C4C4C4"}
+                        _focus={{ boxShadow: "none" }}
+                      />
+                    </Grid>
+                    <Grid templateColumns="repeat(5, 1fr)" gap={2}>
+                      <Tooltip
+                        fontFamily="Poppins"
+                        label="Seat: 2-A"
+                        placement="top"
+                        openDelay={200}
+                        bg="#979797"
+                        rounded="10px"
+                      >
+                        <IconButton
+                          aria-label="Seat"
+                          icon={<PiArmchairDuotone size={40} />}
+                          variant="unstyled"
+                          color={"#C4C4C4"}
+                          _focus={{ boxShadow: "none" }}
+                        />
+                      </Tooltip>
+                      <Tooltip
+                        fontFamily="Poppins"
+                        label="Seat: 2-B"
+                        placement="top"
+                        openDelay={200}
+                        bg="#979797"
+                        rounded="10px"
+                      >
+                        <IconButton
+                          aria-label="Seat"
+                          icon={<PiArmchairDuotone size={40} />}
+                          variant="unstyled"
+                          color={"#C4C4C4"}
+                          _focus={{ boxShadow: "none" }}
+                        />
+                      </Tooltip>
+                      <Stack _focus={{ boxShadow: "none" }} />
+                      <IconButton
+                        aria-label="Seat"
+                        icon={<PiArmchairDuotone size={40} />}
+                        variant="unstyled"
+                        color={"#C4C4C4"}
+                        _focus={{ boxShadow: "none" }}
+                      />
+                      <IconButton
+                        aria-label="Seat"
+                        icon={<PiArmchairDuotone size={40} />}
+                        variant="unstyled"
+                        color={"#C4C4C4"}
+                        _focus={{ boxShadow: "none" }}
+                      />
+                    </Grid> */}
                   </Box>
-                </Collapse>
+                </Flex>
               </CardFlightDetail>
             </Box>
-            {/* ui buat seat */}
-            <CardFlightDetail w="full" p="12px">
-              <Flex justifyContent="flex-end" alignItems="center">
-                <Stack alignItems="center">
-                  <Text fontSize={22} fontWeight={600} mr={5}>
-                    1
-                  </Text>
-                  <Text fontSize={22} fontWeight={600} mr={5}>
-                    2
-                  </Text>
-                </Stack>
-                <Box
-                  w="80%"
-                  p="12px"
-                  bg="white"
-                  borderLeft="4px solid #C4C4C4"
-                  borderRight="4px solid #C4C4C4"
-                >
-                  <Grid templateColumns="repeat(5, 1fr)" gap={2}>
-                    <Tooltip
-                      fontFamily="Poppins"
-                      label="Seat: 1-A"
-                      placement="top"
-                      openDelay={200}
-                      bg="#979797"
-                      rounded="10px"
-                    >
-                      <IconButton
-                        aria-label="Seat"
-                        icon={<PiArmchairDuotone size={40} />}
-                        variant="unstyled"
-                        color={"#6B6B6B"}
-                        _focus={{ boxShadow: "none" }}
-                        _hover={{
-                          color: "#2395FF",
-                        }}
-                      />
-                    </Tooltip>
-                    <Tooltip
-                      fontFamily="Poppins"
-                      label="Seat: 1-B"
-                      placement="top"
-                      openDelay={200}
-                      bg="#979797"
-                      rounded="10px"
-                      isDisabled
-                    >
-                      <IconButton
-                        aria-label="Seat"
-                        icon={<PiArmchairDuotone size={40} />}
-                        variant="unstyled"
-                        color={"#C4C4C4"}
-                        _focus={{ boxShadow: "none" }}
-                        disabled
-                      />
-                    </Tooltip>
-                    <Stack _focus={{ boxShadow: "none" }} />
-                    <IconButton
-                      aria-label="Seat"
-                      icon={<PiArmchairDuotone size={40} />}
-                      variant="unstyled"
-                      color={"#C4C4C4"}
-                      _focus={{ boxShadow: "none" }}
-                    />
-                    <IconButton
-                      aria-label="Seat"
-                      icon={<PiArmchairDuotone size={40} />}
-                      variant="unstyled"
-                      color={"#C4C4C4"}
-                      _focus={{ boxShadow: "none" }}
-                    />
-                  </Grid>
-                  <Grid templateColumns="repeat(5, 1fr)" gap={2}>
-                    <Tooltip
-                      fontFamily="Poppins"
-                      label="Seat: 2-A"
-                      placement="top"
-                      openDelay={200}
-                      bg="#979797"
-                      rounded="10px"
-                    >
-                      <IconButton
-                        aria-label="Seat"
-                        icon={<PiArmchairDuotone size={40} />}
-                        variant="unstyled"
-                        color={"#C4C4C4"}
-                        _focus={{ boxShadow: "none" }}
-                      />
-                    </Tooltip>
-                    <Tooltip
-                      fontFamily="Poppins"
-                      label="Seat: 2-B"
-                      placement="top"
-                      openDelay={200}
-                      bg="#979797"
-                      rounded="10px"
-                    >
-                      <IconButton
-                        aria-label="Seat"
-                        icon={<PiArmchairDuotone size={40} />}
-                        variant="unstyled"
-                        color={"#C4C4C4"}
-                        _focus={{ boxShadow: "none" }}
-                      />
-                    </Tooltip>
-                    <Stack _focus={{ boxShadow: "none" }} />
-                    <IconButton
-                      aria-label="Seat"
-                      icon={<PiArmchairDuotone size={40} />}
-                      variant="unstyled"
-                      color={"#C4C4C4"}
-                      _focus={{ boxShadow: "none" }}
-                    />
-                    <IconButton
-                      aria-label="Seat"
-                      icon={<PiArmchairDuotone size={40} />}
-                      variant="unstyled"
-                      color={"#C4C4C4"}
-                      _focus={{ boxShadow: "none" }}
-                    />
-                  </Grid>
-                </Box>
-              </Flex>
-            </CardFlightDetail>
           </Box>
 
           <Box display={{ base: "block", lg: "none" }} gridColumn="1/-1">
@@ -1177,136 +791,17 @@ const FlightDetail = () => {
                 userSelect="none"
                 pointerEvents="auto"
                 onClick={onOpenModal}
-                fontSize="1rem"
+                fontSize={{ base: "1rem", md: "22px" }}
               >
                 View Details
               </Text>
-              <Modal isOpen={isOpenModal} onClose={onCloseModal}>
-                <ModalOverlay />
-                <ModalContent pt="1rem" mx="1rem">
-                  <ModalCloseButton />
-                  <ModalBody>
-                    <Box px={2} fontFamily={"Poppins"}>
-                      <Flex
-                        alignItems={"flex-start"}
-                        gap={3}
-                        w={"full"}
-                        justifyContent={"space-between"}
-                        color={"gray.500"}
-                        pr={"20px"}
-                      >
-                        <Text fontWeight={500} fontSize={14} maxW="130px">
-                          Ticket amount per 1 ticket
-                        </Text>
-                        <Text fontWeight={400} fontSize={14}>
-                          {rupiah(data?.costs?.price)}
-                        </Text>
-                      </Flex>
-                      <Flex
-                        alignItems={"flex-start"}
-                        gap={3}
-                        w={"full"}
-                        justifyContent={"space-between"}
-                        color={"gray.500"}
-                        pr={"20px"}
-                        mt={2}
-                      >
-                        <Text fontWeight={500} fontSize={14} maxW="130px">
-                          Total Passenger(s)
-                        </Text>
-                        <Text fontWeight={400} fontSize={14}>
-                          {`${
-                            data?.passengers?.filter(
-                              (passenger) => passenger.type === "adult"
-                            ).length
-                          } Adult${
-                            data?.passengers?.filter(
-                              (passenger) => passenger.type === "adult"
-                            ).length > 1
-                              ? "s"
-                              : ""
-                          }${
-                            data?.passengers?.filter(
-                              (passenger) => passenger.type === "child"
-                            ).length > 0
-                              ? `, ${
-                                  data?.passengers?.filter(
-                                    (passenger) => passenger.type === "child"
-                                  ).length
-                                } Child`
-                              : ""
-                          }${
-                            data?.passengers?.filter(
-                              (passenger) => passenger.type === "child"
-                            ).length > 1
-                              ? "s"
-                              : ""
-                          }`}
-                        </Text>
-                      </Flex>
-                      <Flex
-                        alignItems={"flex-start"}
-                        gap={3}
-                        w={"full"}
-                        justifyContent={"space-between"}
-                        color={"gray.500"}
-                        pr={"20px"}
-                        mt={2}
-                      >
-                        <Text fontWeight={500} fontSize={14} maxW="130px">
-                          Tax
-                        </Text>
-                        <Text fontWeight={400} fontSize={14}>
-                          {rupiah(data?.costs?.tax)}
-                        </Text>
-                      </Flex>
-                      <Flex
-                        alignItems={"flex-start"}
-                        gap={3}
-                        w={"full"}
-                        justifyContent={"space-between"}
-                        color={"gray.500"}
-                        pr={"20px"}
-                        mt={2}
-                      >
-                        <Text fontWeight={500} fontSize={14} maxW="130px">
-                          Service fee
-                        </Text>
-                        <Text fontWeight={400} fontSize={14}>
-                          {rupiah(data?.costs?.service_fee)}
-                        </Text>
-                      </Flex>
-                      {insurance && (
-                        <Flex
-                          alignItems={"flex-start"}
-                          gap={3}
-                          w={"full"}
-                          justifyContent={"space-between"}
-                          color={"gray.500"}
-                          pr={"20px"}
-                          mt={2}
-                        >
-                          <Text fontWeight={500} fontSize={14} maxW="130px">
-                            Travel Insurance
-                          </Text>
-                          <Text fontWeight={400} fontSize={14}>
-                            {rupiah(data?.costs?.travel_insurance)}
-                          </Text>
-                        </Flex>
-                      )}
-                      <Text
-                        as={"small"}
-                        color={"red.400"}
-                        my={4}
-                        display={"inline-block"}
-                      >
-                        *The ticket price for both adults and childrens remains
-                        charged at 1 ticket per seat
-                      </Text>
-                    </Box>
-                  </ModalBody>
-                </ModalContent>
-              </Modal>
+              <ModalFlight
+                isOpen={isOpenModal}
+                onClose={onCloseModal}
+                cost={data?.costs}
+                passengers={data?.passengers}
+                insurance={insurance}
+              />
             </Flex>
             <Box bgColor="white" rounded="0.5rem" overflow="hidden">
               <Box px="1.25rem" py="2.5rem" borderBottom="1px solid #E6E6E6">
@@ -1370,25 +865,9 @@ const FlightDetail = () => {
                         <CiCircleCheck color="#2395FF" size={20} />
                       </Flex>
                     )}
-                    {/* <Flex alignItems="center" gap="0.375rem" mb="0.75rem">
-                      <StarIcon />
-                      <StarIcon />
-                      <StarIcon />
-                      <StarIcon />
-                      <StarIcon />
-                    </Flex>
-                    <Text>120k review</Text> */}
                   </Box>
                 </Flex>
                 <Flex gap="20px" justifyContent="space-between">
-                  {/* <Box fontFamily="Lato">
-                    <Text fontSize="0.75rem" color="#A5A5A5">
-                      Code
-                    </Text>
-                    <Text fontSize="0.875rem" fontWeight="500" color="#595959">
-                      AB-221
-                    </Text>
-                  </Box> */}
                   <Box fontFamily="Lato" maxW="50%">
                     <Text fontSize="0.75rem" color="#A5A5A5">
                       Schedule
@@ -1405,14 +884,6 @@ const FlightDetail = () => {
                       {data?.ticket?.class}
                     </Text>
                   </Box>
-                  {/* <Box fontFamily="Lato">
-                    <Text fontSize="0.75rem" color="#A5A5A5">
-                      Terminal
-                    </Text>
-                    <Text fontSize="0.875rem" fontWeight="500" color="#595959">
-                      A
-                    </Text>
-                  </Box> */}
                   <Box fontFamily="Lato">
                     <Text fontSize="0.75rem" color="#A5A5A5">
                       Gate
@@ -1600,7 +1071,8 @@ const FlightDetail = () => {
                 color="white"
                 transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
                 boxShadow="0px 8px 10px 0px #2395FF4D"
-                width="100%"
+                width={{ base: "100%", md: "50%" }}
+                mx="auto"
                 _hover={{ bg: "#1971c2" }}
                 _active={{
                   bg: "#dddfe2",
@@ -1609,35 +1081,11 @@ const FlightDetail = () => {
               >
                 Proceed to Payment
               </Button>
-              <AlertDialog
-                motionPreset="slideInBottom"
-                leastDestructiveRef={cancelRef}
+              <AlertDialogFlight
+                cancelRef={cancelRef}
                 onClose={onCloseAlertDialog}
                 isOpen={isOpenAlertDialog}
-                isCentered
-              >
-                <AlertDialogOverlay />
-
-                <AlertDialogContent pt="1rem" mx="1rem" fontFamily="Poppins">
-                  <AlertDialogHeader>Confirm to proceed?</AlertDialogHeader>
-                  <AlertDialogCloseButton />
-                  <AlertDialogBody>
-                    Are you sure to proceed the payment?.
-                  </AlertDialogBody>
-                  <AlertDialogFooter>
-                    <Button
-                      ref={cancelRef}
-                      onClick={onCloseAlertDialog}
-                      variant="solid"
-                    >
-                      No, Let me check again!
-                    </Button>
-                    <Button bg="#2395FF" color="white" ml={3}>
-                      Yes
-                    </Button>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              />
             </Flex>
           </Box>
         </Grid>
@@ -1645,4 +1093,894 @@ const FlightDetail = () => {
     </Box>
   );
 };
+
+const SeatsFlight = ({ count_row = 0, seats = [] }) => {
+  // Function to split seats into rows and add spacing
+  const arrangeSeats = (seats) => {
+    const rows = [];
+    const seatsPerRow = count_row; // You can adjust this for different numbers per row
+    for (let i = 0; i < seats.length; i += seatsPerRow) {
+      const rowSeats = seats.slice(i, i + seatsPerRow);
+      console.log(`count_row = ${count_row} & rowseats = ${rowSeats.length}`);
+      if (rowSeats.length == 4) {
+        // Add a space in the middle if there are more than 2 seats in the row
+        rows.push([rowSeats[0], rowSeats[1], null, rowSeats[2], rowSeats[3]]);
+      } else if (rowSeats.length === 5) {
+        // No space needed for rows with 2 seats or less
+        rows.push([
+          rowSeats[0],
+          rowSeats[1],
+          null,
+          rowSeats[2],
+          rowSeats[3],
+          rowSeats[4],
+        ]);
+      } else if (rowSeats.length === 6) {
+        // No space needed for rows with 2 seats or less
+        rows.push([
+          rowSeats[0],
+          rowSeats[1],
+          rowSeats[2],
+          null,
+          rowSeats[3],
+          rowSeats[4],
+          rowSeats[5],
+        ]);
+      } else if (rowSeats.length === 7) {
+        // No space needed for rows with 2 seats or less
+        rows.push([
+          rowSeats[0],
+          rowSeats[1],
+          null,
+          rowSeats[2],
+          rowSeats[3],
+          rowSeats[4],
+          null,
+          rowSeats[5],
+          rowSeats[6],
+        ]);
+      } else if (rowSeats.length === 8) {
+        // No space needed for rows with 2 seats or less
+        rows.push([
+          rowSeats[0],
+          rowSeats[1],
+          null,
+          rowSeats[2],
+          rowSeats[3],
+          rowSeats[4],
+          null,
+          rowSeats[5],
+          rowSeats[6],
+          rowSeats[7],
+        ]);
+      } else if (rowSeats.length === 9) {
+        // No space needed for rows with 2 seats or less
+        rows.push([
+          rowSeats[0],
+          rowSeats[1],
+          rowSeats[2],
+          null,
+          rowSeats[3],
+          rowSeats[4],
+          rowSeats[5],
+          null,
+          rowSeats[6],
+          rowSeats[7],
+          rowSeats[8],
+        ]);
+      } else if (rowSeats.length === 10) {
+        // No space needed for rows with 2 seats or less
+        rows.push([
+          rowSeats[0],
+          rowSeats[1],
+          rowSeats[2],
+          null,
+          rowSeats[3],
+          rowSeats[4],
+          rowSeats[5],
+          rowSeats[6],
+          null,
+          rowSeats[7],
+          rowSeats[8],
+          rowSeats[9],
+        ]);
+      } else {
+        // No space needed for rows with 2 seats or less
+        rows.push(rowSeats);
+      }
+    }
+    return rows;
+  };
+
+  // Determine icon size dynamically based on the seat length for responsiveness
+  const getIconSize = (length) => {
+    if (length <= 4) return 40;
+    if (length <= 6) return 30;
+    return 20; // Default small size for larger seat arrays
+  };
+
+  const seatRows = arrangeSeats(seats);
+
+  return (
+    <Box w="full" p="12px" maxH="385px" overflowY="auto">
+      {seatRows.map((row, rowIndex) => (
+        <Grid
+          key={rowIndex}
+          templateColumns={`repeat(${
+            count_row < 4
+              ? count_row
+              : count_row <= 6
+              ? count_row + 1
+              : count_row <= 10
+              ? count_row + 2
+              : 4
+          }, 1fr)`} // 5 columns per row: 2 seats, 1 space, 2 seats
+          gap={2}
+          mb={4} // Margin between rows
+        >
+          {row.map((seat, seatIndex) =>
+            seat ? (
+              <Tooltip
+                key={seatIndex}
+                fontFamily="Poppins"
+                label={seat?.code}
+                placement="top"
+                openDelay={200}
+                bg="#979797"
+                rounded="10px"
+              >
+                <IconButton
+                  aria-label={`Seat ${seat?.code}`}
+                  icon={<PiArmchairDuotone size={20} />}
+                  w="20px"
+                  variant="unstyled"
+                  color={"#6B6B6B"}
+                  _focus={{ boxShadow: "none" }}
+                  _hover={{
+                    color: "#2395FF",
+                  }}
+                />
+              </Tooltip>
+            ) : (
+              <Stack key={seatIndex} /> // Render empty space for null seats
+            )
+          )}
+        </Grid>
+      ))}
+    </Box>
+  );
+};
+
+const ModalFlight = ({
+  cost = {},
+  passengers = [],
+  insurance = false,
+  ...props
+}) => {
+  return (
+    <Modal {...props}>
+      <ModalOverlay />
+      <ModalContent pt="1rem" mx="1rem">
+        <ModalCloseButton />
+        <ModalBody>
+          <CostDetails
+            cost={cost}
+            passengers={passengers}
+            insurance={insurance}
+            px={2}
+          />
+        </ModalBody>
+      </ModalContent>
+    </Modal>
+  );
+};
+
+const AlertDialogFlight = ({ cancelRef, onClose, isOpen }) => {
+  return (
+    <AlertDialog
+      motionPreset="slideInBottom"
+      leastDestructiveRef={cancelRef}
+      onClose={onClose}
+      isOpen={isOpen}
+      isCentered
+    >
+      <AlertDialogOverlay />
+
+      <AlertDialogContent pt="1rem" mx="1rem" fontFamily="Poppins">
+        <AlertDialogHeader>Confirm to proceed?</AlertDialogHeader>
+        <AlertDialogCloseButton />
+        <AlertDialogBody>Are you sure to proceed the payment?.</AlertDialogBody>
+        <AlertDialogFooter>
+          <Button ref={cancelRef} onClick={onClose} variant="solid">
+            No, Let me check again!
+          </Button>
+          <Button bg="#2395FF" color="white" ml={3}>
+            Yes
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
+
+const ContactPersonDetails = ({ form = [], callback }) => {
+  return (
+    <Box as="section">
+      <Box mb="25px">
+        <CardFlightHeading color="white">
+          Contact Person Details
+        </CardFlightHeading>
+      </Box>
+      <CardFlightDetail px={10} py={8}>
+        <FormControl spacing={3} fontFamily={"Lato"} isRequired>
+          {form?.map((item, i) => (
+            <Box key={i} mb={5}>
+              <FormLabel color={"gray.500"}>{item?.label}</FormLabel>
+              <Input
+                variant="flushed"
+                value={item?.value}
+                focusBorderColor="gray.400"
+                type={item?.type}
+                name={item?.name}
+                onChange={callback}
+                readOnly={item?.readOnly}
+                placeholder={item?.placeholder}
+              />
+            </Box>
+          ))}
+          {/* <Flex
+        alignItems={"end"}
+        gap={3}
+        borderBottom={"1px solid"}
+        borderColor={"gray.400"}
+      >
+        <Box>
+          <FormLabel color={"gray.500"}>Phone</FormLabel>
+          <Select
+            variant="flushed"
+            w={70}
+            fontSize={14}
+            focusBorderColor="transparent"
+            onChange={(e) => setCountryCode(e.target.value)}
+          >
+            <option value="+62">+62</option>
+            <option value="+63">+63</option>
+            <option value="+64">+64</option>
+          </Select>
+        </Box>
+        <Stack h={8} w={"2px"} bg={"gray.300"}></Stack>
+        <Input
+          py={2}
+          variant="unstyled"
+          placeholder="Phone number"
+          focusBorderColor="transparent"
+          type="text"
+          border={"none"}
+          borderColor="transparent"
+          value={form?.phone}
+          name="phone"
+          onChange={(e) => handleChange(e)}
+        />
+      </Flex> */}
+        </FormControl>
+        <Flex
+          bg={"#F245451A"}
+          w={"full"}
+          py={{ base: 4 }}
+          px={{ base: 4, lg: 8 }}
+          mt={5}
+          borderRadius={10}
+          gap={5}
+          alignItems="center"
+          fontFamily="Lato"
+        >
+          <Stack w="24px">
+            <IoIosWarning color="red" size={24} />
+          </Stack>
+          <Text as="p" fontSize="14px">
+            Make sure the customer data is correct.
+          </Text>
+        </Flex>
+      </CardFlightDetail>
+    </Box>
+  );
+};
+
+// const PassengerDetails = ({ data = {}, callback }) => {
+//   return (
+//     <>
+//       <Box as="section">
+//         <Box mb="25px">
+//           <CardFlightHeading color="black">Passenger Details</CardFlightHeading>
+//         </Box>
+//         <CardFlightDetail px={10} py={8}>
+//           <Flex
+//             flexDirection={{ base: "column", md: "row" }}
+//             alignItems={{ base: "stretch", md: "center" }}
+//             gap={{ base: "6px", md: 0 }}
+//             justifyContent="space-between"
+//             mb="30px"
+//             rounded="10px"
+//             px="28px"
+//             py="12px"
+//             bgColor="#2395FF1A"
+//             fontFamily="Lato"
+//             color="#595959"
+//           >
+//             <Text>
+//               Passenger:{" "}
+//               {`${
+//                 data?.passengers?.filter(
+//                   (passenger) => passenger.type === "adult"
+//                 ).length
+//               } Adult${
+//                 data?.passengers?.filter(
+//                   (passenger) => passenger.type === "adult"
+//                 ).length > 1
+//                   ? "s"
+//                   : ""
+//               }${
+//                 data?.passengers?.filter(
+//                   (passenger) => passenger.type === "child"
+//                 ).length > 0
+//                   ? `, ${
+//                       data?.passengers?.filter(
+//                         (passenger) => passenger.type === "child"
+//                       ).length
+//                     } Child${
+//                       data?.passengers?.filter(
+//                         (passenger) => passenger.type === "child"
+//                       ).length > 1
+//                         ? "s"
+//                         : ""
+//                     }`
+//                   : ""
+//               }`}
+//             </Text>
+//             <Flex alignItems="center" gap="15px">
+//               <FormLabel htmlFor="same_as_contact_person" mb="0">
+//                 Same as contact person
+//               </FormLabel>
+//               <Switch
+//                 id="same_as_contact_person"
+//                 onChange={handleChangeSameContact}
+//               />
+//             </Flex>
+//           </Flex>
+//           <FormControl spacing={3} fontFamily={"Lato"} isRequired>
+//             <Box mb="30px">
+//               <FormLabel color={"gray.500"}>Title</FormLabel>
+//               <Select
+//                 variant="flushed"
+//                 onChange={(e) =>
+//                   handleChangePassenger(1, "title", e.target.value)
+//                 }
+//               >
+//                 <option value="Mr.">Mr.</option>
+//                 <option value="Mrs.">Mrs.</option>
+//               </Select>
+//             </Box>
+//             <Box mb="30px">
+//               <FormLabel color={"gray.500"}>Full Name</FormLabel>
+//               <Input
+//                 variant="flushed"
+//                 name="name"
+//                 value={data.passengers?.[0]?.name || ""}
+//                 onChange={(e) =>
+//                   handleChangePassenger(1, "name", e.target.value)
+//                 }
+//                 placeholder="Full name (ex. Mike Kowalski)"
+//                 readOnly={data.passengers?.[0]?.readOnly}
+//               />
+//             </Box>
+//             <Box mb="30px">
+//               <FormLabel color={"gray.500"}>Nationality</FormLabel>
+//               <Input
+//                 variant="flushed"
+//                 name="nationality"
+//                 value={data.passengers?.[0]?.nationality || ""}
+//                 onChange={(e) =>
+//                   handleChangePassenger(1, "nationality", e.target.value)
+//                 }
+//                 placeholder="United States"
+//               />
+//             </Box>
+//             {/* <Box>
+//                     <FormLabel color={"gray.500"}>Nationality</FormLabel>
+//                     <Select variant="flushed">
+//                       <option value="mr">Indonesia</option>
+//                       <option value="mrs">Malaysia</option>
+//                       <option value="mrs">Belanda</option>
+//                       <option value="mrs">Jepang</option>
+//                     </Select>
+//                   </Box> */}
+//           </FormControl>
+//           {data?.passengers?.length > 1 && (
+//             <Accordion mb="30px" allowMultiple>
+//               {data?.passengers?.slice(1).map((passenger) => (
+//                 <AccordionItem key={passenger.id}>
+//                   <h2>
+//                     <AccordionButton>
+//                       <Box
+//                         as="span"
+//                         fontFamily="Lato"
+//                         flex="1"
+//                         textAlign="center"
+//                         textTransform="capitalize"
+//                       >
+//                         {passenger?.name
+//                           ? `${passenger?.type}${passenger?.name && " - "}${
+//                               passenger?.name
+//                             }`
+//                           : `New Passenger ${passenger.id - 1}`}
+//                       </Box>
+//                       <AccordionIcon />
+//                     </AccordionButton>
+//                   </h2>
+//                   <AccordionPanel pb={0}>
+//                     <CardFlightDetail>
+//                       <Flex mb="20px" justifyContent="flex-end">
+//                         <Button
+//                           variant="solid"
+//                           size="sm"
+//                           colorScheme="red"
+//                           onClick={() => handleRemovePassenger(passenger.id)}
+//                         >
+//                           <FaTrashAlt />
+//                         </Button>
+//                       </Flex>
+//                       <FormControl spacing={3} fontFamily={"Lato"} isRequired>
+//                         <Box mb="30px">
+//                           <FormLabel color={"gray.500"}>Type</FormLabel>
+//                           <Select
+//                             variant="flushed"
+//                             onChange={(e) =>
+//                               handleChangePassenger(
+//                                 passenger.id,
+//                                 "type",
+//                                 e.target.value
+//                               )
+//                             }
+//                           >
+//                             <option value="adult">Adult</option>
+//                             <option value="child">Child</option>
+//                           </Select>
+//                         </Box>
+//                         {passenger?.type === "adult" && (
+//                           <Box mb="30px">
+//                             <FormLabel color={"gray.500"}>Title</FormLabel>
+//                             <Select
+//                               variant="flushed"
+//                               onChange={(e) =>
+//                                 handleChangePassenger(
+//                                   passenger.id,
+//                                   "title",
+//                                   e.target.value
+//                                 )
+//                               }
+//                             >
+//                               <option value="Mr.">Mr.</option>
+//                               <option value="Mrs.">Mrs.</option>
+//                             </Select>
+//                           </Box>
+//                         )}
+//                         <Box mb="30px">
+//                           <FormLabel color={"gray.500"}>Full Name</FormLabel>
+//                           <Input
+//                             variant="flushed"
+//                             placeholder="Full name (ex. Mike Kowalski)"
+//                             name="name"
+//                             value={passenger?.name || ""}
+//                             onChange={(e) =>
+//                               handleChangePassenger(
+//                                 passenger.id,
+//                                 "name",
+//                                 e.target.value
+//                               )
+//                             }
+//                           />
+//                         </Box>
+//                         <Box mb="30px">
+//                           <FormLabel color={"gray.500"}>Nationality</FormLabel>
+//                           <Input
+//                             variant="flushed"
+//                             placeholder="United States"
+//                             name="nationality"
+//                             value={passenger?.nationality || ""}
+//                             onChange={(e) =>
+//                               handleChangePassenger(
+//                                 passenger.id,
+//                                 "nationality",
+//                                 e.target.value
+//                               )
+//                             }
+//                           />
+//                         </Box>
+//                       </FormControl>
+//                     </CardFlightDetail>
+//                   </AccordionPanel>
+//                 </AccordionItem>
+//               ))}
+//             </Accordion>
+//           )}
+//           <Button
+//             variant="ghost"
+//             fontFamily="Lato"
+//             onClick={handleAddPassenger}
+//             w="full"
+//           >
+//             Add New Passenger
+//           </Button>
+//         </CardFlightDetail>
+//       </Box>
+//       <Box as="section">
+//         <CardFlightDetail>
+//           <Flex
+//             px="28px"
+//             pb="20px"
+//             pt="34px"
+//             alignItems="center"
+//             justifyContent="space-between"
+//             fontFamily="Lato"
+//             borderBottom="1px solid #E6E6E6"
+//           >
+//             <Checkbox
+//               gap={{ base: 0, md: "15px" }}
+//               fontSize={{ base: "10px", md: "18px" }}
+//               fontWeight="600"
+//               color="black"
+//               onChange={handleChangeTravelInsurance}
+//               value={insurance}
+//             >
+//               Travel Insurance
+//             </Checkbox>
+//             <Text
+//               fontSize={{ base: "17px", md: "18px" }}
+//               fontWeight="700"
+//               color="#2395FF"
+//             >
+//               {rupiah(data?.costs?.travel_insurance)}
+//               <Text as="span" fontSize="14px" fontWeight="600" color="#6B6B6B">
+//                 /pax
+//               </Text>
+//             </Text>
+//           </Flex>
+//           <Box px="28px" pb="34px" pt="20px">
+//             <Text fontSize="14px" color="black">
+//               Get travel compensation up to {rupiah(10000)}
+//             </Text>
+//           </Box>
+//         </CardFlightDetail>
+//       </Box>
+//     </>
+//   );
+// };
+
+const FlightDetails = ({
+  ticket = {},
+  passengers = [],
+  cost = {},
+  insurance = false,
+}) => {
+  const { isOpen: isOpenAccordion, onToggle } = useDisclosure();
+
+  return (
+    <Box mb="50px">
+      <Flex alignItems="center" justifyContent="space-between" mb="25px">
+        <CardFlightHeading color={{ base: "black", lg: "white" }}>
+          Flight Details
+        </CardFlightHeading>
+      </Flex>
+      <CardFlightDetail>
+        <Box p="1.75rem" borderBottom="1px solid #E6E6E6">
+          <Flex
+            alignItems={"center"}
+            gap={"12px"}
+            justifyContent="space-between"
+            fontFamily={"Poppins"}
+          >
+            <Image maxW="100px" src={ticket?.merchant_image} />
+            <Text as={"p"} fontWeight={500}>
+              {ticket?.merchant_name}
+            </Text>
+          </Flex>
+          <Flex
+            fontFamily={"Poppins"}
+            fontSize={18}
+            gap={"20px"}
+            mt="1.875rem"
+            alignItems="flex-start"
+            justifyContent="space-between"
+          >
+            <Text fontWeight={500}>
+              {ticket?.departure_city} ({ticket?.departure_country_code})
+            </Text>
+            {/* <Image src="/src/assets/flight.svg" /> */}
+
+            <Box mt="4px">
+              <FlightIcon />
+            </Box>
+            <Text fontWeight={500} align="right">
+              {ticket?.arrival_city} ({ticket?.arrival_country_code})
+            </Text>
+          </Flex>
+          <Flex
+            fontFamily={"Poppins"}
+            alignItems={"center"}
+            justifyContent="flex-start"
+            fontSize={14}
+            gap={"20px"}
+            mt="1.25rem"
+            color={"#6B6B6B"}
+          >
+            <Text fontWeight={400} maxW="140px">
+              {formatScheduleDate(ticket?.departure_schedule)}
+            </Text>
+            <Box bg={"gray.500"} h={2} w={2} borderRadius={"full"}></Box>
+            <Text fontWeight={400}>
+              {formatTimeFull(ticket?.departure_schedule)} -{" "}
+              {formatTimeFull(ticket?.arrival_schedule)}
+            </Text>
+          </Flex>
+          <Flex
+            fontFamily="Poppins"
+            gap="28px"
+            justifyContent="flex-start"
+            mt="1rem"
+          >
+            <Box>
+              <Text fontSize="0.8rem" color="#A5A5A5">
+                Class
+              </Text>
+              <Text fontSize="1rem" fontWeight="500" color="#595959">
+                {ticket?.class}
+              </Text>
+            </Box>
+            <Box>
+              <Text fontSize="0.8rem" color="#A5A5A5">
+                Gate
+              </Text>
+              <Text fontSize="1rem" fontWeight="500" color="#595959">
+                {ticket?.gate}
+              </Text>
+            </Box>
+          </Flex>
+          <Box
+            color={"#2395FF"}
+            fontWeight={500}
+            fontFamily={"Poppins"}
+            mt="1.875rem"
+            display="flex"
+            justifyContent="space-between"
+            gap="1rem"
+          >
+            <Flex flexDirection="column" gap="1rem">
+              {ticket?.is_refund && (
+                <Flex alignItems={"center"} gap={2}>
+                  <CiCircleCheck color="#2395FF" size={24} />
+                  <Text fontWeight={400}>Refundable</Text>
+                </Flex>
+              )}
+              {ticket?.is_reschedule && (
+                <Flex alignItems={"center"} gap={2}>
+                  <CiCircleCheck color="#2395FF" size={24} />
+                  <Text fontWeight={400}>Can reschedule</Text>
+                </Flex>
+              )}
+            </Flex>
+            <List
+              display={{ base: "none", md: "flex" }}
+              justifyContent="flex-end"
+              alignItems="flex-end"
+              gap="12px"
+              minW="100px"
+            >
+              {ticket?.is_luggage && (
+                <Tooltip
+                  fontFamily="Poppins"
+                  label="Luggage"
+                  placement="top"
+                  openDelay={500}
+                  bg="#979797"
+                  rounded="10px"
+                >
+                  <ListItem color="#979797">
+                    <VisuallyHidden>Luggage</VisuallyHidden>
+                    <LuggageIcon />
+                  </ListItem>
+                </Tooltip>
+              )}
+              {ticket?.is_inflight_meal && (
+                <Tooltip
+                  fontFamily="Poppins"
+                  label="Meal"
+                  placement="top"
+                  openDelay={500}
+                  bg="#979797"
+                  rounded="10px"
+                >
+                  <ListItem color="#979797">
+                    <VisuallyHidden>Meal</VisuallyHidden>
+                    <InFlightMealIcon />
+                  </ListItem>
+                </Tooltip>
+              )}
+              {ticket?.is_wifi && (
+                <Tooltip
+                  fontFamily="Poppins"
+                  label="Wi-Fi"
+                  placement="top"
+                  openDelay={500}
+                  bg="#979797"
+                  rounded="10px"
+                >
+                  <ListItem color="#979797">
+                    <VisuallyHidden>Wi-Fi</VisuallyHidden>
+                    <WifiIcon />
+                  </ListItem>
+                </Tooltip>
+              )}
+            </List>
+          </Box>
+        </Box>
+        <Flex
+          alignItems={"center"}
+          justifyContent={"space-between"}
+          fontFamily={"Poppins"}
+          px="1.75rem"
+          py="1.25rem"
+        >
+          <Text fontWeight={600} fontSize="14px">
+            Total Payment
+          </Text>
+          <Flex alignItems={"center"} gap={2}>
+            <Button
+              variant={"unstyled"}
+              onClick={onToggle}
+              display="flex"
+              alignItems="center"
+              gap="1rem"
+            >
+              <Text fontWeight={600} fontSize="17px" color={"#2395FF"}>
+                {/* $ 149,90 */}
+                {rupiah(cost?.total_price)}
+              </Text>
+              {isOpenAccordion ? (
+                <FaChevronUp color="#2395FF" size={20} />
+              ) : (
+                <FaChevronDown color="#2395FF" size={20} />
+              )}
+            </Button>
+          </Flex>
+        </Flex>
+        <Collapse in={isOpenAccordion} animateOpacity>
+          <CostDetails
+            cost={cost}
+            passengers={passengers}
+            insurance={insurance}
+            px={10}
+          />
+        </Collapse>
+      </CardFlightDetail>
+    </Box>
+  );
+};
+
+const CostDetails = ({
+  cost = {},
+  passengers = [],
+  insurance = false,
+  ...props
+}) => {
+  return (
+    <Box fontFamily={"Poppins"} {...props}>
+      <Flex
+        alignItems={"flex-start"}
+        gap={3}
+        w={"full"}
+        justifyContent={"space-between"}
+        color={"gray.500"}
+        pr={"20px"}
+      >
+        <Text fontWeight={500} fontSize={14} maxW="130px">
+          Ticket amount per 1 ticket
+        </Text>
+        <Text fontWeight={400} fontSize={14}>
+          {rupiah(cost?.price)}
+        </Text>
+      </Flex>
+      <Flex
+        alignItems={"flex-start"}
+        gap={3}
+        w={"full"}
+        justifyContent={"space-between"}
+        color={"gray.500"}
+        pr={"20px"}
+        mt={2}
+      >
+        <Text fontWeight={500} fontSize={14} maxW="130px">
+          Total Passenger(s)
+        </Text>
+        <Text fontWeight={400} fontSize={14}>
+          {`${
+            passengers?.filter((passenger) => passenger.type === "adult").length
+          } Adult${
+            passengers?.filter((passenger) => passenger.type === "adult")
+              .length > 1
+              ? "s"
+              : ""
+          }${
+            passengers?.filter((passenger) => passenger.type === "child")
+              .length > 0
+              ? `, ${
+                  passengers?.filter((passenger) => passenger.type === "child")
+                    .length
+                } Child`
+              : ""
+          }${
+            passengers?.filter((passenger) => passenger.type === "child")
+              .length > 1
+              ? "s"
+              : ""
+          }`}
+        </Text>
+      </Flex>
+      <Flex
+        alignItems={"flex-start"}
+        gap={3}
+        w={"full"}
+        justifyContent={"space-between"}
+        color={"gray.500"}
+        pr={"20px"}
+        mt={2}
+      >
+        <Text fontWeight={500} fontSize={14} maxW="130px">
+          Tax
+        </Text>
+        <Text fontWeight={400} fontSize={14}>
+          {rupiah(cost?.tax)}
+        </Text>
+      </Flex>
+      <Flex
+        alignItems={"flex-start"}
+        gap={3}
+        w={"full"}
+        justifyContent={"space-between"}
+        color={"gray.500"}
+        pr={"20px"}
+        mt={2}
+      >
+        <Text fontWeight={500} fontSize={14} maxW="130px">
+          Service fee
+        </Text>
+        <Text fontWeight={400} fontSize={14}>
+          {rupiah(cost?.service_fee)}
+        </Text>
+      </Flex>
+      {insurance && (
+        <Flex
+          alignItems={"flex-start"}
+          gap={3}
+          w={"full"}
+          justifyContent={"space-between"}
+          color={"gray.500"}
+          pr={"20px"}
+          mt={2}
+        >
+          <Text fontWeight={500} fontSize={14} maxW="130px">
+            Travel Insurance
+          </Text>
+          <Text fontWeight={400} fontSize={14}>
+            {rupiah(cost?.travel_insurance)}
+          </Text>
+        </Flex>
+      )}
+      <Text as={"small"} color={"red.400"} my={4} display={"inline-block"}>
+        *The ticket price for both adults and childrens remains charged at 1
+        ticket per seat
+      </Text>
+    </Box>
+  );
+};
+
 export default FlightDetail;

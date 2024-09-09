@@ -21,6 +21,7 @@ import {
   FormLabel,
   Grid,
   Heading,
+  HStack,
   IconButton,
   Image,
   Input,
@@ -35,6 +36,7 @@ import {
   ModalOverlay,
   Select,
   Stack,
+  StackDivider,
   Switch,
   Text,
   Tooltip,
@@ -96,25 +98,31 @@ const FlightDetail = () => {
         name: "",
         nationality: "",
         readOnly: false,
+        seat_selected: {},
       },
     ],
-    costs: {
+    cost: {
       price: 0,
       tax: 0,
       service_fee: 0,
       travel_insurance: 0,
       total_price: 0,
     },
-    selected_seats: [],
   });
 
+  const [passengerIdSelected, setPassengerIdSelected] = useState(1);
   const [passengerIdCounter, setPassengerIdCounter] = useState(2);
   const [insurance, setInsurance] = useState(false);
   //   const [countryCode, setCountryCode] = useState("+62");
   const {
-    isOpen: isOpenModal,
-    onOpen: onOpenModal,
-    onClose: onCloseModal,
+    isOpen: isOpenModalSeat,
+    onOpen: onOpenModalSeat,
+    onClose: onCloseModalSeat,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenModalFlight,
+    onOpen: onOpenModalFlight,
+    onClose: onCloseModalFlight,
   } = useDisclosure();
   const {
     isOpen: isOpenAlertDialog,
@@ -149,6 +157,11 @@ const FlightDetail = () => {
     },
   ];
 
+  const handlePassengerIdClick = (passengerId) => {
+    setPassengerIdSelected(passengerId);
+    onOpenModalSeat();
+  };
+
   const handleChangeContactPerson = (e) => {
     // if (e?.target?.name === "phone") {
     //   setForm({ ...form, phone: `${countryCode} + ${e.target.value}` });
@@ -175,6 +188,7 @@ const FlightDetail = () => {
           name: "",
           nationality: "",
           readOnly: false,
+          seat_selected: {},
         },
       ],
     });
@@ -194,6 +208,19 @@ const FlightDetail = () => {
     setData({
       ...data,
       passengers: updatedPassengers,
+    });
+  };
+
+  const handleSeatSelect = (passengerId, seatId) => {
+    setData((prevData) => {
+      const updatedPassengers = prevData.passengers.map((passenger) => {
+        if (passenger.id === passengerId) {
+          const seat = data?.ticket?.seats?.find((seat) => seat.id === seatId);
+          return { ...passenger, seat_selected: seat };
+        }
+        return passenger;
+      });
+      return { ...prevData, passengers: updatedPassengers };
     });
   };
 
@@ -222,7 +249,7 @@ const FlightDetail = () => {
     setInsurance(isChecked);
   };
 
-  const getCosts = () => {
+  const getCost = () => {
     const passengerCount = data?.passengers?.length;
     const ticketPrice = data?.ticket?.price || 0;
 
@@ -245,7 +272,7 @@ const FlightDetail = () => {
 
     setData({
       ...data,
-      costs: {
+      cost: {
         price: ticketPrice,
         tax,
         service_fee: serviceFee,
@@ -282,11 +309,12 @@ const FlightDetail = () => {
 
   useEffect(() => {
     if (data?.ticket && Object.keys(data.ticket).length > 0) {
-      getCosts();
+      getCost();
     }
   }, [data.ticket, data.passengers.length, insurance]);
 
-  console.log(data?.ticket);
+  console.log(data);
+
   return (
     <Box bg={"gray.200"} fontFamily="Poppins" pb="35px">
       <FlightDetailHeader />
@@ -415,6 +443,28 @@ const FlightDetail = () => {
                       <option value="mrs">Jepang</option>
                     </Select>
                   </Box> */}
+                  <Flex mb="30px">
+                    <Button
+                      onClick={() =>
+                        handlePassengerIdClick(data?.passengers?.[0]?.id)
+                      }
+                      isDisabled={
+                        data?.passengers?.[0]?.name === "" ? true : false
+                      }
+                    >
+                      Choose Seat
+                    </Button>
+                  </Flex>
+                  <ModalSeat
+                    isOpen={isOpenModalSeat}
+                    onClose={onCloseModalSeat}
+                    row_seats={data?.ticket?.row_seats}
+                    seats={data?.ticket?.seats}
+                    passengers={data?.passengers}
+                    passenger_id={passengerIdSelected}
+                    onSelectSeat={handleSeatSelect}
+                    size="full"
+                  />
                 </FormControl>
                 {data?.passengers?.length > 1 && (
                   <Accordion mb="30px" allowMultiple>
@@ -440,18 +490,6 @@ const FlightDetail = () => {
                         </h2>
                         <AccordionPanel pb={0}>
                           <CardFlightDetail>
-                            <Flex mb="20px" justifyContent="flex-end">
-                              <Button
-                                variant="solid"
-                                size="sm"
-                                colorScheme="red"
-                                onClick={() =>
-                                  handleRemovePassenger(passenger.id)
-                                }
-                              >
-                                <FaTrashAlt />
-                              </Button>
-                            </Flex>
                             <FormControl
                               spacing={3}
                               fontFamily={"Lato"}
@@ -529,6 +567,40 @@ const FlightDetail = () => {
                                   }
                                 />
                               </Box>
+
+                              <Flex gap={3} mb="30px">
+                                <Button
+                                  variant="solid"
+                                  isDisabled={
+                                    passenger?.name === "" ? true : false
+                                  }
+                                  onClick={() =>
+                                    handlePassengerIdClick(passenger.id)
+                                  }
+                                >
+                                  Choose Seat
+                                </Button>
+                                <Button
+                                  variant="solid"
+                                  colorScheme="red"
+                                  onClick={() =>
+                                    handleRemovePassenger(passenger.id)
+                                  }
+                                >
+                                  <FaTrashAlt />
+                                </Button>
+                              </Flex>
+
+                              <ModalSeat
+                                isOpen={isOpenModalSeat}
+                                onClose={onCloseModalSeat}
+                                row_seats={data?.ticket?.row_seats}
+                                seats={data?.ticket?.seats}
+                                passengers={data?.passengers}
+                                passenger_id={passengerIdSelected}
+                                onSelectSeat={handleSeatSelect}
+                                size="full"
+                              />
                             </FormControl>
                           </CardFlightDetail>
                         </AccordionPanel>
@@ -572,7 +644,7 @@ const FlightDetail = () => {
                     fontWeight="700"
                     color="#2395FF"
                   >
-                    {rupiah(data?.costs?.travel_insurance)}
+                    {rupiah(data?.cost?.travel_insurance)}
                     <Text
                       as="span"
                       fontSize="14px"
@@ -625,7 +697,7 @@ const FlightDetail = () => {
             <FlightDetails
               ticket={data?.ticket}
               passengers={data?.passengers}
-              cost={data?.costs}
+              cost={data?.cost}
               insurance={insurance}
             />
             {/* ui buat seat */}
@@ -639,135 +711,128 @@ const FlightDetail = () => {
                   Seat Details
                 </CardFlightHeading>
               </Flex>
-              <CardFlightDetail w="full" p="12px">
-                <Flex justifyContent="flex-end" alignItems="center">
-                  {/* <Stack alignItems="center">
-                    <Text fontSize={22} fontWeight={600} mr={5}>
-                      1
-                    </Text>
-                    <Text fontSize={22} fontWeight={600} mr={5}>
-                      2
-                    </Text>
-                  </Stack> */}
-                  <Box
-                    maxW="85%"
-                    w="auto"
-                    p="12px"
-                    bg="white"
-                    borderLeft="4px solid #C4C4C4"
-                    borderRight="4px solid #C4C4C4"
-                  >
-                    <SeatsFlight
-                      count_row={data?.ticket?.row_seats}
-                      seats={data?.ticket?.seats}
-                    />
-                    {/* <Grid templateColumns="repeat(5, 1fr)" gap={2}>
-                      {data?.ticket?.seats?.map((seat, index) => (
-                        <Tooltip
-                          key={seat?.id}
-                          fontFamily="Poppins"
-                          label={seat?.code}
-                          placement="top"
-                          openDelay={200}
-                          bg="#979797"
-                          rounded="10px"
-                        >
-                          <IconButton
-                            aria-label="Seat"
-                            icon={<PiArmchairDuotone size={40} />}
-                            variant="unstyled"
-                            color={"#6B6B6B"}
-                            _focus={{ boxShadow: "none" }}
-                            _hover={{
-                              color: "#2395FF",
-                            }}
-                          />
-                        </Tooltip>
-                      ))}
-                      <Tooltip
-                        fontFamily="Poppins"
-                        label="Seat: 1-B"
-                        placement="top"
-                        openDelay={200}
-                        bg="#979797"
-                        rounded="10px"
-                        isDisabled
-                      >
-                        <IconButton
-                          aria-label="Seat"
-                          icon={<PiArmchairDuotone size={40} />}
-                          variant="unstyled"
-                          color={"#C4C4C4"}
-                          _focus={{ boxShadow: "none" }}
-                          disabled
+              <CardFlightDetail w="full">
+                <Flex
+                  px="28px"
+                  py="30px"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  fontFamily="Lato"
+                  borderBottom="1px solid #E6E6E6"
+                >
+                  {data?.passengers?.[0]?.name !== "" ? (
+                    <VStack
+                      divider={
+                        <StackDivider
+                          display={{ base: "none", lg: "block" }}
+                          borderColor="gray.200"
                         />
-                      </Tooltip>
-                      <Stack />
-                      <IconButton
-                        aria-label="Seat"
-                        icon={<PiArmchairDuotone size={40} />}
-                        variant="unstyled"
-                        color={"#C4C4C4"}
-                        _focus={{ boxShadow: "none" }}
-                      />
-                      <IconButton
-                        aria-label="Seat"
-                        icon={<PiArmchairDuotone size={40} />}
-                        variant="unstyled"
-                        color={"#C4C4C4"}
-                        _focus={{ boxShadow: "none" }}
-                      />
-                    </Grid>
-                    <Grid templateColumns="repeat(5, 1fr)" gap={2}>
-                      <Tooltip
-                        fontFamily="Poppins"
-                        label="Seat: 2-A"
-                        placement="top"
-                        openDelay={200}
-                        bg="#979797"
-                        rounded="10px"
-                      >
-                        <IconButton
-                          aria-label="Seat"
-                          icon={<PiArmchairDuotone size={40} />}
-                          variant="unstyled"
-                          color={"#C4C4C4"}
-                          _focus={{ boxShadow: "none" }}
-                        />
-                      </Tooltip>
-                      <Tooltip
-                        fontFamily="Poppins"
-                        label="Seat: 2-B"
-                        placement="top"
-                        openDelay={200}
-                        bg="#979797"
-                        rounded="10px"
-                      >
-                        <IconButton
-                          aria-label="Seat"
-                          icon={<PiArmchairDuotone size={40} />}
-                          variant="unstyled"
-                          color={"#C4C4C4"}
-                          _focus={{ boxShadow: "none" }}
-                        />
-                      </Tooltip>
-                      <Stack _focus={{ boxShadow: "none" }} />
-                      <IconButton
-                        aria-label="Seat"
-                        icon={<PiArmchairDuotone size={40} />}
-                        variant="unstyled"
-                        color={"#C4C4C4"}
-                        _focus={{ boxShadow: "none" }}
-                      />
-                      <IconButton
-                        aria-label="Seat"
-                        icon={<PiArmchairDuotone size={40} />}
-                        variant="unstyled"
-                        color={"#C4C4C4"}
-                        _focus={{ boxShadow: "none" }}
-                      />
-                    </Grid> */}
-                  </Box>
+                      }
+                      spacing={2}
+                      align="stretch"
+                      w={{ base: "full" }}
+                      my={{ base: 0, lg: 4 }}
+                    >
+                      {data?.passengers
+                        ?.filter((passenger) => passenger?.name !== "")
+                        .map((passenger) => (
+                          <Box
+                            key={passenger?.id}
+                            userSelect="none"
+                            display={{ base: "flex" }}
+                            justifyContent={{ base: "space-between" }}
+                            alignItems={{ base: "center" }}
+                            borderLeft="4px solid #2395FF"
+                            px={2}
+                          >
+                            <Stack spacing={1}>
+                              <Text
+                                fontSize={{ base: "16px", xl: "18px" }}
+                                fontWeight={500}
+                              >
+                                {`${
+                                  passenger?.type === "adult"
+                                    ? passenger?.title
+                                    : ""
+                                } ${passenger?.name}`}
+                              </Text>
+                              <Text
+                                fontSize={{ base: "20px" }}
+                                fontWeight={600}
+                                textTransform="capitalize"
+                              >
+                                {`${passenger?.type}`}
+                              </Text>
+                            </Stack>
+                            <HStack
+                              bg={
+                                Object.values(passenger?.seat_selected)
+                                  .length !== 0
+                                  ? "#2395FF1A"
+                                  : "transparent"
+                              }
+                              py={1}
+                              px={2}
+                              rounded="15px"
+                              spacing={
+                                Object.values(passenger?.seat_selected)
+                                  .length !== 0
+                                  ? 1
+                                  : 0
+                              }
+                              maxW="35%"
+                              fontSize={
+                                Object.values(passenger?.seat_selected)
+                                  .length !== 0
+                                  ? { base: 22, xl: 36 }
+                                  : { base: 16, xl: 20 }
+                              }
+                              textAlign="right"
+                              fontWeight={
+                                Object.values(passenger?.seat_selected)
+                                  .length !== 0
+                                  ? 700
+                                  : 500
+                              }
+                            >
+                              {Object.values(passenger?.seat_selected)
+                                .length !== 0 ? (
+                                <>
+                                  <Text>
+                                    {
+                                      passenger?.seat_selected?.code?.split(
+                                        "-"
+                                      )[0]
+                                    }
+                                  </Text>
+                                  <Text>-</Text>
+                                  <Text>
+                                    {
+                                      passenger?.seat_selected?.code?.split(
+                                        "-"
+                                      )[1]
+                                    }
+                                  </Text>
+                                </>
+                              ) : (
+                                <Text>No Seat Selected</Text>
+                              )}
+                            </HStack>
+                          </Box>
+                        ))}
+                    </VStack>
+                  ) : (
+                    <Stack
+                      bg={"#F245451A"}
+                      w={"full"}
+                      py={{ base: 4 }}
+                      px={{ base: 4, lg: 8 }}
+                    >
+                      <Text as="p" fontSize="14px">
+                        Complete your passenger data first!
+                      </Text>
+                    </Stack>
+                  )}
                 </Flex>
               </CardFlightDetail>
             </Box>
@@ -789,16 +854,16 @@ const FlightDetail = () => {
               </Heading>
               <Text
                 userSelect="none"
-                pointerEvents="auto"
-                onClick={onOpenModal}
+                cursor="pointer"
+                onClick={onOpenModalFlight}
                 fontSize={{ base: "1rem", md: "22px" }}
               >
                 View Details
               </Text>
               <ModalFlight
-                isOpen={isOpenModal}
-                onClose={onCloseModal}
-                cost={data?.costs}
+                isOpen={isOpenModalFlight}
+                onClose={onCloseModalFlight}
+                cost={data?.cost}
                 passengers={data?.passengers}
                 insurance={insurance}
               />
@@ -1055,7 +1120,7 @@ const FlightDetail = () => {
                 Total you'll pay
               </Text>
               <Text fontSize="1.5rem" fontWeight="600" color="#2395FF">
-                {rupiah(data?.costs?.total_price)}
+                {rupiah(data?.cost?.total_price)}
               </Text>
             </Flex>
             <Flex>
@@ -1094,160 +1159,404 @@ const FlightDetail = () => {
   );
 };
 
-const SeatsFlight = ({ count_row = 0, seats = [] }) => {
-  // Function to split seats into rows and add spacing
-  const arrangeSeats = (seats) => {
-    const rows = [];
-    const seatsPerRow = count_row; // You can adjust this for different numbers per row
-    for (let i = 0; i < seats.length; i += seatsPerRow) {
-      const rowSeats = seats.slice(i, i + seatsPerRow);
-      console.log(`count_row = ${count_row} & rowseats = ${rowSeats.length}`);
-      if (rowSeats.length == 4) {
-        // Add a space in the middle if there are more than 2 seats in the row
-        rows.push([rowSeats[0], rowSeats[1], null, rowSeats[2], rowSeats[3]]);
-      } else if (rowSeats.length === 5) {
-        // No space needed for rows with 2 seats or less
-        rows.push([
-          rowSeats[0],
-          rowSeats[1],
-          null,
-          rowSeats[2],
-          rowSeats[3],
-          rowSeats[4],
-        ]);
-      } else if (rowSeats.length === 6) {
-        // No space needed for rows with 2 seats or less
-        rows.push([
-          rowSeats[0],
-          rowSeats[1],
-          rowSeats[2],
-          null,
-          rowSeats[3],
-          rowSeats[4],
-          rowSeats[5],
-        ]);
-      } else if (rowSeats.length === 7) {
-        // No space needed for rows with 2 seats or less
-        rows.push([
-          rowSeats[0],
-          rowSeats[1],
-          null,
-          rowSeats[2],
-          rowSeats[3],
-          rowSeats[4],
-          null,
-          rowSeats[5],
-          rowSeats[6],
-        ]);
-      } else if (rowSeats.length === 8) {
-        // No space needed for rows with 2 seats or less
-        rows.push([
-          rowSeats[0],
-          rowSeats[1],
-          null,
-          rowSeats[2],
-          rowSeats[3],
-          rowSeats[4],
-          null,
-          rowSeats[5],
-          rowSeats[6],
-          rowSeats[7],
-        ]);
-      } else if (rowSeats.length === 9) {
-        // No space needed for rows with 2 seats or less
-        rows.push([
-          rowSeats[0],
-          rowSeats[1],
-          rowSeats[2],
-          null,
-          rowSeats[3],
-          rowSeats[4],
-          rowSeats[5],
-          null,
-          rowSeats[6],
-          rowSeats[7],
-          rowSeats[8],
-        ]);
-      } else if (rowSeats.length === 10) {
-        // No space needed for rows with 2 seats or less
-        rows.push([
-          rowSeats[0],
-          rowSeats[1],
-          rowSeats[2],
-          null,
-          rowSeats[3],
-          rowSeats[4],
-          rowSeats[5],
-          rowSeats[6],
-          null,
-          rowSeats[7],
-          rowSeats[8],
-          rowSeats[9],
-        ]);
-      } else {
-        // No space needed for rows with 2 seats or less
-        rows.push(rowSeats);
-      }
+const SeatsFlight = ({
+  count_row = 0,
+  seats = [],
+  passenger_id = 0,
+  passengers = [],
+  onSelectSeat,
+}) => {
+  const handleSeatClick = (id) => {
+    let seat_selected_passenger = passengers.find(
+      (passenger) => passenger.seat_selected.id === id
+    );
+    if (!seat_selected_passenger) {
+      onSelectSeat(passenger_id, id);
     }
+  };
+
+  // console.log(passenger_seat_selected);
+
+  const data_dummy = [
+    {
+      code: "1-A",
+      id: 1,
+      is_booking: false,
+    },
+    {
+      code: "1-B",
+      id: 2,
+      is_booking: false,
+    },
+    {
+      code: "1-C",
+      id: 3,
+      is_booking: false,
+    },
+    {
+      code: "1-D",
+      id: 4,
+      is_booking: false,
+    },
+    {
+      code: "2-A",
+      id: 5,
+      is_booking: false,
+    },
+    {
+      code: "2-B",
+      id: 6,
+      is_booking: false,
+    },
+    {
+      code: "2-C",
+      id: 7,
+      is_booking: false,
+    },
+  ];
+  // Function to split seats into rows and add spacing
+  const arrangeSeats = (data, seatsPerRow) => {
+    const rows = [];
+    let numRows = data[0]?.code.split("-")[0] || 1;
+
+    // let code_data = data[0]?.code;
+    // console.log(code_data.split("-")[0]);
+    const generateAlphabetRow = (seatPositions) => {
+      const row = [];
+      let seatIndex = 0;
+      for (let i = 0; i < seatPositions.length; i++) {
+        if (seatPositions[i] === null) {
+          row.push(null);
+        } else {
+          row.push((seatIndex + 10).toString(36).toUpperCase());
+          seatIndex++;
+        }
+      }
+
+      return row;
+    };
+
+    // Fungsi untuk menyusun kursi dengan slot null yang teratur
+    const generateRow = (rowSeats, seatPositions, numberOfRows) => {
+      const row = [];
+      let seatIndex = 0;
+      for (let i = 0; i < seatPositions.length; i++) {
+        if (seatPositions[i] === null) {
+          row.push(numberOfRows); // Tambah null di posisi yang sesuai
+        } else {
+          row.push(rowSeats[seatIndex] || null); // Tambah kursi jika ada, jika tidak ada isi dengan null
+          seatIndex++;
+        }
+      }
+      return row;
+    };
+
+    // Template posisi kursi berdasarkan jumlah seatsPerRow
+    const seatLayouts = {
+      4: [0, 1, null, 2, 3],
+      6: [0, 1, 2, null, 3, 4, 5],
+      7: [0, 1, null, 2, 3, 4, null, 5, 6],
+      8: [0, 1, 2, null, 3, 4, 5, null, 6, 7],
+      9: [0, 1, 2, null, 3, 4, 5, null, 6, 7, 8],
+      10: [0, 1, 2, null, 3, 4, 5, 6, null, 7, 8, 9],
+    };
+
+    rows.push(generateAlphabetRow(seatLayouts[seatsPerRow]));
+
+    for (let i = 0; i < data.length; i += seatsPerRow) {
+      const rowSeats = data.slice(i, i + seatsPerRow);
+
+      if (seatsPerRow <= 10) {
+        // Jika seatsPerRow ada di layout yang ditentukan, gunakan fungsi generateRow
+        rows.push(generateRow(rowSeats, seatLayouts[seatsPerRow], numRows));
+      } else {
+        rows.push(rowSeats); // Jika lebih dari 10, masukkan kursi secara langsung
+      }
+
+      numRows++;
+    }
+
     return rows;
   };
 
-  // Determine icon size dynamically based on the seat length for responsiveness
-  const getIconSize = (length) => {
-    if (length <= 4) return 40;
-    if (length <= 6) return 30;
-    return 20; // Default small size for larger seat arrays
-  };
-
-  const seatRows = arrangeSeats(seats);
+  const seatRows = arrangeSeats(seats, count_row);
+  // console.log(seatRows);
 
   return (
-    <Box w="full" p="12px" maxH="385px" overflowY="auto">
+    <Box
+      bg="gray.50"
+      w="full"
+      minW={{ base: "auto", lg: "605px" }}
+      maxW={{ base: "auto", lg: "700px" }}
+      p="12px"
+      maxH={{ base: "70vh", md: "75vh", lg: "90vh" }}
+      overflowY="auto"
+      style={{
+        "::WebkitScrollbar": { display: "none" },
+        msOverflowStyle: "auto",
+        scrollbarWidth: "thin",
+      }}
+    >
       {seatRows.map((row, rowIndex) => (
         <Grid
           key={rowIndex}
           templateColumns={`repeat(${
-            count_row < 4
-              ? count_row
-              : count_row <= 6
-              ? count_row + 1
-              : count_row <= 10
-              ? count_row + 2
-              : 4
-          }, 1fr)`} // 5 columns per row: 2 seats, 1 space, 2 seats
-          gap={2}
-          mb={4} // Margin between rows
+            count_row <= 6 ? count_row + 1 : count_row <= 10 ? count_row + 2 : 4
+          }, 1fr)`}
+          mb={5} // Margin between rows
         >
           {row.map((seat, seatIndex) =>
             seat ? (
-              <Tooltip
-                key={seatIndex}
-                fontFamily="Poppins"
-                label={seat?.code}
-                placement="top"
-                openDelay={200}
-                bg="#979797"
-                rounded="10px"
-              >
-                <IconButton
-                  aria-label={`Seat ${seat?.code}`}
-                  icon={<PiArmchairDuotone size={20} />}
-                  w="20px"
-                  variant="unstyled"
-                  color={"#6B6B6B"}
-                  _focus={{ boxShadow: "none" }}
-                  _hover={{
-                    color: "#2395FF",
-                  }}
-                />
-              </Tooltip>
+              typeof seat === "object" ? (
+                <Tooltip
+                  key={seatIndex}
+                  fontFamily="Poppins"
+                  label={seat?.code}
+                  placement="top"
+                  openDelay={200}
+                  bg="#979797"
+                  rounded="10px"
+                >
+                  <IconButton
+                    aria-label={`Seat ${seat?.code}`}
+                    icon={<PiArmchairDuotone size={48} />}
+                    size="lg"
+                    mx="auto"
+                    variant="unstyled"
+                    color={
+                      passengers.find(
+                        (passenger) => passenger.seat_selected.id === seat.id
+                      )
+                        ? "#2395FF"
+                        : "#6B6B6B"
+                    }
+                    _focus={{ boxShadow: "none" }}
+                    _hover={{
+                      color:
+                        seat?.is_booking === true
+                          ? passengers.find(
+                              (passenger) =>
+                                passenger.seat_selected.id === seat.id
+                            )
+                            ? "#2395FF"
+                            : "#6B6B6B"
+                          : passengers.find(
+                              (passenger) =>
+                                passenger.seat_selected.id === seat.id
+                            )
+                          ? "#2395FF"
+                          : "#000000",
+                    }}
+                    onClick={() => handleSeatClick(seat?.id)}
+                    isDisabled={seat?.is_booking === true ? true : false}
+                  />
+                </Tooltip>
+              ) : (
+                <Flex
+                  key={seatIndex}
+                  minW="48px"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <Text fontFamily="Poppins" fontSize="large" fontWeight={600}>
+                    {seat}
+                  </Text>
+                </Flex>
+              )
             ) : (
-              <Stack key={seatIndex} /> // Render empty space for null seats
+              <Stack minW="48px" key={seatIndex} />
             )
           )}
         </Grid>
       ))}
     </Box>
+  );
+};
+
+const ModalSeat = ({
+  row_seats = 0,
+  seats = [],
+  passengers = [],
+  passenger_id = 1,
+  onSelectSeat,
+  ...props
+}) => {
+  return (
+    <Modal {...props}>
+      <ModalOverlay />
+      <ModalContent w="full" pt="1rem" mx="1rem">
+        <ModalCloseButton />
+        <ModalBody
+          display="flex"
+          flexDirection={{ base: "column", lg: "row" }}
+          gap={{ base: 3, lg: 10 }}
+          my={{ base: 6, lg: 4 }}
+          fontFamily="Poppins"
+        >
+          <SeatsFlight
+            passenger_id={passenger_id}
+            passengers={passengers}
+            count_row={row_seats}
+            seats={seats}
+            onSelectSeat={onSelectSeat}
+          />
+          <VStack
+            divider={
+              <StackDivider
+                display={{ base: "none", lg: "block" }}
+                borderColor="gray.200"
+              />
+            }
+            spacing={2}
+            align="stretch"
+            w={{ base: "full" }}
+          >
+            <Box display="flex" flexDirection="column" gap={2} fontSize="20px">
+              <Text fontWeight={700}>Information: </Text>
+              <Flex
+                flexDirection={{ base: "row", lg: "column" }}
+                justifyContent={{ base: "space-between", lg: "flex-start" }}
+                gap={{ base: 2, lg: 1 }}
+                flexWrap={{ base: "wrap", lg: "nowrap" }}
+                fontWeight={500}
+              >
+                <Flex gap={2} alignItems="center">
+                  <IconButton
+                    icon={<PiArmchairDuotone size={48} />}
+                    size="lg"
+                    w="40px"
+                    variant="unstyled"
+                    color={"#6B6B6B"}
+                    _focus={{ boxShadow: "none" }}
+                  />
+                  <Text>Available</Text>
+                </Flex>
+                <Flex gap={2} alignItems="center">
+                  <IconButton
+                    icon={<PiArmchairDuotone size={48} />}
+                    size="lg"
+                    w="40px"
+                    variant="unstyled"
+                    color={"#6B6B6B"}
+                    _focus={{ boxShadow: "none" }}
+                    isDisabled
+                  />
+                  <Text>Reserved</Text>
+                </Flex>
+                <Flex gap={2} alignItems="center">
+                  <IconButton
+                    icon={<PiArmchairDuotone size={48} />}
+                    size="lg"
+                    w="40px"
+                    variant="unstyled"
+                    color={"#2395FF"}
+                    _focus={{ boxShadow: "none" }}
+                  />
+                  <Text>Selected</Text>
+                </Flex>
+              </Flex>
+            </Box>
+            <Box
+              display={{ base: "none", lg: "flex" }}
+              flexDirection="column"
+              gap={2}
+              fontSize="20px"
+            >
+              <Text fontWeight={700}>Passengers: </Text>
+              <VStack
+                divider={
+                  <StackDivider
+                    display={{ base: "none", lg: "block" }}
+                    borderColor="gray.200"
+                  />
+                }
+                spacing={2}
+                align="stretch"
+                w={{ base: "full" }}
+                my={{ base: 0, lg: 4 }}
+              >
+                {passengers
+                  ?.filter((passenger) => passenger?.name !== "")
+                  .map((passenger) => (
+                    <Box
+                      key={passenger?.id}
+                      display={{ base: "flex" }}
+                      justifyContent={{ base: "space-between" }}
+                      alignItems={{ base: "center" }}
+                      borderLeft="4px solid #2395FF"
+                      px={2}
+                    >
+                      <Stack spacing={3}>
+                        <Text
+                          fontSize={{ base: "18px", xl: "20px" }}
+                          fontWeight={500}
+                        >
+                          {`${
+                            passenger?.type === "adult" ? passenger?.title : ""
+                          } ${passenger?.name}`}
+                        </Text>
+                        <Text
+                          fontSize={{ base: "20px" }}
+                          fontWeight={600}
+                          textTransform="capitalize"
+                        >
+                          {`${passenger?.type}`}
+                        </Text>
+                      </Stack>
+                      <HStack
+                        bg={
+                          Object.values(passenger?.seat_selected).length !== 0
+                            ? "#2395FF1A"
+                            : "transparent"
+                        }
+                        py={1}
+                        px={2}
+                        rounded="15px"
+                        textAlign="right"
+                        spacing={
+                          Object.values(passenger?.seat_selected).length !== 0
+                            ? 1
+                            : 0
+                        }
+                        fontSize={
+                          Object.values(passenger?.seat_selected).length !== 0
+                            ? { base: 24, xl: 36 }
+                            : { base: 16, xl: 20 }
+                        }
+                        fontWeight={
+                          Object.values(passenger?.seat_selected).length !== 0
+                            ? 700
+                            : 500
+                        }
+                        letterSpacing={
+                          Object.values(passenger?.seat_selected).length !== 0
+                            ? { base: 2, xl: 4 }
+                            : { base: 0 }
+                        }
+                      >
+                        {Object.values(passenger?.seat_selected).length !==
+                        0 ? (
+                          <>
+                            <Text>
+                              {passenger?.seat_selected?.code?.split("-")[0]}
+                            </Text>
+                            <Text>-</Text>
+                            <Text>
+                              {passenger?.seat_selected?.code?.split("-")[1]}
+                            </Text>
+                          </>
+                        ) : (
+                          <Text>No Seat Selected</Text>
+                        )}
+                      </HStack>
+                    </Box>
+                  ))}
+              </VStack>
+            </Box>
+          </VStack>
+        </ModalBody>
+      </ModalContent>
+    </Modal>
   );
 };
 

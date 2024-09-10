@@ -31,8 +31,6 @@ import {
   ModalBody,
   ModalCloseButton,
   ModalContent,
-  ModalFooter,
-  ModalHeader,
   ModalOverlay,
   Select,
   Stack,
@@ -50,18 +48,15 @@ import { IoIosWarning } from "react-icons/io";
 import CardFlightDetail from "../../../components/module/FligthDetail/Card";
 import { CiCircleCheck } from "react-icons/ci";
 import { RiLuggageDepositFill } from "react-icons/ri";
-import { PiArmchair, PiArmchairDuotone } from "react-icons/pi";
+import { PiArmchairDuotone } from "react-icons/pi";
 import { FaChevronDown, FaChevronUp, FaTrashAlt } from "react-icons/fa";
 import {
   FlightIcon,
   HamburgerIcon,
   InFlightMealIcon,
   LuggageIcon,
-  RestroomIcon,
-  StarIcon,
   WifiIcon,
 } from "../../../components/base/Icons";
-import garudaIndonesiaLogo from "../../../assets/garuda-indonesia-logo.png";
 import { useParams } from "react-router-dom";
 import api from "../../../services/api";
 import { formatScheduleDate, formatTimeFull } from "../../../utils/date";
@@ -110,57 +105,7 @@ const FlightDetail = () => {
     },
   });
 
-  const [passengerIdSelected, setPassengerIdSelected] = useState(1);
-  const [passengerIdCounter, setPassengerIdCounter] = useState(2);
   const [insurance, setInsurance] = useState(false);
-  //   const [countryCode, setCountryCode] = useState("+62");
-  const {
-    isOpen: isOpenModalSeat,
-    onOpen: onOpenModalSeat,
-    onClose: onCloseModalSeat,
-  } = useDisclosure();
-  const {
-    isOpen: isOpenModalFlight,
-    onOpen: onOpenModalFlight,
-    onClose: onCloseModalFlight,
-  } = useDisclosure();
-  const {
-    isOpen: isOpenAlertDialog,
-    onOpen: onOpenAlertDialog,
-    onClose: onCloseAlertDialog,
-  } = useDisclosure();
-  const cancelRef = useRef();
-  const FORM_CONTACTPERSON = [
-    {
-      label: "Full Name",
-      value: data?.contact_person?.name,
-      type: "text",
-      name: "name",
-      readOnly: true,
-      placeholder: "Full name (ex. Mike Kowalski)",
-    },
-    {
-      label: "Email",
-      value: data?.contact_person?.email,
-      type: "email",
-      name: "email",
-      readOnly: true,
-      placeholder: "example@mail.com",
-    },
-    {
-      label: "Phone",
-      value: data?.contact_person?.phone,
-      type: "number",
-      name: "phone",
-      readOnly: false,
-      placeholder: "08xxx",
-    },
-  ];
-
-  const handlePassengerIdClick = (passengerId) => {
-    setPassengerIdSelected(passengerId);
-    onOpenModalSeat();
-  };
 
   const handleChangeContactPerson = (e) => {
     // if (e?.target?.name === "phone") {
@@ -174,73 +119,6 @@ const FlightDetail = () => {
         [e?.target?.name]: e?.target?.value,
       },
     });
-  };
-
-  const handleAddPassenger = () => {
-    setData({
-      ...data,
-      passengers: [
-        ...data.passengers,
-        {
-          id: passengerIdCounter,
-          type: "adult",
-          title: "Mr.",
-          name: "",
-          nationality: "",
-          readOnly: false,
-          seat_selected: {},
-        },
-      ],
-    });
-    setPassengerIdCounter(passengerIdCounter + 1);
-  };
-
-  const handleChangePassenger = (id, key, value) => {
-    const updatedPassengers = data.passengers.map((passenger) => {
-      if (passenger.id === id) {
-        let newPassenger = { ...passenger, [key]: value };
-
-        return newPassenger;
-      }
-      return passenger;
-    });
-
-    setData({
-      ...data,
-      passengers: updatedPassengers,
-    });
-  };
-
-  const handleSeatSelect = (passengerId, seatId) => {
-    setData((prevData) => {
-      const updatedPassengers = prevData.passengers.map((passenger) => {
-        if (passenger.id === passengerId) {
-          const seat = data?.ticket?.seats?.find((seat) => seat.id === seatId);
-          return { ...passenger, seat_selected: seat };
-        }
-        return passenger;
-      });
-      return { ...prevData, passengers: updatedPassengers };
-    });
-  };
-
-  const handleRemovePassenger = (id) => {
-    setData({
-      ...data,
-      passengers: data.passengers.filter((passenger) => passenger.id !== id),
-    });
-  };
-
-  const handleChangeSameContact = (e) => {
-    const isChecked = e.target.checked;
-
-    handleChangePassenger(
-      1,
-      "name",
-      isChecked ? data?.contact_person?.name : ""
-    );
-
-    // handleChangePassenger(1, "readOnly", isChecked);
   };
 
   const handleChangeTravelInsurance = (e) => {
@@ -333,360 +211,21 @@ const FlightDetail = () => {
             gridColumn={{ base: "1/span 12", lg: "1/span 8" }}
           >
             <ContactPersonDetails
-              form={FORM_CONTACTPERSON}
+              contact_person={data?.contact_person}
               callback={(e) => handleChangeContactPerson(e)}
             />
-            <Box as="section">
-              <Box mb="25px">
-                <CardFlightHeading color="black">
-                  Passenger Details
-                </CardFlightHeading>
-              </Box>
-              <CardFlightDetail px={10} py={8}>
-                <Flex
-                  flexDirection={{ base: "column", md: "row" }}
-                  alignItems={{ base: "stretch", md: "center" }}
-                  gap={{ base: "6px", md: 0 }}
-                  justifyContent="space-between"
-                  mb="30px"
-                  rounded="10px"
-                  px="28px"
-                  py="12px"
-                  bgColor="#2395FF1A"
-                  fontFamily="Lato"
-                  color="#595959"
-                >
-                  <Text>
-                    Passenger:{" "}
-                    {`${
-                      data?.passengers?.filter(
-                        (passenger) => passenger.type === "adult"
-                      ).length
-                    } Adult${
-                      data?.passengers?.filter(
-                        (passenger) => passenger.type === "adult"
-                      ).length > 1
-                        ? "s"
-                        : ""
-                    }${
-                      data?.passengers?.filter(
-                        (passenger) => passenger.type === "child"
-                      ).length > 0
-                        ? `, ${
-                            data?.passengers?.filter(
-                              (passenger) => passenger.type === "child"
-                            ).length
-                          } Child${
-                            data?.passengers?.filter(
-                              (passenger) => passenger.type === "child"
-                            ).length > 1
-                              ? "s"
-                              : ""
-                          }`
-                        : ""
-                    }`}
-                  </Text>
-                  <Flex alignItems="center" gap="15px">
-                    <FormLabel htmlFor="same_as_contact_person" mb="0">
-                      Same as contact person
-                    </FormLabel>
-                    <Switch
-                      id="same_as_contact_person"
-                      onChange={handleChangeSameContact}
-                    />
-                  </Flex>
-                </Flex>
-                <FormControl spacing={3} fontFamily={"Lato"} isRequired>
-                  <Box mb="30px">
-                    <FormLabel color={"gray.500"}>Title</FormLabel>
-                    <Select
-                      variant="flushed"
-                      onChange={(e) =>
-                        handleChangePassenger(1, "title", e.target.value)
-                      }
-                    >
-                      <option value="Mr.">Mr.</option>
-                      <option value="Mrs.">Mrs.</option>
-                    </Select>
-                  </Box>
-                  <Box mb="30px">
-                    <FormLabel color={"gray.500"}>Full Name</FormLabel>
-                    <Input
-                      variant="flushed"
-                      name="name"
-                      value={data.passengers?.[0]?.name || ""}
-                      onChange={(e) =>
-                        handleChangePassenger(1, "name", e.target.value)
-                      }
-                      placeholder="Full name (ex. Mike Kowalski)"
-                      readOnly={data.passengers?.[0]?.readOnly}
-                    />
-                  </Box>
-                  <Box mb="30px">
-                    <FormLabel color={"gray.500"}>Nationality</FormLabel>
-                    <Input
-                      variant="flushed"
-                      name="nationality"
-                      value={data.passengers?.[0]?.nationality || ""}
-                      onChange={(e) =>
-                        handleChangePassenger(1, "nationality", e.target.value)
-                      }
-                      placeholder="United States"
-                    />
-                  </Box>
-                  {/* <Box>
-                    <FormLabel color={"gray.500"}>Nationality</FormLabel>
-                    <Select variant="flushed">
-                      <option value="mr">Indonesia</option>
-                      <option value="mrs">Malaysia</option>
-                      <option value="mrs">Belanda</option>
-                      <option value="mrs">Jepang</option>
-                    </Select>
-                  </Box> */}
-                  <Flex mb="30px">
-                    <Button
-                      onClick={() =>
-                        handlePassengerIdClick(data?.passengers?.[0]?.id)
-                      }
-                      isDisabled={
-                        data?.passengers?.[0]?.name === "" ? true : false
-                      }
-                    >
-                      Choose Seat
-                    </Button>
-                  </Flex>
-                  <ModalSeat
-                    isOpen={isOpenModalSeat}
-                    onClose={onCloseModalSeat}
-                    row_seats={data?.ticket?.row_seats}
-                    seats={data?.ticket?.seats}
-                    passengers={data?.passengers}
-                    passenger_id={passengerIdSelected}
-                    onSelectSeat={handleSeatSelect}
-                    size="full"
-                  />
-                </FormControl>
-                {data?.passengers?.length > 1 && (
-                  <Accordion mb="30px" allowMultiple>
-                    {data?.passengers?.slice(1).map((passenger) => (
-                      <AccordionItem key={passenger.id}>
-                        <h2>
-                          <AccordionButton>
-                            <Box
-                              as="span"
-                              fontFamily="Lato"
-                              flex="1"
-                              textAlign="center"
-                              textTransform="capitalize"
-                            >
-                              {passenger?.name
-                                ? `${passenger?.type}${
-                                    passenger?.name && " - "
-                                  }${passenger?.name}`
-                                : `New Passenger ${passenger.id - 1}`}
-                            </Box>
-                            <AccordionIcon />
-                          </AccordionButton>
-                        </h2>
-                        <AccordionPanel pb={0}>
-                          <CardFlightDetail>
-                            <FormControl
-                              spacing={3}
-                              fontFamily={"Lato"}
-                              isRequired
-                            >
-                              <Box mb="30px">
-                                <FormLabel color={"gray.500"}>Type</FormLabel>
-                                <Select
-                                  variant="flushed"
-                                  onChange={(e) =>
-                                    handleChangePassenger(
-                                      passenger.id,
-                                      "type",
-                                      e.target.value
-                                    )
-                                  }
-                                >
-                                  <option value="adult">Adult</option>
-                                  <option value="child">Child</option>
-                                </Select>
-                              </Box>
-                              {passenger?.type === "adult" && (
-                                <Box mb="30px">
-                                  <FormLabel color={"gray.500"}>
-                                    Title
-                                  </FormLabel>
-                                  <Select
-                                    variant="flushed"
-                                    onChange={(e) =>
-                                      handleChangePassenger(
-                                        passenger.id,
-                                        "title",
-                                        e.target.value
-                                      )
-                                    }
-                                  >
-                                    <option value="Mr.">Mr.</option>
-                                    <option value="Mrs.">Mrs.</option>
-                                  </Select>
-                                </Box>
-                              )}
-                              <Box mb="30px">
-                                <FormLabel color={"gray.500"}>
-                                  Full Name
-                                </FormLabel>
-                                <Input
-                                  variant="flushed"
-                                  placeholder="Full name (ex. Mike Kowalski)"
-                                  name="name"
-                                  value={passenger?.name || ""}
-                                  onChange={(e) =>
-                                    handleChangePassenger(
-                                      passenger.id,
-                                      "name",
-                                      e.target.value
-                                    )
-                                  }
-                                />
-                              </Box>
-                              <Box mb="30px">
-                                <FormLabel color={"gray.500"}>
-                                  Nationality
-                                </FormLabel>
-                                <Input
-                                  variant="flushed"
-                                  placeholder="United States"
-                                  name="nationality"
-                                  value={passenger?.nationality || ""}
-                                  onChange={(e) =>
-                                    handleChangePassenger(
-                                      passenger.id,
-                                      "nationality",
-                                      e.target.value
-                                    )
-                                  }
-                                />
-                              </Box>
-
-                              <Flex gap={3} mb="30px">
-                                <Button
-                                  variant="solid"
-                                  isDisabled={
-                                    passenger?.name === "" ? true : false
-                                  }
-                                  onClick={() =>
-                                    handlePassengerIdClick(passenger.id)
-                                  }
-                                >
-                                  Choose Seat
-                                </Button>
-                                <Button
-                                  variant="solid"
-                                  colorScheme="red"
-                                  onClick={() =>
-                                    handleRemovePassenger(passenger.id)
-                                  }
-                                >
-                                  <FaTrashAlt />
-                                </Button>
-                              </Flex>
-
-                              <ModalSeat
-                                isOpen={isOpenModalSeat}
-                                onClose={onCloseModalSeat}
-                                row_seats={data?.ticket?.row_seats}
-                                seats={data?.ticket?.seats}
-                                passengers={data?.passengers}
-                                passenger_id={passengerIdSelected}
-                                onSelectSeat={handleSeatSelect}
-                                size="full"
-                              />
-                            </FormControl>
-                          </CardFlightDetail>
-                        </AccordionPanel>
-                      </AccordionItem>
-                    ))}
-                  </Accordion>
-                )}
-                <Button
-                  variant="ghost"
-                  fontFamily="Lato"
-                  onClick={handleAddPassenger}
-                  w="full"
-                >
-                  Add New Passenger
-                </Button>
-              </CardFlightDetail>
-            </Box>
-            <Box as="section">
-              <CardFlightDetail>
-                <Flex
-                  px="28px"
-                  pb="20px"
-                  pt="34px"
-                  alignItems="center"
-                  justifyContent="space-between"
-                  fontFamily="Lato"
-                  borderBottom="1px solid #E6E6E6"
-                >
-                  <Checkbox
-                    gap={{ base: 0, md: "15px" }}
-                    fontSize={{ base: "10px", md: "18px" }}
-                    fontWeight="600"
-                    color="black"
-                    onChange={handleChangeTravelInsurance}
-                    value={insurance}
-                  >
-                    Travel Insurance
-                  </Checkbox>
-                  <Text
-                    fontSize={{ base: "17px", md: "18px" }}
-                    fontWeight="700"
-                    color="#2395FF"
-                  >
-                    {rupiah(data?.cost?.travel_insurance)}
-                    <Text
-                      as="span"
-                      fontSize="14px"
-                      fontWeight="600"
-                      color="#6B6B6B"
-                    >
-                      /pax
-                    </Text>
-                  </Text>
-                </Flex>
-                <Box px="28px" pb="34px" pt="20px">
-                  <Text fontSize="14px" color="black">
-                    Get travel compensation up to {rupiah(10000)}
-                  </Text>
-                </Box>
-              </CardFlightDetail>
-            </Box>
+            <PassengerDetails
+              data={data}
+              setData={setData}
+              insurance={insurance}
+              callbackInsurance={handleChangeTravelInsurance}
+            />
             <Flex
               alignItems="center"
               justifyContent="center"
               display={{ base: "none", lg: "flex" }}
             >
-              <Button
-                onClick={onOpenAlertDialog}
-                type="submit"
-                bg="#2395FF"
-                borderRadius="10px"
-                py="28px"
-                px="60px"
-                fontSize="18px"
-                fontWeight="700"
-                color="white"
-                transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
-                boxShadow="0px 8px 10px 0px #2395FF4D"
-                _hover={{ bg: "#1971c2" }}
-                _active={{
-                  bg: "#dddfe2",
-                  boxShadow: "0px 8px 10px 0px #dddfe24D",
-                }}
-              >
-                Proceed to Payment
-              </Button>
+              <AlertDialogFlight />
             </Flex>
           </Box>
           <Box
@@ -700,462 +239,476 @@ const FlightDetail = () => {
               cost={data?.cost}
               insurance={insurance}
             />
-            {/* ui buat seat */}
-            <Box>
-              <Flex
-                alignItems="center"
-                justifyContent="space-between"
-                mb="25px"
-              >
-                <CardFlightHeading color="black">
-                  Seat Details
-                </CardFlightHeading>
-              </Flex>
-              <CardFlightDetail w="full">
-                <Flex
-                  px="28px"
-                  py="30px"
-                  alignItems="center"
-                  justifyContent="space-between"
-                  fontFamily="Lato"
-                  borderBottom="1px solid #E6E6E6"
-                >
-                  {data?.passengers?.[0]?.name !== "" ? (
-                    <VStack
-                      divider={
-                        <StackDivider
-                          display={{ base: "none", lg: "block" }}
-                          borderColor="gray.200"
-                        />
-                      }
-                      spacing={2}
-                      align="stretch"
-                      w={{ base: "full" }}
-                      my={{ base: 0, lg: 4 }}
-                    >
-                      {data?.passengers
-                        ?.filter((passenger) => passenger?.name !== "")
-                        .map((passenger) => (
-                          <Box
-                            key={passenger?.id}
-                            userSelect="none"
-                            display={{ base: "flex" }}
-                            justifyContent={{ base: "space-between" }}
-                            alignItems={{ base: "center" }}
-                            borderLeft="4px solid #2395FF"
-                            px={2}
-                          >
-                            <Stack spacing={1}>
-                              <Text
-                                fontSize={{ base: "16px", xl: "18px" }}
-                                fontWeight={500}
-                              >
-                                {`${
-                                  passenger?.type === "adult"
-                                    ? passenger?.title
-                                    : ""
-                                } ${passenger?.name}`}
-                              </Text>
-                              <Text
-                                fontSize={{ base: "20px" }}
-                                fontWeight={600}
-                                textTransform="capitalize"
-                              >
-                                {`${passenger?.type}`}
-                              </Text>
-                            </Stack>
-                            <HStack
-                              bg={
-                                Object.values(passenger?.seat_selected)
-                                  .length !== 0
-                                  ? "#2395FF1A"
-                                  : "transparent"
-                              }
-                              py={1}
-                              px={2}
-                              rounded="15px"
-                              spacing={
-                                Object.values(passenger?.seat_selected)
-                                  .length !== 0
-                                  ? 1
-                                  : 0
-                              }
-                              maxW="35%"
-                              fontSize={
-                                Object.values(passenger?.seat_selected)
-                                  .length !== 0
-                                  ? { base: 22, xl: 36 }
-                                  : { base: 16, xl: 20 }
-                              }
-                              textAlign="right"
-                              fontWeight={
-                                Object.values(passenger?.seat_selected)
-                                  .length !== 0
-                                  ? 700
-                                  : 500
-                              }
-                            >
-                              {Object.values(passenger?.seat_selected)
-                                .length !== 0 ? (
-                                <>
-                                  <Text>
-                                    {
-                                      passenger?.seat_selected?.code?.split(
-                                        "-"
-                                      )[0]
-                                    }
-                                  </Text>
-                                  <Text>-</Text>
-                                  <Text>
-                                    {
-                                      passenger?.seat_selected?.code?.split(
-                                        "-"
-                                      )[1]
-                                    }
-                                  </Text>
-                                </>
-                              ) : (
-                                <Text>No Seat Selected</Text>
-                              )}
-                            </HStack>
-                          </Box>
-                        ))}
-                    </VStack>
-                  ) : (
-                    <Stack
-                      bg={"#F245451A"}
-                      w={"full"}
-                      py={{ base: 4 }}
-                      px={{ base: 4, lg: 8 }}
-                    >
-                      <Text as="p" fontSize="14px">
-                        Complete your passenger data first!
-                      </Text>
-                    </Stack>
-                  )}
-                </Flex>
-              </CardFlightDetail>
-            </Box>
+            <SeatDetails passengers={data?.passengers} />
           </Box>
 
-          <Box display={{ base: "block", lg: "none" }} gridColumn="1/-1">
-            <Flex
-              alignItems="center"
-              justifyContent="space-between"
-              color="black"
-              fontWeight="600"
-              my="2rem"
-            >
-              <Heading
-                fontFamily="Poppins"
-                fontSize={{ base: "1.125rem", md: "24px" }}
-              >
-                Flight Details
-              </Heading>
-              <Text
-                userSelect="none"
-                cursor="pointer"
-                onClick={onOpenModalFlight}
-                fontSize={{ base: "1rem", md: "22px" }}
-              >
-                View Details
-              </Text>
-              <ModalFlight
-                isOpen={isOpenModalFlight}
-                onClose={onCloseModalFlight}
-                cost={data?.cost}
-                passengers={data?.passengers}
-                insurance={insurance}
-              />
-            </Flex>
-            <Box bgColor="white" rounded="0.5rem" overflow="hidden">
-              <Box px="1.25rem" py="2.5rem" borderBottom="1px solid #E6E6E6">
-                <Flex justifyContent="space-between" mb="1.5rem">
-                  <Box>
-                    <Text fontSize="16px" fontWeight="500" color="black">
-                      {data?.ticket?.departure_city} (
-                      {data?.ticket?.departure_country_code})
-                    </Text>
-                    <Text fontSize="0.75rem" color="#6B6B6B">
-                      {formatTimeFull(data?.ticket?.departure_schedule)}
-                    </Text>
-                  </Box>
-                  <Box mt="0.15rem">
-                    <FlightIcon />
-                  </Box>
-                  <Box textAlign="right">
-                    <Text fontSize="16px" fontWeight="500" color="black">
-                      {data?.ticket?.arrival_city} (
-                      {data?.ticket?.arrival_country_code})
-                    </Text>
-                    <Text fontSize="0.75rem" color="#6B6B6B">
-                      {formatTimeFull(data?.ticket?.arrival_schedule)}
-                    </Text>
-                  </Box>
-                </Flex>
-                <Flex
-                  alignItems="center"
-                  justifyContent="space-between"
-                  gap={5}
-                  mb="1.875rem"
-                  fontFamily="Poppins"
-                >
-                  <Box w="75px">
-                    <Image
-                      w="full"
-                      src={data?.ticket?.merchant_image}
-                      alt={data?.ticket?.merchant_name}
-                    />
-                  </Box>
-                  <Box display="flex" flexDirection="column" gap="10px">
-                    {data?.ticket?.is_refund && (
-                      <Flex
-                        alignItems={"center"}
-                        gap={2}
-                        justifyContent="flex-end"
-                      >
-                        <Text fontWeight={400}>Refundable</Text>
-                        <CiCircleCheck color="#2395FF" size={20} />
-                      </Flex>
-                    )}
-                    {data?.ticket?.is_reschedule && (
-                      <Flex
-                        alignItems={"center"}
-                        gap={2}
-                        justifyContent="flex-end"
-                      >
-                        <Text align="right" fontWeight={400}>
-                          Can reschedule
-                        </Text>
-                        <CiCircleCheck color="#2395FF" size={20} />
-                      </Flex>
-                    )}
-                  </Box>
-                </Flex>
-                <Flex gap="20px" justifyContent="space-between">
-                  <Box fontFamily="Lato" maxW="50%">
-                    <Text fontSize="0.75rem" color="#A5A5A5">
-                      Schedule
-                    </Text>
-                    <Text fontSize="0.875rem" fontWeight="500" color="#595959">
-                      {formatScheduleDate(data?.ticket?.departure_schedule)}
-                    </Text>
-                  </Box>
-                  <Box fontFamily="Lato">
-                    <Text fontSize="0.75rem" color="#A5A5A5">
-                      Class
-                    </Text>
-                    <Text fontSize="0.875rem" fontWeight="500" color="#595959">
-                      {data?.ticket?.class}
-                    </Text>
-                  </Box>
-                  <Box fontFamily="Lato">
-                    <Text fontSize="0.75rem" color="#A5A5A5">
-                      Gate
-                    </Text>
-                    <Text fontSize="0.875rem" fontWeight="500" color="#595959">
-                      {data?.ticket?.gate}
-                    </Text>
-                  </Box>
-                </Flex>
-              </Box>
-              <Box
-                px="1.25rem"
-                pt="1.25rem"
-                pb="1.875rem"
-                shadow="0px 8px 27px 0px #0E3F6C30"
-              >
-                <Flex
-                  alignItems="center"
-                  justifyContent={
-                    data?.passengers?.filter(
-                      (passenger) => passenger.type === "child"
-                    ).length > 0
-                      ? "space-between"
-                      : "flex-end"
-                  }
-                >
-                  {data?.passengers?.filter(
-                    (passenger) => passenger.type === "child"
-                  ).length > 0 && (
-                    <Flex alignItems="center" gap="16px">
-                      <Text
-                        as="span"
-                        fontWeight="700"
-                        fontSize="1.125rem"
-                        w="36px"
-                        aspectRatio="1/1"
-                        color="#2395FF"
-                        bgColor="#2395FF2E"
-                        rounded="100%"
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="center"
-                      >
-                        {
-                          data?.passengers?.filter(
-                            (passenger) => passenger.type === "child"
-                          ).length
-                        }
-                      </Text>
-                      <Text fontSize="0.875rem" color="#979797">
-                        Child
-                        {`${
-                          data?.passengers?.filter(
-                            (passenger) => passenger.type === "child"
-                          ).length > 1
-                            ? "s"
-                            : ""
-                        }`}
-                      </Text>
-                    </Flex>
-                  )}
-                  <Flex alignItems="center" gap="16px">
-                    <Text
-                      as="span"
-                      fontWeight="700"
-                      fontSize="1.125rem"
-                      w="36px"
-                      aspectRatio="1/1"
-                      color="#2395FF"
-                      bgColor="#2395FF2E"
-                      rounded="100%"
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      {
-                        data?.passengers?.filter(
-                          (passenger) => passenger.type === "adult"
-                        ).length
-                      }
-                    </Text>
-                    <Text fontSize="0.875rem" color="#979797">
-                      Adult
-                      {`${
-                        data?.passengers?.filter(
-                          (passenger) => passenger.type === "adult"
-                        ).length > 1
-                          ? "s"
-                          : ""
-                      }`}
-                    </Text>
-                  </Flex>
-                </Flex>
-              </Box>
-            </Box>
-          </Box>
-          <Box
-            display={{ base: "block", lg: "none" }}
-            gridColumn="1/-1"
-            mb="40px"
-          >
-            <Box mb="0.75rem">
-              <Heading fontSize="0.875rem" fontWeight="600">
-                Facilities
-              </Heading>
-            </Box>
-            <List
-              display="flex"
-              alignItems="center"
-              gap="0.75rem"
-              flexWrap="wrap"
-            >
-              {data?.ticket?.is_luggage && (
-                <ListItem
-                  px="1.25rem"
-                  py="1rem"
-                  bgColor="#E45D32"
-                  rounded="0.625rem"
-                  display="flex"
-                  alignItems="center"
-                  gap="20px"
-                  color="white"
-                >
-                  <RiLuggageDepositFill size={22} />
-                  <Text fontSize="0.875rem" fontWeight="600">
-                    Luggage
-                  </Text>
-                </ListItem>
-              )}
-              {data?.ticket?.is_inflight_meal && (
-                <ListItem
-                  px="1.25rem"
-                  py="1rem"
-                  bgColor="#7861D7"
-                  rounded="0.625rem"
-                  display="flex"
-                  alignItems="center"
-                  gap="20px"
-                  color="white"
-                >
-                  <HamburgerIcon />
-                  <Text fontSize="0.875rem" fontWeight="600">
-                    Meal
-                  </Text>
-                </ListItem>
-              )}
-              {data?.ticket?.is_wifi && (
-                <ListItem
-                  px="1.25rem"
-                  py="1rem"
-                  bgColor="#6DDA6B"
-                  rounded="0.625rem"
-                  display="flex"
-                  alignItems="center"
-                  gap="20px"
-                  color="white"
-                >
-                  <WifiIcon />
-                  <Text fontSize="0.875rem" fontWeight="600">
-                    Wi-Fi
-                  </Text>
-                </ListItem>
-              )}
-            </List>
-          </Box>
-          <Box display={{ base: "block", lg: "none" }} gridColumn="1/-1">
-            <Flex alignItems="center" justifyContent="space-between" mb="30px">
-              <Text fontSize="0.875rem" fontWeight="500" color="#6B6B6B">
-                Total you'll pay
-              </Text>
-              <Text fontSize="1.5rem" fontWeight="600" color="#2395FF">
-                {rupiah(data?.cost?.total_price)}
-              </Text>
-            </Flex>
-            <Flex>
-              <Button
-                onClick={onOpenAlertDialog}
-                type="submit"
-                bg="#2395FF"
-                borderRadius="10px"
-                py="28px"
-                px="60px"
-                fontSize="18px"
-                fontWeight="700"
-                color="white"
-                transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
-                boxShadow="0px 8px 10px 0px #2395FF4D"
-                width={{ base: "100%", md: "50%" }}
-                mx="auto"
-                _hover={{ bg: "#1971c2" }}
-                _active={{
-                  bg: "#dddfe2",
-                  boxShadow: "0px 8px 10px 0px #dddfe24D",
-                }}
-              >
-                Proceed to Payment
-              </Button>
-              <AlertDialogFlight
-                cancelRef={cancelRef}
-                onClose={onCloseAlertDialog}
-                isOpen={isOpenAlertDialog}
-              />
-            </Flex>
-          </Box>
+          <MobileFlightDetails data={data} insurance={insurance} />
         </Grid>
       </Container>
     </Box>
+  );
+};
+
+const SeatDetails = ({ passengers = [] }) => {
+  return (
+    <Collapse
+      in={
+        passengers?.filter((passenger) => passenger?.name !== "").length > 0
+          ? true
+          : false
+      }
+      animateOpacity
+      transition={{ enter: { delay: 0.5 } }}
+    >
+      <Box>
+        <Flex alignItems="center" justifyContent="space-between" mb="25px">
+          <CardFlightHeading color="black">Seat Details</CardFlightHeading>
+        </Flex>
+        <CardFlightDetail w="full">
+          <Flex
+            px="28px"
+            py="30px"
+            alignItems="center"
+            justifyContent="space-between"
+            fontFamily="Lato"
+            borderBottom="1px solid #E6E6E6"
+          >
+            <VStack
+              divider={
+                <StackDivider
+                  display={{ base: "none", lg: "block" }}
+                  borderColor="gray.200"
+                />
+              }
+              spacing={2}
+              align="stretch"
+              w={{ base: "full" }}
+              my={{ base: 0, lg: 4 }}
+            >
+              {passengers
+                ?.filter((passenger) => passenger?.name !== "")
+                .map((passenger) => (
+                  <Box
+                    key={passenger?.id}
+                    userSelect="none"
+                    display={{ base: "flex" }}
+                    justifyContent={{ base: "space-between" }}
+                    alignItems={{ base: "center" }}
+                    borderLeft="4px solid #2395FF"
+                    px={2}
+                  >
+                    <Stack spacing={1}>
+                      <Text
+                        fontSize={{ base: "16px", xl: "18px" }}
+                        fontWeight={500}
+                      >
+                        {`${
+                          passenger?.type === "adult" ? passenger?.title : ""
+                        } ${passenger?.name}`}
+                      </Text>
+                      <Text
+                        fontSize={{ base: "20px" }}
+                        fontWeight={600}
+                        textTransform="capitalize"
+                      >
+                        {`${passenger?.type}`}
+                      </Text>
+                    </Stack>
+                    <HStack
+                      bg={
+                        Object.values(passenger?.seat_selected).length !== 0
+                          ? "#2395FF1A"
+                          : "transparent"
+                      }
+                      py={1}
+                      px={2}
+                      rounded="15px"
+                      spacing={
+                        Object.values(passenger?.seat_selected).length !== 0
+                          ? 1
+                          : 0
+                      }
+                      maxW="35%"
+                      fontSize={
+                        Object.values(passenger?.seat_selected).length !== 0
+                          ? { base: 22, xl: 36 }
+                          : { base: 16, xl: 20 }
+                      }
+                      textAlign="right"
+                      fontWeight={
+                        Object.values(passenger?.seat_selected).length !== 0
+                          ? 700
+                          : 500
+                      }
+                    >
+                      {Object.values(passenger?.seat_selected).length !== 0 ? (
+                        <>
+                          <Text>
+                            {passenger?.seat_selected?.code?.split("-")[0]}
+                          </Text>
+                          <Text>-</Text>
+                          <Text>
+                            {passenger?.seat_selected?.code?.split("-")[1]}
+                          </Text>
+                        </>
+                      ) : (
+                        <Text>No Seat Selected</Text>
+                      )}
+                    </HStack>
+                  </Box>
+                ))}
+            </VStack>
+          </Flex>
+        </CardFlightDetail>
+      </Box>
+    </Collapse>
+  );
+};
+
+const MobileFlightDetails = ({ data = {}, insurance = false }) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  return (
+    <>
+      <Box display={{ base: "block", lg: "none" }} gridColumn="1/-1">
+        <Flex
+          alignItems="center"
+          justifyContent="space-between"
+          color="black"
+          fontWeight="600"
+          my="2rem"
+        >
+          <Heading
+            fontFamily="Poppins"
+            fontSize={{ base: "1.125rem", md: "24px" }}
+          >
+            Flight Details
+          </Heading>
+          <Text
+            userSelect="none"
+            cursor="pointer"
+            onClick={onOpen}
+            fontSize={{ base: "1rem", md: "22px" }}
+          >
+            View Details
+          </Text>
+          <ModalFlight
+            isOpen={isOpen}
+            onClose={onClose}
+            cost={data?.cost}
+            passengers={data?.passengers}
+            insurance={insurance}
+          />
+        </Flex>
+        <Box bgColor="white" rounded="0.5rem" overflow="hidden">
+          <Box px="1.25rem" py="2.5rem" borderBottom="1px solid #E6E6E6">
+            <Flex justifyContent="space-between" mb="1.5rem">
+              <Box>
+                <Text fontSize="16px" fontWeight="500" color="black">
+                  {data?.ticket?.departure_city} (
+                  {data?.ticket?.departure_country_code})
+                </Text>
+                <Text fontSize="0.75rem" color="#6B6B6B">
+                  {formatTimeFull(data?.ticket?.departure_schedule)}
+                </Text>
+              </Box>
+              <Box mt="0.15rem">
+                <FlightIcon />
+              </Box>
+              <Box textAlign="right">
+                <Text fontSize="16px" fontWeight="500" color="black">
+                  {data?.ticket?.arrival_city} (
+                  {data?.ticket?.arrival_country_code})
+                </Text>
+                <Text fontSize="0.75rem" color="#6B6B6B">
+                  {formatTimeFull(data?.ticket?.arrival_schedule)}
+                </Text>
+              </Box>
+            </Flex>
+            <Flex
+              alignItems="center"
+              justifyContent="space-between"
+              gap={5}
+              mb="1.875rem"
+              fontFamily="Poppins"
+            >
+              <Box w="75px">
+                <Image
+                  w="full"
+                  src={data?.ticket?.merchant_image}
+                  alt={data?.ticket?.merchant_name}
+                />
+              </Box>
+              <Box display="flex" flexDirection="column" gap="10px">
+                {data?.ticket?.is_refund && (
+                  <Flex alignItems={"center"} gap={2} justifyContent="flex-end">
+                    <Text fontWeight={400}>Refundable</Text>
+                    <CiCircleCheck color="#2395FF" size={20} />
+                  </Flex>
+                )}
+                {data?.ticket?.is_reschedule && (
+                  <Flex alignItems={"center"} gap={2} justifyContent="flex-end">
+                    <Text align="right" fontWeight={400}>
+                      Can reschedule
+                    </Text>
+                    <CiCircleCheck color="#2395FF" size={20} />
+                  </Flex>
+                )}
+              </Box>
+            </Flex>
+            <Flex gap="20px" justifyContent="space-between">
+              <Box fontFamily="Lato" maxW="50%">
+                <Text fontSize="0.75rem" color="#A5A5A5">
+                  Schedule
+                </Text>
+                <Text fontSize="0.875rem" fontWeight="500" color="#595959">
+                  {formatScheduleDate(data?.ticket?.departure_schedule)}
+                </Text>
+              </Box>
+              <Box fontFamily="Lato">
+                <Text fontSize="0.75rem" color="#A5A5A5">
+                  Class
+                </Text>
+                <Text fontSize="0.875rem" fontWeight="500" color="#595959">
+                  {data?.ticket?.class}
+                </Text>
+              </Box>
+              <Box fontFamily="Lato">
+                <Text fontSize="0.75rem" color="#A5A5A5">
+                  Gate
+                </Text>
+                <Text fontSize="0.875rem" fontWeight="500" color="#595959">
+                  {data?.ticket?.gate}
+                </Text>
+              </Box>
+            </Flex>
+          </Box>
+          <Box
+            px="1.25rem"
+            pt="1.25rem"
+            pb="1.875rem"
+            shadow="0px 8px 27px 0px #0E3F6C30"
+          >
+            <Flex
+              alignItems="center"
+              justifyContent={
+                data?.passengers?.filter(
+                  (passenger) => passenger.type === "child"
+                ).length > 0
+                  ? "space-between"
+                  : "flex-end"
+              }
+            >
+              {data?.passengers?.filter(
+                (passenger) => passenger.type === "child"
+              ).length > 0 && (
+                <Flex alignItems="center" gap="16px">
+                  <Text
+                    as="span"
+                    fontWeight="700"
+                    fontSize="1.125rem"
+                    w="36px"
+                    aspectRatio="1/1"
+                    color="#2395FF"
+                    bgColor="#2395FF2E"
+                    rounded="100%"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    {
+                      data?.passengers?.filter(
+                        (passenger) => passenger.type === "child"
+                      ).length
+                    }
+                  </Text>
+                  <Text fontSize="0.875rem" color="#979797">
+                    Child
+                    {`${
+                      data?.passengers?.filter(
+                        (passenger) => passenger.type === "child"
+                      ).length > 1
+                        ? "s"
+                        : ""
+                    }`}
+                  </Text>
+                </Flex>
+              )}
+              <Flex alignItems="center" gap="16px">
+                <Text
+                  as="span"
+                  fontWeight="700"
+                  fontSize="1.125rem"
+                  w="36px"
+                  aspectRatio="1/1"
+                  color="#2395FF"
+                  bgColor="#2395FF2E"
+                  rounded="100%"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  {
+                    data?.passengers?.filter(
+                      (passenger) => passenger.type === "adult"
+                    ).length
+                  }
+                </Text>
+                <Text fontSize="0.875rem" color="#979797">
+                  Adult
+                  {`${
+                    data?.passengers?.filter(
+                      (passenger) => passenger.type === "adult"
+                    ).length > 1
+                      ? "s"
+                      : ""
+                  }`}
+                </Text>
+              </Flex>
+            </Flex>
+          </Box>
+        </Box>
+      </Box>
+      <Box display={{ base: "block", lg: "none" }} gridColumn="1/-1" mb="40px">
+        <Box mb="0.75rem">
+          <Heading fontSize="0.875rem" fontWeight="600">
+            Facilities
+          </Heading>
+        </Box>
+        <List display="flex" alignItems="center" gap="0.75rem" flexWrap="wrap">
+          {data?.ticket?.is_luggage && (
+            <ListItem
+              px="1.25rem"
+              py="1rem"
+              bgColor="#E45D32"
+              rounded="0.625rem"
+              display="flex"
+              alignItems="center"
+              gap="20px"
+              color="white"
+            >
+              <RiLuggageDepositFill size={22} />
+              <Text fontSize="0.875rem" fontWeight="600">
+                Luggage
+              </Text>
+            </ListItem>
+          )}
+          {data?.ticket?.is_inflight_meal && (
+            <ListItem
+              px="1.25rem"
+              py="1rem"
+              bgColor="#7861D7"
+              rounded="0.625rem"
+              display="flex"
+              alignItems="center"
+              gap="20px"
+              color="white"
+            >
+              <HamburgerIcon />
+              <Text fontSize="0.875rem" fontWeight="600">
+                Meal
+              </Text>
+            </ListItem>
+          )}
+          {data?.ticket?.is_wifi && (
+            <ListItem
+              px="1.25rem"
+              py="1rem"
+              bgColor="#6DDA6B"
+              rounded="0.625rem"
+              display="flex"
+              alignItems="center"
+              gap="20px"
+              color="white"
+            >
+              <WifiIcon />
+              <Text fontSize="0.875rem" fontWeight="600">
+                Wi-Fi
+              </Text>
+            </ListItem>
+          )}
+        </List>
+      </Box>
+      <Box display={{ base: "block", lg: "none" }} gridColumn="1/-1">
+        <Flex alignItems="center" justifyContent="space-between" mb="30px">
+          <Text fontSize="0.875rem" fontWeight="500" color="#6B6B6B">
+            Total you'll pay
+          </Text>
+          <Text fontSize="1.5rem" fontWeight="600" color="#2395FF">
+            {rupiah(data?.cost?.total_price)}
+          </Text>
+        </Flex>
+        <Flex>
+          <AlertDialogFlight />
+        </Flex>
+      </Box>
+    </>
+  );
+};
+
+const FormControlPassenger = ({
+  passenger = {},
+  callback,
+  isTypePassenger = false,
+}) => {
+  const FORM_TEXT_PASSENGER = [
+    {
+      label: "Full Name",
+      value: passenger?.name,
+      name: "name",
+      readOnly: passenger?.readOnly,
+      placeholder: "Full name (ex. Mike Kowalski)",
+    },
+    {
+      label: "Nationality",
+      value: passenger?.nationality,
+      name: "nationality",
+      readOnly: false,
+      placeholder: "United States",
+    },
+  ];
+
+  return (
+    <FormControl spacing={3} fontFamily={"Lato"} isRequired>
+      {isTypePassenger && (
+        <Box mb="30px">
+          <FormLabel color={"gray.500"}>Type</FormLabel>
+          <Select
+            variant="flushed"
+            onChange={(e) => callback(passenger?.id, "type", e.target.value)}
+          >
+            <option value="adult">Adult</option>
+            <option value="child">Child</option>
+          </Select>
+        </Box>
+      )}
+      {passenger?.type == "adult" && (
+        <Box mb="30px">
+          <FormLabel color={"gray.500"}>Title</FormLabel>
+          <Select
+            variant="flushed"
+            onChange={(e) => callback(passenger?.id, "title", e.target.value)}
+          >
+            <option value="Mr.">Mr.</option>
+            <option value="Mrs.">Mrs.</option>
+          </Select>
+        </Box>
+      )}
+      {FORM_TEXT_PASSENGER?.map((item, i) => (
+        <Box key={i} mb="30px">
+          <FormLabel color={"gray.500"}>{item?.label}</FormLabel>
+          <Input
+            variant="flushed"
+            name={item?.name}
+            value={item?.value || ""}
+            onChange={(e) =>
+              callback(passenger?.id, item?.name, e.target.value)
+            }
+            placeholder={item?.placeholder}
+            readOnly={item?.readOnly}
+          />
+        </Box>
+      ))}
+    </FormControl>
   );
 };
 
@@ -1377,186 +930,209 @@ const ModalSeat = ({
   row_seats = 0,
   seats = [],
   passengers = [],
-  passenger_id = 1,
+  passenger = {},
   onSelectSeat,
-  ...props
 }) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [passengerIdSelected, setPassengerIdSelected] = useState(1);
+
+  const handlePassengerIdClick = (passengerId) => {
+    setPassengerIdSelected(passengerId);
+    onOpen();
+  };
+
   return (
-    <Modal {...props}>
-      <ModalOverlay />
-      <ModalContent w="full" pt="1rem" mx="1rem">
-        <ModalCloseButton />
-        <ModalBody
-          display="flex"
-          flexDirection={{ base: "column", lg: "row" }}
-          gap={{ base: 3, lg: 10 }}
-          my={{ base: 6, lg: 4 }}
-          fontFamily="Poppins"
-        >
-          <SeatsFlight
-            passenger_id={passenger_id}
-            passengers={passengers}
-            count_row={row_seats}
-            seats={seats}
-            onSelectSeat={onSelectSeat}
-          />
-          <VStack
-            divider={
-              <StackDivider
-                display={{ base: "none", lg: "block" }}
-                borderColor="gray.200"
-              />
-            }
-            spacing={2}
-            align="stretch"
-            w={{ base: "full" }}
+    <>
+      <Button
+        onClick={() => handlePassengerIdClick(passenger?.id)}
+        isDisabled={passenger?.name === "" ? true : false}
+      >
+        Choose Seat
+      </Button>
+
+      <Modal isOpen={isOpen} onClose={onClose} size="full">
+        <ModalOverlay />
+        <ModalContent w="full" pt="1rem" mx="1rem">
+          <ModalCloseButton />
+          <ModalBody
+            display="flex"
+            flexDirection={{ base: "column", lg: "row" }}
+            gap={{ base: 3, lg: 10 }}
+            my={{ base: 6, lg: 4 }}
+            fontFamily="Poppins"
           >
-            <Box display="flex" flexDirection="column" gap={2} fontSize="20px">
-              <Text fontWeight={700}>Information: </Text>
-              <Flex
-                flexDirection={{ base: "row", lg: "column" }}
-                justifyContent={{ base: "space-between", lg: "flex-start" }}
-                gap={{ base: 2, lg: 1 }}
-                flexWrap={{ base: "wrap", lg: "nowrap" }}
-                fontWeight={500}
-              >
-                <Flex gap={2} alignItems="center">
-                  <IconButton
-                    icon={<PiArmchairDuotone size={48} />}
-                    size="lg"
-                    w="40px"
-                    variant="unstyled"
-                    color={"#6B6B6B"}
-                    _focus={{ boxShadow: "none" }}
-                  />
-                  <Text>Available</Text>
-                </Flex>
-                <Flex gap={2} alignItems="center">
-                  <IconButton
-                    icon={<PiArmchairDuotone size={48} />}
-                    size="lg"
-                    w="40px"
-                    variant="unstyled"
-                    color={"#6B6B6B"}
-                    _focus={{ boxShadow: "none" }}
-                    isDisabled
-                  />
-                  <Text>Reserved</Text>
-                </Flex>
-                <Flex gap={2} alignItems="center">
-                  <IconButton
-                    icon={<PiArmchairDuotone size={48} />}
-                    size="lg"
-                    w="40px"
-                    variant="unstyled"
-                    color={"#2395FF"}
-                    _focus={{ boxShadow: "none" }}
-                  />
-                  <Text>Selected</Text>
-                </Flex>
-              </Flex>
-            </Box>
-            <Box
-              display={{ base: "none", lg: "flex" }}
-              flexDirection="column"
-              gap={2}
-              fontSize="20px"
+            <SeatsFlight
+              passenger_id={passengerIdSelected}
+              passengers={passengers}
+              count_row={row_seats}
+              seats={seats}
+              onSelectSeat={onSelectSeat}
+            />
+            <VStack
+              divider={
+                <StackDivider
+                  display={{ base: "none", lg: "block" }}
+                  borderColor="gray.200"
+                />
+              }
+              spacing={2}
+              align="stretch"
+              w={{ base: "full" }}
             >
-              <Text fontWeight={700}>Passengers: </Text>
-              <VStack
-                divider={
-                  <StackDivider
-                    display={{ base: "none", lg: "block" }}
-                    borderColor="gray.200"
-                  />
-                }
-                spacing={2}
-                align="stretch"
-                w={{ base: "full" }}
-                my={{ base: 0, lg: 4 }}
+              <Box
+                display="flex"
+                flexDirection="column"
+                gap={2}
+                fontSize="20px"
               >
-                {passengers
-                  ?.filter((passenger) => passenger?.name !== "")
-                  .map((passenger) => (
-                    <Box
-                      key={passenger?.id}
-                      display={{ base: "flex" }}
-                      justifyContent={{ base: "space-between" }}
-                      alignItems={{ base: "center" }}
-                      borderLeft="4px solid #2395FF"
-                      px={2}
-                    >
-                      <Stack spacing={3}>
-                        <Text
-                          fontSize={{ base: "18px", xl: "20px" }}
-                          fontWeight={500}
-                        >
-                          {`${
-                            passenger?.type === "adult" ? passenger?.title : ""
-                          } ${passenger?.name}`}
-                        </Text>
-                        <Text
-                          fontSize={{ base: "20px" }}
-                          fontWeight={600}
-                          textTransform="capitalize"
-                        >
-                          {`${passenger?.type}`}
-                        </Text>
-                      </Stack>
-                      <HStack
-                        bg={
-                          Object.values(passenger?.seat_selected).length !== 0
-                            ? "#2395FF1A"
-                            : "transparent"
-                        }
-                        py={1}
+                <Text fontWeight={700}>Information: </Text>
+                <Flex
+                  flexDirection={{ base: "row", lg: "column" }}
+                  justifyContent={{ base: "space-between", lg: "flex-start" }}
+                  gap={{ base: 2, lg: 1 }}
+                  flexWrap={{ base: "wrap", lg: "nowrap" }}
+                  fontWeight={500}
+                >
+                  <Flex gap={2} alignItems="center">
+                    <IconButton
+                      icon={<PiArmchairDuotone size={48} />}
+                      size="lg"
+                      w="40px"
+                      variant="unstyled"
+                      color={"#6B6B6B"}
+                      _focus={{ boxShadow: "none" }}
+                    />
+                    <Text>Available</Text>
+                  </Flex>
+                  <Flex gap={2} alignItems="center">
+                    <IconButton
+                      icon={<PiArmchairDuotone size={48} />}
+                      size="lg"
+                      w="40px"
+                      variant="unstyled"
+                      color={"#6B6B6B"}
+                      _focus={{ boxShadow: "none" }}
+                      isDisabled
+                    />
+                    <Text>Reserved</Text>
+                  </Flex>
+                  <Flex gap={2} alignItems="center">
+                    <IconButton
+                      icon={<PiArmchairDuotone size={48} />}
+                      size="lg"
+                      w="40px"
+                      variant="unstyled"
+                      color={"#2395FF"}
+                      _focus={{ boxShadow: "none" }}
+                    />
+                    <Text>Selected</Text>
+                  </Flex>
+                </Flex>
+              </Box>
+              <Box
+                display={{ base: "none", lg: "flex" }}
+                flexDirection="column"
+                gap={2}
+                fontSize="20px"
+              >
+                <Text fontWeight={700}>Passengers: </Text>
+                <VStack
+                  divider={
+                    <StackDivider
+                      display={{ base: "none", lg: "block" }}
+                      borderColor="gray.200"
+                    />
+                  }
+                  spacing={2}
+                  align="stretch"
+                  w={{ base: "full" }}
+                  my={{ base: 0, lg: 4 }}
+                >
+                  {passengers
+                    ?.filter((passenger) => passenger?.name !== "")
+                    .map((passenger) => (
+                      <Box
+                        key={passenger?.id}
+                        display={{ base: "flex" }}
+                        justifyContent={{ base: "space-between" }}
+                        alignItems={{ base: "center" }}
+                        borderLeft="4px solid #2395FF"
                         px={2}
-                        rounded="15px"
-                        textAlign="right"
-                        spacing={
-                          Object.values(passenger?.seat_selected).length !== 0
-                            ? 1
-                            : 0
-                        }
-                        fontSize={
-                          Object.values(passenger?.seat_selected).length !== 0
-                            ? { base: 24, xl: 36 }
-                            : { base: 16, xl: 20 }
-                        }
-                        fontWeight={
-                          Object.values(passenger?.seat_selected).length !== 0
-                            ? 700
-                            : 500
-                        }
-                        letterSpacing={
-                          Object.values(passenger?.seat_selected).length !== 0
-                            ? { base: 2, xl: 4 }
-                            : { base: 0 }
-                        }
                       >
-                        {Object.values(passenger?.seat_selected).length !==
-                        0 ? (
-                          <>
-                            <Text>
-                              {passenger?.seat_selected?.code?.split("-")[0]}
-                            </Text>
-                            <Text>-</Text>
-                            <Text>
-                              {passenger?.seat_selected?.code?.split("-")[1]}
-                            </Text>
-                          </>
-                        ) : (
-                          <Text>No Seat Selected</Text>
-                        )}
-                      </HStack>
-                    </Box>
-                  ))}
-              </VStack>
-            </Box>
-          </VStack>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+                        <Stack spacing={3}>
+                          <Text
+                            fontSize={{ base: "18px", xl: "20px" }}
+                            fontWeight={500}
+                          >
+                            {`${
+                              passenger?.type === "adult"
+                                ? passenger?.title
+                                : ""
+                            } ${passenger?.name}`}
+                          </Text>
+                          <Text
+                            fontSize={{ base: "20px" }}
+                            fontWeight={600}
+                            textTransform="capitalize"
+                          >
+                            {`${passenger?.type}`}
+                          </Text>
+                        </Stack>
+                        <HStack
+                          bg={
+                            Object.values(passenger?.seat_selected).length !== 0
+                              ? "#2395FF1A"
+                              : "transparent"
+                          }
+                          py={1}
+                          px={2}
+                          rounded="15px"
+                          textAlign="right"
+                          spacing={
+                            Object.values(passenger?.seat_selected).length !== 0
+                              ? 1
+                              : 0
+                          }
+                          fontSize={
+                            Object.values(passenger?.seat_selected).length !== 0
+                              ? { base: 24, xl: 36 }
+                              : { base: 16, xl: 20 }
+                          }
+                          fontWeight={
+                            Object.values(passenger?.seat_selected).length !== 0
+                              ? 700
+                              : 500
+                          }
+                          letterSpacing={
+                            Object.values(passenger?.seat_selected).length !== 0
+                              ? { base: 2, xl: 4 }
+                              : { base: 0 }
+                          }
+                        >
+                          {Object.values(passenger?.seat_selected).length !==
+                          0 ? (
+                            <>
+                              <Text>
+                                {passenger?.seat_selected?.code?.split("-")[0]}
+                              </Text>
+                              <Text>-</Text>
+                              <Text>
+                                {passenger?.seat_selected?.code?.split("-")[1]}
+                              </Text>
+                            </>
+                          ) : (
+                            <Text>No Seat Selected</Text>
+                          )}
+                        </HStack>
+                      </Box>
+                    ))}
+                </VStack>
+              </Box>
+            </VStack>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+    </>
   );
 };
 
@@ -1584,35 +1160,90 @@ const ModalFlight = ({
   );
 };
 
-const AlertDialogFlight = ({ cancelRef, onClose, isOpen }) => {
+const AlertDialogFlight = () => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const cancelRef = useRef();
   return (
-    <AlertDialog
-      motionPreset="slideInBottom"
-      leastDestructiveRef={cancelRef}
-      onClose={onClose}
-      isOpen={isOpen}
-      isCentered
-    >
-      <AlertDialogOverlay />
+    <>
+      <Button
+        onClick={onOpen}
+        type="submit"
+        bg="#2395FF"
+        borderRadius="10px"
+        py="28px"
+        px="60px"
+        fontSize="18px"
+        fontWeight="700"
+        color="white"
+        transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+        boxShadow="0px 8px 10px 0px #2395FF4D"
+        width={{ base: "100%", md: "50%" }}
+        mx="auto"
+        _hover={{ bg: "#1971c2" }}
+        _active={{
+          bg: "#dddfe2",
+          boxShadow: "0px 8px 10px 0px #dddfe24D",
+        }}
+      >
+        Proceed to Payment
+      </Button>
+      <AlertDialog
+        motionPreset="slideInBottom"
+        leastDestructiveRef={cancelRef}
+        onClose={onClose}
+        isOpen={isOpen}
+        isCentered
+      >
+        <AlertDialogOverlay />
 
-      <AlertDialogContent pt="1rem" mx="1rem" fontFamily="Poppins">
-        <AlertDialogHeader>Confirm to proceed?</AlertDialogHeader>
-        <AlertDialogCloseButton />
-        <AlertDialogBody>Are you sure to proceed the payment?.</AlertDialogBody>
-        <AlertDialogFooter>
-          <Button ref={cancelRef} onClick={onClose} variant="solid">
-            No, Let me check again!
-          </Button>
-          <Button bg="#2395FF" color="white" ml={3}>
-            Yes
-          </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+        <AlertDialogContent pt="1rem" mx="1rem" fontFamily="Poppins">
+          <AlertDialogHeader>Confirm to proceed?</AlertDialogHeader>
+          <AlertDialogCloseButton />
+          <AlertDialogBody>
+            Are you sure to proceed the payment?.
+          </AlertDialogBody>
+          <AlertDialogFooter>
+            <Button ref={cancelRef} onClick={onClose} variant="solid">
+              No, Let me check again!
+            </Button>
+            <Button bg="#2395FF" color="white" ml={3}>
+              Yes
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
-const ContactPersonDetails = ({ form = [], callback }) => {
+const ContactPersonDetails = ({ contact_person = [], callback }) => {
+  const FORM_CONTACTPERSON = [
+    {
+      label: "Full Name",
+      value: contact_person?.name,
+      type: "text",
+      name: "name",
+      readOnly: true,
+      placeholder: "Full name (ex. Mike Kowalski)",
+    },
+    {
+      label: "Email",
+      value: contact_person?.email,
+      type: "email",
+      name: "email",
+      readOnly: true,
+      placeholder: "example@mail.com",
+    },
+    {
+      label: "Phone",
+      value: contact_person?.phone,
+      type: "number",
+      name: "phone",
+      readOnly: false,
+      placeholder: "08xxx",
+    },
+  ];
+
   return (
     <Box as="section">
       <Box mb="25px">
@@ -1622,7 +1253,7 @@ const ContactPersonDetails = ({ form = [], callback }) => {
       </Box>
       <CardFlightDetail px={10} py={8}>
         <FormControl spacing={3} fontFamily={"Lato"} isRequired>
-          {form?.map((item, i) => (
+          {FORM_CONTACTPERSON?.map((item, i) => (
             <Box key={i} mb={5}>
               <FormLabel color={"gray.500"}>{item?.label}</FormLabel>
               <Input
@@ -1695,275 +1326,257 @@ const ContactPersonDetails = ({ form = [], callback }) => {
   );
 };
 
-// const PassengerDetails = ({ data = {}, callback }) => {
-//   return (
-//     <>
-//       <Box as="section">
-//         <Box mb="25px">
-//           <CardFlightHeading color="black">Passenger Details</CardFlightHeading>
-//         </Box>
-//         <CardFlightDetail px={10} py={8}>
-//           <Flex
-//             flexDirection={{ base: "column", md: "row" }}
-//             alignItems={{ base: "stretch", md: "center" }}
-//             gap={{ base: "6px", md: 0 }}
-//             justifyContent="space-between"
-//             mb="30px"
-//             rounded="10px"
-//             px="28px"
-//             py="12px"
-//             bgColor="#2395FF1A"
-//             fontFamily="Lato"
-//             color="#595959"
-//           >
-//             <Text>
-//               Passenger:{" "}
-//               {`${
-//                 data?.passengers?.filter(
-//                   (passenger) => passenger.type === "adult"
-//                 ).length
-//               } Adult${
-//                 data?.passengers?.filter(
-//                   (passenger) => passenger.type === "adult"
-//                 ).length > 1
-//                   ? "s"
-//                   : ""
-//               }${
-//                 data?.passengers?.filter(
-//                   (passenger) => passenger.type === "child"
-//                 ).length > 0
-//                   ? `, ${
-//                       data?.passengers?.filter(
-//                         (passenger) => passenger.type === "child"
-//                       ).length
-//                     } Child${
-//                       data?.passengers?.filter(
-//                         (passenger) => passenger.type === "child"
-//                       ).length > 1
-//                         ? "s"
-//                         : ""
-//                     }`
-//                   : ""
-//               }`}
-//             </Text>
-//             <Flex alignItems="center" gap="15px">
-//               <FormLabel htmlFor="same_as_contact_person" mb="0">
-//                 Same as contact person
-//               </FormLabel>
-//               <Switch
-//                 id="same_as_contact_person"
-//                 onChange={handleChangeSameContact}
-//               />
-//             </Flex>
-//           </Flex>
-//           <FormControl spacing={3} fontFamily={"Lato"} isRequired>
-//             <Box mb="30px">
-//               <FormLabel color={"gray.500"}>Title</FormLabel>
-//               <Select
-//                 variant="flushed"
-//                 onChange={(e) =>
-//                   handleChangePassenger(1, "title", e.target.value)
-//                 }
-//               >
-//                 <option value="Mr.">Mr.</option>
-//                 <option value="Mrs.">Mrs.</option>
-//               </Select>
-//             </Box>
-//             <Box mb="30px">
-//               <FormLabel color={"gray.500"}>Full Name</FormLabel>
-//               <Input
-//                 variant="flushed"
-//                 name="name"
-//                 value={data.passengers?.[0]?.name || ""}
-//                 onChange={(e) =>
-//                   handleChangePassenger(1, "name", e.target.value)
-//                 }
-//                 placeholder="Full name (ex. Mike Kowalski)"
-//                 readOnly={data.passengers?.[0]?.readOnly}
-//               />
-//             </Box>
-//             <Box mb="30px">
-//               <FormLabel color={"gray.500"}>Nationality</FormLabel>
-//               <Input
-//                 variant="flushed"
-//                 name="nationality"
-//                 value={data.passengers?.[0]?.nationality || ""}
-//                 onChange={(e) =>
-//                   handleChangePassenger(1, "nationality", e.target.value)
-//                 }
-//                 placeholder="United States"
-//               />
-//             </Box>
-//             {/* <Box>
-//                     <FormLabel color={"gray.500"}>Nationality</FormLabel>
-//                     <Select variant="flushed">
-//                       <option value="mr">Indonesia</option>
-//                       <option value="mrs">Malaysia</option>
-//                       <option value="mrs">Belanda</option>
-//                       <option value="mrs">Jepang</option>
-//                     </Select>
-//                   </Box> */}
-//           </FormControl>
-//           {data?.passengers?.length > 1 && (
-//             <Accordion mb="30px" allowMultiple>
-//               {data?.passengers?.slice(1).map((passenger) => (
-//                 <AccordionItem key={passenger.id}>
-//                   <h2>
-//                     <AccordionButton>
-//                       <Box
-//                         as="span"
-//                         fontFamily="Lato"
-//                         flex="1"
-//                         textAlign="center"
-//                         textTransform="capitalize"
-//                       >
-//                         {passenger?.name
-//                           ? `${passenger?.type}${passenger?.name && " - "}${
-//                               passenger?.name
-//                             }`
-//                           : `New Passenger ${passenger.id - 1}`}
-//                       </Box>
-//                       <AccordionIcon />
-//                     </AccordionButton>
-//                   </h2>
-//                   <AccordionPanel pb={0}>
-//                     <CardFlightDetail>
-//                       <Flex mb="20px" justifyContent="flex-end">
-//                         <Button
-//                           variant="solid"
-//                           size="sm"
-//                           colorScheme="red"
-//                           onClick={() => handleRemovePassenger(passenger.id)}
-//                         >
-//                           <FaTrashAlt />
-//                         </Button>
-//                       </Flex>
-//                       <FormControl spacing={3} fontFamily={"Lato"} isRequired>
-//                         <Box mb="30px">
-//                           <FormLabel color={"gray.500"}>Type</FormLabel>
-//                           <Select
-//                             variant="flushed"
-//                             onChange={(e) =>
-//                               handleChangePassenger(
-//                                 passenger.id,
-//                                 "type",
-//                                 e.target.value
-//                               )
-//                             }
-//                           >
-//                             <option value="adult">Adult</option>
-//                             <option value="child">Child</option>
-//                           </Select>
-//                         </Box>
-//                         {passenger?.type === "adult" && (
-//                           <Box mb="30px">
-//                             <FormLabel color={"gray.500"}>Title</FormLabel>
-//                             <Select
-//                               variant="flushed"
-//                               onChange={(e) =>
-//                                 handleChangePassenger(
-//                                   passenger.id,
-//                                   "title",
-//                                   e.target.value
-//                                 )
-//                               }
-//                             >
-//                               <option value="Mr.">Mr.</option>
-//                               <option value="Mrs.">Mrs.</option>
-//                             </Select>
-//                           </Box>
-//                         )}
-//                         <Box mb="30px">
-//                           <FormLabel color={"gray.500"}>Full Name</FormLabel>
-//                           <Input
-//                             variant="flushed"
-//                             placeholder="Full name (ex. Mike Kowalski)"
-//                             name="name"
-//                             value={passenger?.name || ""}
-//                             onChange={(e) =>
-//                               handleChangePassenger(
-//                                 passenger.id,
-//                                 "name",
-//                                 e.target.value
-//                               )
-//                             }
-//                           />
-//                         </Box>
-//                         <Box mb="30px">
-//                           <FormLabel color={"gray.500"}>Nationality</FormLabel>
-//                           <Input
-//                             variant="flushed"
-//                             placeholder="United States"
-//                             name="nationality"
-//                             value={passenger?.nationality || ""}
-//                             onChange={(e) =>
-//                               handleChangePassenger(
-//                                 passenger.id,
-//                                 "nationality",
-//                                 e.target.value
-//                               )
-//                             }
-//                           />
-//                         </Box>
-//                       </FormControl>
-//                     </CardFlightDetail>
-//                   </AccordionPanel>
-//                 </AccordionItem>
-//               ))}
-//             </Accordion>
-//           )}
-//           <Button
-//             variant="ghost"
-//             fontFamily="Lato"
-//             onClick={handleAddPassenger}
-//             w="full"
-//           >
-//             Add New Passenger
-//           </Button>
-//         </CardFlightDetail>
-//       </Box>
-//       <Box as="section">
-//         <CardFlightDetail>
-//           <Flex
-//             px="28px"
-//             pb="20px"
-//             pt="34px"
-//             alignItems="center"
-//             justifyContent="space-between"
-//             fontFamily="Lato"
-//             borderBottom="1px solid #E6E6E6"
-//           >
-//             <Checkbox
-//               gap={{ base: 0, md: "15px" }}
-//               fontSize={{ base: "10px", md: "18px" }}
-//               fontWeight="600"
-//               color="black"
-//               onChange={handleChangeTravelInsurance}
-//               value={insurance}
-//             >
-//               Travel Insurance
-//             </Checkbox>
-//             <Text
-//               fontSize={{ base: "17px", md: "18px" }}
-//               fontWeight="700"
-//               color="#2395FF"
-//             >
-//               {rupiah(data?.costs?.travel_insurance)}
-//               <Text as="span" fontSize="14px" fontWeight="600" color="#6B6B6B">
-//                 /pax
-//               </Text>
-//             </Text>
-//           </Flex>
-//           <Box px="28px" pb="34px" pt="20px">
-//             <Text fontSize="14px" color="black">
-//               Get travel compensation up to {rupiah(10000)}
-//             </Text>
-//           </Box>
-//         </CardFlightDetail>
-//       </Box>
-//     </>
-//   );
-// };
+const PassengerDetails = ({
+  data = {},
+  setData,
+  insurance = false,
+  callbackInsurance,
+}) => {
+  const [passengerIdCounter, setPassengerIdCounter] = useState(2);
+
+  const handleAddPassenger = () => {
+    setData({
+      ...data,
+      passengers: [
+        ...data.passengers,
+        {
+          id: passengerIdCounter,
+          type: "adult",
+          title: "Mr.",
+          name: "",
+          nationality: "",
+          readOnly: false,
+          seat_selected: {},
+        },
+      ],
+    });
+    setPassengerIdCounter(passengerIdCounter + 1);
+  };
+
+  const handleChangePassenger = (id, key, value) => {
+    const updatedPassengers = data.passengers.map((passenger) => {
+      if (passenger.id === id) {
+        let newPassenger = { ...passenger, [key]: value };
+
+        return newPassenger;
+      }
+      return passenger;
+    });
+
+    setData({
+      ...data,
+      passengers: updatedPassengers,
+    });
+  };
+
+  const handleSeatSelect = (passengerId, seatId) => {
+    setData((prevData) => {
+      const updatedPassengers = prevData.passengers.map((passenger) => {
+        if (passenger.id === passengerId) {
+          const seat = data?.ticket?.seats?.find((seat) => seat.id === seatId);
+          return { ...passenger, seat_selected: seat };
+        }
+        return passenger;
+      });
+      return { ...prevData, passengers: updatedPassengers };
+    });
+  };
+
+  const handleRemovePassenger = (id) => {
+    setData({
+      ...data,
+      passengers: data.passengers.filter((passenger) => passenger.id !== id),
+    });
+  };
+
+  const handleChangeSameContact = (e) => {
+    const isChecked = e.target.checked;
+
+    handleChangePassenger(
+      1,
+      "name",
+      isChecked ? data?.contact_person?.name : ""
+    );
+
+    // handleChangePassenger(1, "readOnly", isChecked);
+  };
+
+  return (
+    <>
+      <Box as="section">
+        <Box mb="25px">
+          <CardFlightHeading color="black">Passenger Details</CardFlightHeading>
+        </Box>
+        <CardFlightDetail px={10} py={8}>
+          <Flex
+            flexDirection={{ base: "column", md: "row" }}
+            alignItems={{ base: "stretch", md: "center" }}
+            gap={{ base: "6px", md: 0 }}
+            justifyContent="space-between"
+            mb="30px"
+            rounded="10px"
+            px="28px"
+            py="12px"
+            bgColor="#2395FF1A"
+            fontFamily="Lato"
+            color="#595959"
+          >
+            <Text>
+              Passenger:{" "}
+              {`${
+                data?.passengers?.filter(
+                  (passenger) => passenger.type === "adult"
+                ).length
+              } Adult${
+                data?.passengers?.filter(
+                  (passenger) => passenger.type === "adult"
+                ).length > 1
+                  ? "s"
+                  : ""
+              }${
+                data?.passengers?.filter(
+                  (passenger) => passenger.type === "child"
+                ).length > 0
+                  ? `, ${
+                      data?.passengers?.filter(
+                        (passenger) => passenger.type === "child"
+                      ).length
+                    } Child${
+                      data?.passengers?.filter(
+                        (passenger) => passenger.type === "child"
+                      ).length > 1
+                        ? "s"
+                        : ""
+                    }`
+                  : ""
+              }`}
+            </Text>
+            <Flex alignItems="center" gap="15px">
+              <FormLabel htmlFor="same_as_contact_person" mb="0">
+                Same as contact person
+              </FormLabel>
+              <Switch
+                id="same_as_contact_person"
+                onChange={handleChangeSameContact}
+              />
+            </Flex>
+          </Flex>
+          <FormControlPassenger
+            passenger={data?.passengers?.[0]}
+            callback={handleChangePassenger}
+          />
+          <Flex mb="30px" fontFamily="Lato">
+            <ModalSeat
+              row_seats={data?.ticket?.row_seats}
+              seats={data?.ticket?.seats}
+              passengers={data?.passengers}
+              passenger={data?.passengers?.[0]}
+              onSelectSeat={handleSeatSelect}
+            />
+          </Flex>
+          {data?.passengers?.length > 1 && (
+            <Accordion mb="30px" allowMultiple>
+              {data?.passengers?.slice(1).map((passenger) => (
+                <AccordionItem key={passenger.id}>
+                  <h2>
+                    <AccordionButton>
+                      <Box
+                        as="span"
+                        fontFamily="Lato"
+                        flex="1"
+                        textAlign="center"
+                        textTransform="capitalize"
+                      >
+                        {passenger?.name
+                          ? `${passenger?.type}${passenger?.name && " - "}${
+                              passenger?.name
+                            }`
+                          : `New Passenger ${passenger.id - 1}`}
+                      </Box>
+                      <AccordionIcon />
+                    </AccordionButton>
+                  </h2>
+                  <AccordionPanel pb={0}>
+                    <CardFlightDetail>
+                      <FormControlPassenger
+                        isTypePassenger={true}
+                        passenger={passenger}
+                        callback={handleChangePassenger}
+                      />
+                      <Flex fontFamily="Lato" gap={3} mb="30px">
+                        <ModalSeat
+                          row_seats={data?.ticket?.row_seats}
+                          seats={data?.ticket?.seats}
+                          passengers={data?.passengers}
+                          passenger={passenger}
+                          onSelectSeat={handleSeatSelect}
+                        />
+                        <Button
+                          variant="solid"
+                          colorScheme="red"
+                          onClick={() => handleRemovePassenger(passenger.id)}
+                        >
+                          <FaTrashAlt />
+                        </Button>
+                      </Flex>
+                    </CardFlightDetail>
+                  </AccordionPanel>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          )}
+          <Button
+            variant="ghost"
+            fontFamily="Lato"
+            onClick={handleAddPassenger}
+            w="full"
+          >
+            Add New Passenger
+          </Button>
+        </CardFlightDetail>
+      </Box>
+      <Box as="section">
+        <CardFlightDetail>
+          <Flex
+            px="28px"
+            pb="20px"
+            pt="34px"
+            alignItems="center"
+            justifyContent="space-between"
+            fontFamily="Lato"
+            borderBottom="1px solid #E6E6E6"
+          >
+            <Checkbox
+              gap={{ base: 0, md: "15px" }}
+              fontSize={{ base: "10px", md: "18px" }}
+              fontWeight="600"
+              color="black"
+              onChange={callbackInsurance}
+              value={insurance}
+            >
+              Travel Insurance
+            </Checkbox>
+            <Text
+              fontSize={{ base: "17px", md: "18px" }}
+              fontWeight="700"
+              color="#2395FF"
+            >
+              {rupiah(data?.cost?.travel_insurance)}
+              <Text as="span" fontSize="14px" fontWeight="600" color="#6B6B6B">
+                /pax
+              </Text>
+            </Text>
+          </Flex>
+          <Box px="28px" pb="34px" pt="20px">
+            <Text fontSize="14px" color="black">
+              Get travel compensation up to {rupiah(10000)}
+            </Text>
+          </Box>
+        </CardFlightDetail>
+      </Box>
+    </>
+  );
+};
 
 const FlightDetails = ({
   ticket = {},

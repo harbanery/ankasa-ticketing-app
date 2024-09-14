@@ -39,6 +39,7 @@ import {
   Text,
   Tooltip,
   useDisclosure,
+  useToast,
   VisuallyHidden,
   VStack,
 } from "@chakra-ui/react";
@@ -61,6 +62,7 @@ import { useParams } from "react-router-dom";
 import api from "../../../services/api";
 import { formatScheduleDate, formatTimeFull } from "../../../utils/date";
 import { rupiah } from "../../../utils/currency";
+import { optionToast } from "../../../utils/constants";
 
 function CardFlightHeading({ children, ...props }) {
   return (
@@ -108,10 +110,6 @@ const FlightDetail = () => {
   const [insurance, setInsurance] = useState(false);
 
   const handleChangeContactPerson = (e) => {
-    // if (e?.target?.name === "phone") {
-    //   setForm({ ...form, phone: `${countryCode} + ${e.target.value}` });
-    // }
-    // setForm({ ...form, [e?.target?.name]: e?.target?.value });
     setData({
       ...data,
       contact_person: {
@@ -191,8 +189,6 @@ const FlightDetail = () => {
     }
   }, [data.ticket, data.passengers.length, insurance]);
 
-  console.log(data);
-
   return (
     <Box bg={"gray.200"} fontFamily="Poppins" pb="35px">
       <FlightDetailHeader />
@@ -225,7 +221,7 @@ const FlightDetail = () => {
               justifyContent="center"
               display={{ base: "none", lg: "flex" }}
             >
-              <AlertDialogFlight />
+              <AlertDialogFlight data={data} />
             </Flex>
           </Box>
           <Box
@@ -246,402 +242,6 @@ const FlightDetail = () => {
         </Grid>
       </Container>
     </Box>
-  );
-};
-
-const SeatDetails = ({ passengers = [] }) => {
-  return (
-    <Collapse
-      in={
-        passengers?.filter((passenger) => passenger?.name !== "").length > 0
-          ? true
-          : false
-      }
-      animateOpacity
-      transition={{ enter: { delay: 0.5 } }}
-    >
-      <Box>
-        <Flex alignItems="center" justifyContent="space-between" mb="25px">
-          <CardFlightHeading color="black">Seat Details</CardFlightHeading>
-        </Flex>
-        <CardFlightDetail w="full">
-          <Flex
-            px="28px"
-            py="30px"
-            alignItems="center"
-            justifyContent="space-between"
-            fontFamily="Lato"
-            borderBottom="1px solid #E6E6E6"
-          >
-            <VStack
-              divider={
-                <StackDivider
-                  display={{ base: "none", lg: "block" }}
-                  borderColor="gray.200"
-                />
-              }
-              spacing={2}
-              align="stretch"
-              w={{ base: "full" }}
-              my={{ base: 0, lg: 4 }}
-            >
-              {passengers
-                ?.filter((passenger) => passenger?.name !== "")
-                .map((passenger) => (
-                  <Box
-                    key={passenger?.id}
-                    userSelect="none"
-                    display={{ base: "flex" }}
-                    justifyContent={{ base: "space-between" }}
-                    alignItems={{ base: "center" }}
-                    borderLeft="4px solid #2395FF"
-                    px={2}
-                  >
-                    <Stack spacing={1}>
-                      <Text
-                        fontSize={{ base: "16px", xl: "18px" }}
-                        fontWeight={500}
-                      >
-                        {`${
-                          passenger?.type === "adult" ? passenger?.title : ""
-                        } ${passenger?.name}`}
-                      </Text>
-                      <Text
-                        fontSize={{ base: "20px" }}
-                        fontWeight={600}
-                        textTransform="capitalize"
-                      >
-                        {`${passenger?.type}`}
-                      </Text>
-                    </Stack>
-                    <HStack
-                      bg={
-                        Object.values(passenger?.seat_selected).length !== 0
-                          ? "#2395FF1A"
-                          : "transparent"
-                      }
-                      py={1}
-                      px={2}
-                      rounded="15px"
-                      spacing={
-                        Object.values(passenger?.seat_selected).length !== 0
-                          ? 1
-                          : 0
-                      }
-                      maxW="35%"
-                      fontSize={
-                        Object.values(passenger?.seat_selected).length !== 0
-                          ? { base: 22, xl: 36 }
-                          : { base: 16, xl: 20 }
-                      }
-                      textAlign="right"
-                      fontWeight={
-                        Object.values(passenger?.seat_selected).length !== 0
-                          ? 700
-                          : 500
-                      }
-                    >
-                      {Object.values(passenger?.seat_selected).length !== 0 ? (
-                        <>
-                          <Text>
-                            {passenger?.seat_selected?.code?.split("-")[0]}
-                          </Text>
-                          <Text>-</Text>
-                          <Text>
-                            {passenger?.seat_selected?.code?.split("-")[1]}
-                          </Text>
-                        </>
-                      ) : (
-                        <Text>No Seat Selected</Text>
-                      )}
-                    </HStack>
-                  </Box>
-                ))}
-            </VStack>
-          </Flex>
-        </CardFlightDetail>
-      </Box>
-    </Collapse>
-  );
-};
-
-const MobileFlightDetails = ({ data = {}, insurance = false }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  return (
-    <>
-      <Box display={{ base: "block", lg: "none" }} gridColumn="1/-1">
-        <Flex
-          alignItems="center"
-          justifyContent="space-between"
-          color="black"
-          fontWeight="600"
-          my="2rem"
-        >
-          <Heading
-            fontFamily="Poppins"
-            fontSize={{ base: "1.125rem", md: "24px" }}
-          >
-            Flight Details
-          </Heading>
-          <Text
-            userSelect="none"
-            cursor="pointer"
-            onClick={onOpen}
-            fontSize={{ base: "1rem", md: "22px" }}
-          >
-            View Details
-          </Text>
-          <ModalFlight
-            isOpen={isOpen}
-            onClose={onClose}
-            cost={data?.cost}
-            passengers={data?.passengers}
-            insurance={insurance}
-          />
-        </Flex>
-        <Box bgColor="white" rounded="0.5rem" overflow="hidden">
-          <Box px="1.25rem" py="2.5rem" borderBottom="1px solid #E6E6E6">
-            <Flex justifyContent="space-between" mb="1.5rem">
-              <Box>
-                <Text fontSize="16px" fontWeight="500" color="black">
-                  {data?.ticket?.departure_city} (
-                  {data?.ticket?.departure_country_code})
-                </Text>
-                <Text fontSize="0.75rem" color="#6B6B6B">
-                  {formatTimeFull(data?.ticket?.departure_schedule)}
-                </Text>
-              </Box>
-              <Box mt="0.15rem">
-                <FlightIcon />
-              </Box>
-              <Box textAlign="right">
-                <Text fontSize="16px" fontWeight="500" color="black">
-                  {data?.ticket?.arrival_city} (
-                  {data?.ticket?.arrival_country_code})
-                </Text>
-                <Text fontSize="0.75rem" color="#6B6B6B">
-                  {formatTimeFull(data?.ticket?.arrival_schedule)}
-                </Text>
-              </Box>
-            </Flex>
-            <Flex
-              alignItems="center"
-              justifyContent="space-between"
-              gap={5}
-              mb="1.875rem"
-              fontFamily="Poppins"
-            >
-              <Box w="75px">
-                <Image
-                  w="full"
-                  src={data?.ticket?.merchant_image}
-                  alt={data?.ticket?.merchant_name}
-                />
-              </Box>
-              <Box display="flex" flexDirection="column" gap="10px">
-                {data?.ticket?.is_refund && (
-                  <Flex alignItems={"center"} gap={2} justifyContent="flex-end">
-                    <Text fontWeight={400}>Refundable</Text>
-                    <CiCircleCheck color="#2395FF" size={20} />
-                  </Flex>
-                )}
-                {data?.ticket?.is_reschedule && (
-                  <Flex alignItems={"center"} gap={2} justifyContent="flex-end">
-                    <Text align="right" fontWeight={400}>
-                      Can reschedule
-                    </Text>
-                    <CiCircleCheck color="#2395FF" size={20} />
-                  </Flex>
-                )}
-              </Box>
-            </Flex>
-            <Flex gap="20px" justifyContent="space-between">
-              <Box fontFamily="Lato" maxW="50%">
-                <Text fontSize="0.75rem" color="#A5A5A5">
-                  Schedule
-                </Text>
-                <Text fontSize="0.875rem" fontWeight="500" color="#595959">
-                  {formatScheduleDate(data?.ticket?.departure_schedule)}
-                </Text>
-              </Box>
-              <Box fontFamily="Lato">
-                <Text fontSize="0.75rem" color="#A5A5A5">
-                  Class
-                </Text>
-                <Text fontSize="0.875rem" fontWeight="500" color="#595959">
-                  {data?.ticket?.class}
-                </Text>
-              </Box>
-              <Box fontFamily="Lato">
-                <Text fontSize="0.75rem" color="#A5A5A5">
-                  Gate
-                </Text>
-                <Text fontSize="0.875rem" fontWeight="500" color="#595959">
-                  {data?.ticket?.gate}
-                </Text>
-              </Box>
-            </Flex>
-          </Box>
-          <Box
-            px="1.25rem"
-            pt="1.25rem"
-            pb="1.875rem"
-            shadow="0px 8px 27px 0px #0E3F6C30"
-          >
-            <Flex
-              alignItems="center"
-              justifyContent={
-                data?.passengers?.filter(
-                  (passenger) => passenger.type === "child"
-                ).length > 0
-                  ? "space-between"
-                  : "flex-end"
-              }
-            >
-              {data?.passengers?.filter(
-                (passenger) => passenger.type === "child"
-              ).length > 0 && (
-                <Flex alignItems="center" gap="16px">
-                  <Text
-                    as="span"
-                    fontWeight="700"
-                    fontSize="1.125rem"
-                    w="36px"
-                    aspectRatio="1/1"
-                    color="#2395FF"
-                    bgColor="#2395FF2E"
-                    rounded="100%"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    {
-                      data?.passengers?.filter(
-                        (passenger) => passenger.type === "child"
-                      ).length
-                    }
-                  </Text>
-                  <Text fontSize="0.875rem" color="#979797">
-                    Child
-                    {`${
-                      data?.passengers?.filter(
-                        (passenger) => passenger.type === "child"
-                      ).length > 1
-                        ? "s"
-                        : ""
-                    }`}
-                  </Text>
-                </Flex>
-              )}
-              <Flex alignItems="center" gap="16px">
-                <Text
-                  as="span"
-                  fontWeight="700"
-                  fontSize="1.125rem"
-                  w="36px"
-                  aspectRatio="1/1"
-                  color="#2395FF"
-                  bgColor="#2395FF2E"
-                  rounded="100%"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  {
-                    data?.passengers?.filter(
-                      (passenger) => passenger.type === "adult"
-                    ).length
-                  }
-                </Text>
-                <Text fontSize="0.875rem" color="#979797">
-                  Adult
-                  {`${
-                    data?.passengers?.filter(
-                      (passenger) => passenger.type === "adult"
-                    ).length > 1
-                      ? "s"
-                      : ""
-                  }`}
-                </Text>
-              </Flex>
-            </Flex>
-          </Box>
-        </Box>
-      </Box>
-      <Box display={{ base: "block", lg: "none" }} gridColumn="1/-1" mb="40px">
-        <Box mb="0.75rem">
-          <Heading fontSize="0.875rem" fontWeight="600">
-            Facilities
-          </Heading>
-        </Box>
-        <List display="flex" alignItems="center" gap="0.75rem" flexWrap="wrap">
-          {data?.ticket?.is_luggage && (
-            <ListItem
-              px="1.25rem"
-              py="1rem"
-              bgColor="#E45D32"
-              rounded="0.625rem"
-              display="flex"
-              alignItems="center"
-              gap="20px"
-              color="white"
-            >
-              <RiLuggageDepositFill size={22} />
-              <Text fontSize="0.875rem" fontWeight="600">
-                Luggage
-              </Text>
-            </ListItem>
-          )}
-          {data?.ticket?.is_inflight_meal && (
-            <ListItem
-              px="1.25rem"
-              py="1rem"
-              bgColor="#7861D7"
-              rounded="0.625rem"
-              display="flex"
-              alignItems="center"
-              gap="20px"
-              color="white"
-            >
-              <HamburgerIcon />
-              <Text fontSize="0.875rem" fontWeight="600">
-                Meal
-              </Text>
-            </ListItem>
-          )}
-          {data?.ticket?.is_wifi && (
-            <ListItem
-              px="1.25rem"
-              py="1rem"
-              bgColor="#6DDA6B"
-              rounded="0.625rem"
-              display="flex"
-              alignItems="center"
-              gap="20px"
-              color="white"
-            >
-              <WifiIcon />
-              <Text fontSize="0.875rem" fontWeight="600">
-                Wi-Fi
-              </Text>
-            </ListItem>
-          )}
-        </List>
-      </Box>
-      <Box display={{ base: "block", lg: "none" }} gridColumn="1/-1">
-        <Flex alignItems="center" justifyContent="space-between" mb="30px">
-          <Text fontSize="0.875rem" fontWeight="500" color="#6B6B6B">
-            Total you'll pay
-          </Text>
-          <Text fontSize="1.5rem" fontWeight="600" color="#2395FF">
-            {rupiah(data?.cost?.total_price)}
-          </Text>
-        </Flex>
-        <Flex>
-          <AlertDialogFlight />
-        </Flex>
-      </Box>
-    </>
   );
 };
 
@@ -728,52 +328,10 @@ const SeatsFlight = ({
     }
   };
 
-  // console.log(passenger_seat_selected);
-
-  const data_dummy = [
-    {
-      code: "1-A",
-      id: 1,
-      is_booking: false,
-    },
-    {
-      code: "1-B",
-      id: 2,
-      is_booking: false,
-    },
-    {
-      code: "1-C",
-      id: 3,
-      is_booking: false,
-    },
-    {
-      code: "1-D",
-      id: 4,
-      is_booking: false,
-    },
-    {
-      code: "2-A",
-      id: 5,
-      is_booking: false,
-    },
-    {
-      code: "2-B",
-      id: 6,
-      is_booking: false,
-    },
-    {
-      code: "2-C",
-      id: 7,
-      is_booking: false,
-    },
-  ];
-  // Function to split seats into rows and add spacing
   const arrangeSeats = (data, seatsPerRow) => {
     const rows = [];
     let numRows = data[0]?.code.split("-")[0] || 1;
 
-    // let code_data = data[0]?.code;
-    // console.log(code_data.split("-")[0]);
     const generateAlphabetRow = (seatPositions) => {
       const row = [];
       let seatIndex = 0;
@@ -789,22 +347,20 @@ const SeatsFlight = ({
       return row;
     };
 
-    // Fungsi untuk menyusun kursi dengan slot null yang teratur
     const generateRow = (rowSeats, seatPositions, numberOfRows) => {
       const row = [];
       let seatIndex = 0;
       for (let i = 0; i < seatPositions.length; i++) {
         if (seatPositions[i] === null) {
-          row.push(numberOfRows); // Tambah null di posisi yang sesuai
+          row.push(numberOfRows);
         } else {
-          row.push(rowSeats[seatIndex] || null); // Tambah kursi jika ada, jika tidak ada isi dengan null
+          row.push(rowSeats[seatIndex] || null);
           seatIndex++;
         }
       }
       return row;
     };
 
-    // Template posisi kursi berdasarkan jumlah seatsPerRow
     const seatLayouts = {
       4: [0, 1, null, 2, 3],
       6: [0, 1, 2, null, 3, 4, 5],
@@ -820,10 +376,9 @@ const SeatsFlight = ({
       const rowSeats = data.slice(i, i + seatsPerRow);
 
       if (seatsPerRow <= 10) {
-        // Jika seatsPerRow ada di layout yang ditentukan, gunakan fungsi generateRow
         rows.push(generateRow(rowSeats, seatLayouts[seatsPerRow], numRows));
       } else {
-        rows.push(rowSeats); // Jika lebih dari 10, masukkan kursi secara langsung
+        rows.push(rowSeats);
       }
 
       numRows++;
@@ -833,7 +388,6 @@ const SeatsFlight = ({
   };
 
   const seatRows = arrangeSeats(seats, count_row);
-  // console.log(seatRows);
 
   return (
     <Box
@@ -856,7 +410,7 @@ const SeatsFlight = ({
           templateColumns={`repeat(${
             count_row <= 6 ? count_row + 1 : count_row <= 10 ? count_row + 2 : 4
           }, 1fr)`}
-          mb={5} // Margin between rows
+          mb={5}
         >
           {row.map((seat, seatIndex) =>
             seat ? (
@@ -1160,9 +714,62 @@ const ModalFlight = ({
   );
 };
 
-const AlertDialogFlight = () => {
+const AlertDialogFlight = ({ data = {} }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef();
+  const toast = useToast();
+
+  const handleCreatePayment = async () => {
+    const checkPassengers = data?.passengers?.filter(
+      (passenger) =>
+        passenger?.name === "" ||
+        passenger.nationality === "" ||
+        Object.values(passenger?.seat_selected).length === 0
+    );
+
+    if (checkPassengers.length == 0) {
+      try {
+        const res = await api.post(`orders`, {
+          ticket_id: data?.ticket?.id,
+          total_price: data?.cost?.total_price,
+          passengers: data?.passengers?.map((passenger) => ({
+            seat_id: passenger?.seat_selected?.id,
+            name: `${passenger?.title} ${passenger?.name}`,
+            category: passenger?.type,
+            nationality: passenger?.nationality,
+          })),
+        });
+        toast({
+          title: "Order Successfully",
+          status: "success",
+          ...optionToast,
+        });
+        if (res?.data?.url) {
+          const timeout = setTimeout(() => {
+            onClose();
+            window.open(res?.data?.url, "_blank");
+            // window.location.replace(res?.data?.url);
+          }, 2000);
+          return () => clearTimeout(timeout);
+        }
+      } catch (err) {
+        console.log(err);
+        toast({
+          title: "Order failed",
+          status: "error",
+          ...optionToast,
+        });
+      }
+    } else {
+      toast({
+        title: "Order failed",
+        description: `Seat and form not complete.`,
+        status: "error",
+        ...optionToast,
+      });
+    }
+  };
+
   return (
     <>
       <Button
@@ -1206,7 +813,12 @@ const AlertDialogFlight = () => {
             <Button ref={cancelRef} onClick={onClose} variant="solid">
               No, Let me check again!
             </Button>
-            <Button bg="#2395FF" color="white" ml={3}>
+            <Button
+              bg="#2395FF"
+              onClick={handleCreatePayment}
+              color="white"
+              ml={3}
+            >
               Yes
             </Button>
           </AlertDialogFooter>
@@ -1268,40 +880,6 @@ const ContactPersonDetails = ({ contact_person = [], callback }) => {
               />
             </Box>
           ))}
-          {/* <Flex
-        alignItems={"end"}
-        gap={3}
-        borderBottom={"1px solid"}
-        borderColor={"gray.400"}
-      >
-        <Box>
-          <FormLabel color={"gray.500"}>Phone</FormLabel>
-          <Select
-            variant="flushed"
-            w={70}
-            fontSize={14}
-            focusBorderColor="transparent"
-            onChange={(e) => setCountryCode(e.target.value)}
-          >
-            <option value="+62">+62</option>
-            <option value="+63">+63</option>
-            <option value="+64">+64</option>
-          </Select>
-        </Box>
-        <Stack h={8} w={"2px"} bg={"gray.300"}></Stack>
-        <Input
-          py={2}
-          variant="unstyled"
-          placeholder="Phone number"
-          focusBorderColor="transparent"
-          type="text"
-          border={"none"}
-          borderColor="transparent"
-          value={form?.phone}
-          name="phone"
-          onChange={(e) => handleChange(e)}
-        />
-      </Flex> */}
         </FormControl>
         <Flex
           bg={"#F245451A"}
@@ -1788,6 +1366,286 @@ const FlightDetails = ({
   );
 };
 
+const MobileFlightDetails = ({ data = {}, insurance = false }) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  return (
+    <>
+      <Box display={{ base: "block", lg: "none" }} gridColumn="1/-1">
+        <Flex
+          alignItems="center"
+          justifyContent="space-between"
+          color="black"
+          fontWeight="600"
+          my="2rem"
+        >
+          <Heading
+            fontFamily="Poppins"
+            fontSize={{ base: "1.125rem", md: "24px" }}
+          >
+            Flight Details
+          </Heading>
+          <Text
+            userSelect="none"
+            cursor="pointer"
+            onClick={onOpen}
+            fontSize={{ base: "1rem", md: "22px" }}
+          >
+            View Details
+          </Text>
+          <ModalFlight
+            isOpen={isOpen}
+            onClose={onClose}
+            cost={data?.cost}
+            passengers={data?.passengers}
+            insurance={insurance}
+          />
+        </Flex>
+        <Box bgColor="white" rounded="0.5rem" overflow="hidden">
+          <Box px="1.25rem" py="2.5rem" borderBottom="1px solid #E6E6E6">
+            <Flex justifyContent="space-between" mb="1.5rem">
+              <Box>
+                <Text fontSize="16px" fontWeight="500" color="black">
+                  {data?.ticket?.departure_city} (
+                  {data?.ticket?.departure_country_code})
+                </Text>
+                <Text fontSize="0.75rem" color="#6B6B6B">
+                  {formatTimeFull(data?.ticket?.departure_schedule)}
+                </Text>
+              </Box>
+              <Box mt="0.15rem">
+                <FlightIcon />
+              </Box>
+              <Box textAlign="right">
+                <Text fontSize="16px" fontWeight="500" color="black">
+                  {data?.ticket?.arrival_city} (
+                  {data?.ticket?.arrival_country_code})
+                </Text>
+                <Text fontSize="0.75rem" color="#6B6B6B">
+                  {formatTimeFull(data?.ticket?.arrival_schedule)}
+                </Text>
+              </Box>
+            </Flex>
+            <Flex
+              alignItems="center"
+              justifyContent="space-between"
+              gap={5}
+              mb="1.875rem"
+              fontFamily="Poppins"
+            >
+              <Box w="75px">
+                <Image
+                  w="full"
+                  src={data?.ticket?.merchant_image}
+                  alt={data?.ticket?.merchant_name}
+                />
+              </Box>
+              <Box display="flex" flexDirection="column" gap="10px">
+                {data?.ticket?.is_refund && (
+                  <Flex alignItems={"center"} gap={2} justifyContent="flex-end">
+                    <Text fontWeight={400}>Refundable</Text>
+                    <CiCircleCheck color="#2395FF" size={20} />
+                  </Flex>
+                )}
+                {data?.ticket?.is_reschedule && (
+                  <Flex alignItems={"center"} gap={2} justifyContent="flex-end">
+                    <Text align="right" fontWeight={400}>
+                      Can reschedule
+                    </Text>
+                    <CiCircleCheck color="#2395FF" size={20} />
+                  </Flex>
+                )}
+              </Box>
+            </Flex>
+            <Flex gap="20px" justifyContent="space-between">
+              <Box fontFamily="Lato" maxW="50%">
+                <Text fontSize="0.75rem" color="#A5A5A5">
+                  Schedule
+                </Text>
+                <Text fontSize="0.875rem" fontWeight="500" color="#595959">
+                  {formatScheduleDate(data?.ticket?.departure_schedule)}
+                </Text>
+              </Box>
+              <Box fontFamily="Lato">
+                <Text fontSize="0.75rem" color="#A5A5A5">
+                  Class
+                </Text>
+                <Text fontSize="0.875rem" fontWeight="500" color="#595959">
+                  {data?.ticket?.class}
+                </Text>
+              </Box>
+              <Box fontFamily="Lato">
+                <Text fontSize="0.75rem" color="#A5A5A5">
+                  Gate
+                </Text>
+                <Text fontSize="0.875rem" fontWeight="500" color="#595959">
+                  {data?.ticket?.gate}
+                </Text>
+              </Box>
+            </Flex>
+          </Box>
+          <Box
+            px="1.25rem"
+            pt="1.25rem"
+            pb="1.875rem"
+            shadow="0px 8px 27px 0px #0E3F6C30"
+          >
+            <Flex
+              alignItems="center"
+              justifyContent={
+                data?.passengers?.filter(
+                  (passenger) => passenger.type === "child"
+                ).length > 0
+                  ? "space-between"
+                  : "flex-end"
+              }
+            >
+              {data?.passengers?.filter(
+                (passenger) => passenger.type === "child"
+              ).length > 0 && (
+                <Flex alignItems="center" gap="16px">
+                  <Text
+                    as="span"
+                    fontWeight="700"
+                    fontSize="1.125rem"
+                    w="36px"
+                    aspectRatio="1/1"
+                    color="#2395FF"
+                    bgColor="#2395FF2E"
+                    rounded="100%"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    {
+                      data?.passengers?.filter(
+                        (passenger) => passenger.type === "child"
+                      ).length
+                    }
+                  </Text>
+                  <Text fontSize="0.875rem" color="#979797">
+                    Child
+                    {`${
+                      data?.passengers?.filter(
+                        (passenger) => passenger.type === "child"
+                      ).length > 1
+                        ? "s"
+                        : ""
+                    }`}
+                  </Text>
+                </Flex>
+              )}
+              <Flex alignItems="center" gap="16px">
+                <Text
+                  as="span"
+                  fontWeight="700"
+                  fontSize="1.125rem"
+                  w="36px"
+                  aspectRatio="1/1"
+                  color="#2395FF"
+                  bgColor="#2395FF2E"
+                  rounded="100%"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  {
+                    data?.passengers?.filter(
+                      (passenger) => passenger.type === "adult"
+                    ).length
+                  }
+                </Text>
+                <Text fontSize="0.875rem" color="#979797">
+                  Adult
+                  {`${
+                    data?.passengers?.filter(
+                      (passenger) => passenger.type === "adult"
+                    ).length > 1
+                      ? "s"
+                      : ""
+                  }`}
+                </Text>
+              </Flex>
+            </Flex>
+          </Box>
+        </Box>
+      </Box>
+      <Box display={{ base: "block", lg: "none" }} gridColumn="1/-1" mb="40px">
+        <Box mb="0.75rem">
+          <Heading fontSize="0.875rem" fontWeight="600">
+            Facilities
+          </Heading>
+        </Box>
+        <List display="flex" alignItems="center" gap="0.75rem" flexWrap="wrap">
+          {data?.ticket?.is_luggage && (
+            <ListItem
+              px="1.25rem"
+              py="1rem"
+              bgColor="#E45D32"
+              rounded="0.625rem"
+              display="flex"
+              alignItems="center"
+              gap="20px"
+              color="white"
+            >
+              <RiLuggageDepositFill size={22} />
+              <Text fontSize="0.875rem" fontWeight="600">
+                Luggage
+              </Text>
+            </ListItem>
+          )}
+          {data?.ticket?.is_inflight_meal && (
+            <ListItem
+              px="1.25rem"
+              py="1rem"
+              bgColor="#7861D7"
+              rounded="0.625rem"
+              display="flex"
+              alignItems="center"
+              gap="20px"
+              color="white"
+            >
+              <HamburgerIcon />
+              <Text fontSize="0.875rem" fontWeight="600">
+                Meal
+              </Text>
+            </ListItem>
+          )}
+          {data?.ticket?.is_wifi && (
+            <ListItem
+              px="1.25rem"
+              py="1rem"
+              bgColor="#6DDA6B"
+              rounded="0.625rem"
+              display="flex"
+              alignItems="center"
+              gap="20px"
+              color="white"
+            >
+              <WifiIcon />
+              <Text fontSize="0.875rem" fontWeight="600">
+                Wi-Fi
+              </Text>
+            </ListItem>
+          )}
+        </List>
+      </Box>
+      <Box display={{ base: "block", lg: "none" }} gridColumn="1/-1">
+        <Flex alignItems="center" justifyContent="space-between" mb="30px">
+          <Text fontSize="0.875rem" fontWeight="500" color="#6B6B6B">
+            Total you'll pay
+          </Text>
+          <Text fontSize="1.5rem" fontWeight="600" color="#2395FF">
+            {rupiah(data?.cost?.total_price)}
+          </Text>
+        </Flex>
+        <Flex>
+          <AlertDialogFlight data={data} />
+        </Flex>
+      </Box>
+    </>
+  );
+};
+
 const CostDetails = ({
   cost = {},
   passengers = [],
@@ -1902,6 +1760,122 @@ const CostDetails = ({
         ticket per seat
       </Text>
     </Box>
+  );
+};
+
+const SeatDetails = ({ passengers = [] }) => {
+  return (
+    <Collapse
+      in={
+        passengers?.filter((passenger) => passenger?.name !== "").length > 0
+          ? true
+          : false
+      }
+      animateOpacity
+      transition={{ enter: { delay: 0.5 } }}
+    >
+      <Box>
+        <Flex alignItems="center" justifyContent="space-between" mb="25px">
+          <CardFlightHeading color="black">Seat Details</CardFlightHeading>
+        </Flex>
+        <CardFlightDetail w="full">
+          <Flex
+            px="28px"
+            py="30px"
+            alignItems="center"
+            justifyContent="space-between"
+            fontFamily="Lato"
+            borderBottom="1px solid #E6E6E6"
+          >
+            <VStack
+              divider={
+                <StackDivider
+                  display={{ base: "none", lg: "block" }}
+                  borderColor="gray.200"
+                />
+              }
+              spacing={2}
+              align="stretch"
+              w={{ base: "full" }}
+              my={{ base: 0, lg: 4 }}
+            >
+              {passengers
+                ?.filter((passenger) => passenger?.name !== "")
+                .map((passenger) => (
+                  <Box
+                    key={passenger?.id}
+                    userSelect="none"
+                    display={{ base: "flex" }}
+                    justifyContent={{ base: "space-between" }}
+                    alignItems={{ base: "center" }}
+                    borderLeft="4px solid #2395FF"
+                    px={2}
+                  >
+                    <Stack spacing={1}>
+                      <Text
+                        fontSize={{ base: "16px", xl: "18px" }}
+                        fontWeight={500}
+                      >
+                        {`${
+                          passenger?.type === "adult" ? passenger?.title : ""
+                        } ${passenger?.name}`}
+                      </Text>
+                      <Text
+                        fontSize={{ base: "20px" }}
+                        fontWeight={600}
+                        textTransform="capitalize"
+                      >
+                        {`${passenger?.type}`}
+                      </Text>
+                    </Stack>
+                    <HStack
+                      bg={
+                        Object.values(passenger?.seat_selected).length !== 0
+                          ? "#2395FF1A"
+                          : "transparent"
+                      }
+                      py={1}
+                      px={2}
+                      rounded="15px"
+                      spacing={
+                        Object.values(passenger?.seat_selected).length !== 0
+                          ? 1
+                          : 0
+                      }
+                      maxW="35%"
+                      fontSize={
+                        Object.values(passenger?.seat_selected).length !== 0
+                          ? { base: 22, xl: 36 }
+                          : { base: 16, xl: 20 }
+                      }
+                      textAlign="right"
+                      fontWeight={
+                        Object.values(passenger?.seat_selected).length !== 0
+                          ? 700
+                          : 500
+                      }
+                    >
+                      {Object.values(passenger?.seat_selected).length !== 0 ? (
+                        <>
+                          <Text>
+                            {passenger?.seat_selected?.code?.split("-")[0]}
+                          </Text>
+                          <Text>-</Text>
+                          <Text>
+                            {passenger?.seat_selected?.code?.split("-")[1]}
+                          </Text>
+                        </>
+                      ) : (
+                        <Text>No Seat Selected</Text>
+                      )}
+                    </HStack>
+                  </Box>
+                ))}
+            </VStack>
+          </Flex>
+        </CardFlightDetail>
+      </Box>
+    </Collapse>
   );
 };
 

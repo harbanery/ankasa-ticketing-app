@@ -1,7 +1,10 @@
 import {
+  differenceInMilliseconds,
   format,
   formatDistanceToNowStrict,
+  formatDuration,
   millisecondsToHours,
+  millisecondsToMinutes,
 } from "date-fns";
 
 const convertDateTimeToHours = (dateString) => {
@@ -16,11 +19,27 @@ const convertDateTimeToHours = (dateString) => {
   }
 
   const now = new Date();
-  const milliseconds = now - date;
+  const milliseconds = differenceInMilliseconds(now, date);
 
   const hours = millisecondsToHours(milliseconds);
 
   return { date, hours };
+};
+
+export const convertDistanceTime = (datetimeFirst, datetimeLast) => {
+  if (!datetimeFirst || !datetimeLast) {
+    return "Invalid date";
+  }
+
+  const dateFirst = new Date(datetimeFirst);
+  const dateLast = new Date(datetimeLast);
+
+  const milliseconds = differenceInMilliseconds(dateLast, dateFirst);
+
+  const minutes = millisecondsToMinutes(milliseconds) % 60;
+  const hours = millisecondsToHours(milliseconds);
+
+  return formatDuration({ hours, minutes });
 };
 
 export const formatNotification = (datetime) => {
@@ -63,4 +82,20 @@ export const formatTime = (datetime) => {
   }
 
   return format(datetime, "H:mm");
+};
+
+export const formatTimeFull = (datetime) => {
+  if (!datetime) {
+    return "Invalid date";
+  }
+
+  return format(datetime, "HH:mm");
+};
+
+export const formatScheduleDate = (datetime) => {
+  if (!datetime) {
+    return "Invalid date";
+  }
+
+  return format(datetime, "EEEE, i MMMM y");
 };

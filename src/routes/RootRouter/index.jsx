@@ -39,6 +39,7 @@ const RootRouter = () => {
         {
           path: "flight/:id",
           element: <FlightDetail />,
+          loader: protectedRoute,
         },
         {
           path: "my-booking/:id",
@@ -59,10 +60,6 @@ const RootRouter = () => {
               element: <MyBooking />,
             },
           ],
-        },
-        {
-          path: "chat",
-          element: <Chat />,
         },
         {
           path: "chat",

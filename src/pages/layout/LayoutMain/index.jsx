@@ -12,12 +12,13 @@ import {
 const LayoutMain = () => {
   const { data, token } = useLoaderData();
   // console.log(token);
-  const user = data?.data;
+  const user = data?.profile?.data;
+  const chats = data?.chats?.data;
   // console.log(user);
 
   return (
     <>
-      <Navbar data_user={user} token={token} />
+      <Navbar data_user={user} data_chat={chats} token={token} />
       <Outlet />
       <Footer />
     </>

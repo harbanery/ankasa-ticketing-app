@@ -33,7 +33,7 @@ const MyBooking = () => {
     <Box fontFamily={"Poppins"}>
       <Box>
         <Text
-          font-family={"poppins"}
+          fontFamily={"poppins"}
           fontWeight={500}
           fontSize={"14px"}
           lineHeight={"21px"}
@@ -44,7 +44,7 @@ const MyBooking = () => {
         </Text>
         <Text
           mt={2}
-          font-family={"poppins"}
+          fontFamily={"poppins"}
           fontWeight={600}
           fontSize={"24px"}
           lineHeight={"36px"}

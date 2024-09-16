@@ -12,13 +12,14 @@ import {
   Stack,
   Text,
   useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { FaRegUserCircle } from "react-icons/fa";
 import { FaStar } from "react-icons/fa6";
-import { IoIosArrowForward, IoMdSettings } from "react-icons/io";
+import { IoMdSettings } from "react-icons/io";
 import api from "../../../services/api";
-import { Outlet } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { IoLocationSharp } from "react-icons/io5";
 
 const ProfileMobile = ({
@@ -27,6 +28,8 @@ const ProfileMobile = ({
   activeIndex,
   activeColor,
   defaultColor,
+  profile,
+  isActive,
 }) => {
   return (
     <Collapse
@@ -48,7 +51,12 @@ const ProfileMobile = ({
           rowGap={8}
         >
           <Box borderRadius="full" border="4px" borderColor="#2395FF" p={2}>
-            <Image boxSize={{base: "100px",lg: "150px"}} src={profile.image} alt="Dan Abramov" rounded="full" />
+            <Image
+              boxSize={{ base: "100px", lg: "150px" }}
+              src={profile.image}
+              alt="Dan Abramov"
+              rounded="full"
+            />
           </Box>
           <Button
             w={"150px"}
@@ -74,7 +82,7 @@ const ProfileMobile = ({
               fontFamily={"poppins"}
               textTransform={"capitalize"}
             >
-              Username
+              {profile.username}
             </Text>
             <Flex alignItems={"center"} columnGap={2}>
               <IoLocationSharp color="#2395FF" size={24} />
@@ -85,7 +93,7 @@ const ProfileMobile = ({
                 color={"#6B6B6B"}
                 lineHeight={"22px"}
               >
-                Surakarta, Indonesia
+                {profile.city}, Indonesia
               </Text>
             </Flex>
           </Box>
@@ -153,7 +161,7 @@ const ProfileMobile = ({
                   color={"#AEFAFF"}
                   lineHeight={"22px"}
                 >
-                  NAMA LENGKAP CUSTOMER
+                  {profile.username}
                 </Text>
                 <Text
                   fontWeight={400}
@@ -181,7 +189,7 @@ const ProfileMobile = ({
             <GridItem
               colSpan={1}
               onClick={() => handleClick(0)}
-              color={activeIndex === 0 ? activeColor : defaultColor}
+              color={isActive ? activeColor : defaultColor}
               cursor="pointer"
             >
               <FaRegUserCircle w={"20px"} h={"20px"} />
@@ -193,10 +201,10 @@ const ProfileMobile = ({
               fontSize={"14px"}
               lineHeight={"22px"}
               onClick={() => handleClick(0)}
-              color={activeIndex === 0 ? activeColor : defaultColor}
+              color={isActive ? activeColor : defaultColor}
               cursor="pointer"
             >
-              Profile
+              <Link to="/profile/my-profile">Profile</Link>
             </GridItem>
             <GridItem
               colSpan={1}
@@ -267,24 +275,100 @@ const ProfileMobile = ({
 const Profile = () => {
   const [profile, setProfile] = useState([]);
   const { isOpen, onToggle } = useDisclosure();
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState("");
+  const toast = useToast();
+  const [loading, setLoading] = useState(false)
+  // toast({
+  //   title: "Profile photo updated successfully.",
+  //   status: "success",
+  //   duration: 3000,
+  //   isClosable: true,
+  // });
   useEffect(() => {
     api
       .get("customer/profile")
       .then((res) => {
         setProfile(res.data.data);
-        console.log("data", res.data.data);
+        console.log("data: ", res.data.data.email);
       })
       .catch((err) => {
         console.log(err);
       });
   }, []);
   const [activeIndex, setActiveIndex] = useState(0);
+  const location = useLocation();
+  const isActive = location.pathname === "/profile/my-profile";
 
   const handleClick = (index) => {
     setActiveIndex(index);
   };
   const defaultColor = "#000"; // Warna default ketika tidak aktif
   const activeColor = "#2395FF"; // Warna ketika aktif
+
+  const handleChangeImage = (e) => {
+    setLoading(true)
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      setPreview(URL.createObjectURL(file)); // Membuat URL preview dari file yang dipilih
+      setLoading(false)
+    }
+  };
+
+  const handleUploadImage = async () => {
+    setLoading(true)
+    if (!image) {
+      toast({
+        title: "Select ad image to upload",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      setLoading(false)
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", image);
+
+    try {
+      // Upload image logic here...
+      const response = await api.post(
+        "customer/upload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setProfile((prevProfile) => ({
+          ...prevProfile,
+          image: response.data.image, // Menggunakan URL dari hasil upload
+        }));
+        setLoading(false)
+        toast({
+          title: "Profile photo updated successfully.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+        console.log("Photo uploaded successfully:", response.data);
+      }
+    } catch (error) {
+      setLoading(false)
+      toast({
+        title: "Failed to upload image",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      console.error("Error uploading photo:", error);
+    }
+  };
   return (
     <Flex
       bgColor={{ base: "white", md: "#F5F6FA" }}
@@ -307,6 +391,8 @@ const Profile = () => {
         activeIndex={activeIndex}
         defaultColor={defaultColor}
         handleClick={handleClick}
+        profile={profile}
+        isActive={isActive}
       />
       <Box
         display={{ base: "none", md: "block", lg: "block" }}
@@ -323,9 +409,19 @@ const Profile = () => {
           rowGap={8}
         >
           <Box borderRadius="full" border="4px" borderColor="#2395FF" p={2}>
-            <Image boxSize="150px" as={Avatar} alt="Dan Abramov" />
+            <Image
+              boxSize="150px"
+              src={preview || profile.image || "/src/assets/profile.png"} // Replace with dynamic profile image source
+              alt="Profile Photo"
+              rounded="full"
+              objectFit={"cover"}
+            />
           </Box>
           <Button
+            as="label" // This allows the button to function as a label for the input
+            isLoading={loading}
+            loadingText="Process..."
+            htmlFor="file-upload"
             w={"150px"}
             h={"50px"}
             bgColor="white"
@@ -338,8 +434,38 @@ const Profile = () => {
               border: "2px",
               borderColor: "white",
             }}
+            display={!image ? "inline-flex" : "none"}
+            flexDirection="column"
           >
-            Select Photo
+            Select Photo<Text fontSize={9}> Max 2 MB</Text>
+            
+            <input
+              id="file-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleChangeImage}
+              style={{ display: "none" }} // Hide the default input
+            />
+          </Button>
+          <Button
+          isLoading={loading}
+          loadingText="Process..."
+            w={"150px"}
+            h={"50px"}
+            bgColor="white"
+            color={"#2395FF"}
+            border={"2px"}
+            borderColor={"#2395FF"}
+            _hover={{
+              bg: "#2395FF",
+              color: "white",
+              border: "2px",
+              borderColor: "white",
+            }}
+            onClick={handleUploadImage} // Trigger upload when the button is clicked
+            display={image ? "block" : "none"}
+          >
+            Upload Photo
           </Button>
           <Box>
             <Text
@@ -359,7 +485,7 @@ const Profile = () => {
                 color={"#6B6B6B"}
                 lineHeight={"22px"}
               >
-                Surakarta, Indonesia
+                {profile.city}, Indonesia
               </Text>
             </Flex>
           </Box>
@@ -427,7 +553,7 @@ const Profile = () => {
                   color={"#AEFAFF"}
                   lineHeight={"22px"}
                 >
-                  NAMA LENGKAP CUSTOMER
+                  {profile.username}
                 </Text>
                 <Text
                   fontWeight={400}
@@ -455,7 +581,7 @@ const Profile = () => {
             <GridItem
               colSpan={1}
               onClick={() => handleClick(0)}
-              color={activeIndex === 0 ? activeColor : defaultColor}
+              color={isActive ? activeColor : defaultColor}
               cursor="pointer"
             >
               <FaRegUserCircle w={"20px"} h={"20px"} />
@@ -467,10 +593,10 @@ const Profile = () => {
               fontSize={"14px"}
               lineHeight={"22px"}
               onClick={() => handleClick(0)}
-              color={activeIndex === 0 ? activeColor : defaultColor}
+              color={isActive ? activeColor : defaultColor}
               cursor="pointer"
             >
-              Profile
+              <Link to="/profile/my-profile">Profile</Link>
             </GridItem>
             <GridItem
               colSpan={1}
@@ -537,7 +663,6 @@ const Profile = () => {
       <Box
         bgColor={"white"}
         w={{ base: "", md: "876px", lg: "876px" }}
-        h={"650px"}
         rounded={15}
         py={8}
         px={6}

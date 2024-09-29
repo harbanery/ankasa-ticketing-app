@@ -482,7 +482,7 @@ const ChatBar = ({ data = [], user = {}, location }) => {
           mx={{ base: "16px", md: "28px" }}
           my={{ base: "20px", md: "40px" }}
         >
-          <CardChat data={data} user={user} />
+          <CardChat />
         </PopoverBody>
       </PopoverContent>
     </Popover>

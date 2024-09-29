@@ -7,95 +7,78 @@ import {
   millisecondsToMinutes,
 } from "date-fns";
 
-const convertDateTimeToHours = (dateString) => {
-  if (!dateString) {
-    return "Invalid date";
-  }
-
+const parseDate = (dateString) => {
   const date = new Date(dateString);
+  return isNaN(date.getTime()) ? null : date;
+};
 
-  if (isNaN(date.getTime())) {
-    return "Invalid date";
-  }
+const convertDateTimeToHours = (dateString) => {
+  const date = parseDate(dateString);
+  if (!date) return "Invalid date";
 
   const now = new Date();
   const milliseconds = differenceInMilliseconds(now, date);
-
   const hours = millisecondsToHours(milliseconds);
 
   return { date, hours };
 };
 
 export const convertDistanceTime = (datetimeFirst, datetimeLast) => {
-  if (!datetimeFirst || !datetimeLast) {
-    return "Invalid date";
-  }
-
-  const dateFirst = new Date(datetimeFirst);
-  const dateLast = new Date(datetimeLast);
+  const dateFirst = parseDate(datetimeFirst);
+  const dateLast = parseDate(datetimeLast);
+  if (!dateFirst || !dateLast) return "Invalid date";
 
   const milliseconds = differenceInMilliseconds(dateLast, dateFirst);
-
-  const minutes = millisecondsToMinutes(milliseconds) % 60;
   const hours = millisecondsToHours(milliseconds);
+  const minutes = millisecondsToMinutes(milliseconds) % 60;
 
   return formatDuration({ hours, minutes });
 };
 
 export const formatNotification = (datetime) => {
-  if (!datetime) {
-    return "Invalid date";
-  }
-
   const { date, hours } = convertDateTimeToHours(datetime);
+  if (date === "Invalid date") return "Invalid date";
 
-  if (hours >= 24) {
-    return format(date, "d MMMM yyyy, K:mm a");
-  } else {
-    return formatDistanceToNowStrict(date, {
-      addSuffix: true,
-    });
-  }
+  return hours >= 24
+    ? format(date, "d MMMM yyyy, K:mm a")
+    : formatDistanceToNowStrict(date, { addSuffix: true });
 };
 
 export const formatChat = (datetime) => {
-  if (!datetime) {
-    return "Invalid date";
-  }
-
   const { date, hours } = convertDateTimeToHours(datetime);
+  if (date === "Invalid date") return "Invalid date";
 
   if (hours >= 24) {
-    if (hours < 48) {
-      return "Yesterday";
-    } else {
-      return format(date, "dd/MM/yyyy");
-    }
-  } else {
-    return format(date, "H:mm");
+    return hours < 48 ? "Yesterday" : format(date, "dd/MM/yyyy");
   }
+
+  return format(date, "H:mm");
 };
 
 export const formatTime = (datetime) => {
-  if (!datetime) {
-    return "Invalid date";
-  }
+  const date = parseDate(datetime);
+  if (!date) return "Invalid date";
 
-  return format(datetime, "H:mm");
+  return format(date, "H:mm");
 };
 
 export const formatTimeFull = (datetime) => {
-  if (!datetime) {
-    return "Invalid date";
-  }
+  const date = parseDate(datetime);
+  if (!date) return "Invalid date";
 
-  return format(datetime, "HH:mm");
+  return format(date, "HH:mm");
 };
 
 export const formatScheduleDate = (datetime) => {
-  if (!datetime) {
-    return "Invalid date";
-  }
+  const date = parseDate(datetime);
+  if (!date) return "Invalid date";
 
-  return format(datetime, "EEEE, i MMMM y");
+  return format(date, "EEEE, d MMMM y");
+};
+
+export const formatOrderDate = (datetime) => {
+  const date = parseDate(datetime);
+  if (!date) return "Invalid date";
+
+  return format(date, "EEEE, dd MMMM `yy - HH:mm");
 };

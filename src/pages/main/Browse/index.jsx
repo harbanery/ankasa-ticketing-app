@@ -387,6 +387,7 @@ function FlightCard({ flight }) {
         alignItems={{ md: "flex-start" }}
         position="relative"
         pointerEvents={{ base: "auto", md: "none" }}
+        cursor={{ base: "pointer", md: "default" }}
       >
         <Flex alignItems="center" gap="30px" mb={{ base: "20px", md: "30px" }}>
           <Image

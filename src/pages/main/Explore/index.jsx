@@ -244,7 +244,7 @@ const Explore = () => {
           justifyContent="center"
         >
           <Image
-            src="https://s3-alpha-sig.figma.com/img/d80b/8091/3097cdde4bed0635ba416301c724bea9?Expires=1725840000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=YEBJOYqlt3i4br~uC3JdqRhQlafZYIL1rXPObbBqQE8jO7MtitUWdrhTqIAc6vOgL45-SlOym2JJmLSI2zyvJZKfg~VD08VuYyUYLWg5bJC59ErAccX~sWj5FSvfYEwvQoGBd5TPzMe4zjEadbQ9lELbPc0EGkrqcmb1gg-UmOv6-Vv2hrDFqrEeowtrLK30AYMt2geWZSt3Cc3ciolQuk~4UuDyyZxOYAAFx~20scP-RfW7vsaCftoxFsbUGM82AzrCKB5gyWc7lsUFSF9eVBESnDqfEwSgF3SD49nwPMM544RrlsyI5ksmiJ09Hk-CSeG3YZ1rEnVDjlVgJ0Z6tw__"
+            src="/src/assets/cities/kyoto.jpg"
             w="full"
             h="full"
             objectFit="cover"
@@ -274,7 +274,7 @@ const Explore = () => {
           justifyContent="center"
         >
           <Image
-            src="https://s3-alpha-sig.figma.com/img/d80b/8091/3097cdde4bed0635ba416301c724bea9?Expires=1725840000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=YEBJOYqlt3i4br~uC3JdqRhQlafZYIL1rXPObbBqQE8jO7MtitUWdrhTqIAc6vOgL45-SlOym2JJmLSI2zyvJZKfg~VD08VuYyUYLWg5bJC59ErAccX~sWj5FSvfYEwvQoGBd5TPzMe4zjEadbQ9lELbPc0EGkrqcmb1gg-UmOv6-Vv2hrDFqrEeowtrLK30AYMt2geWZSt3Cc3ciolQuk~4UuDyyZxOYAAFx~20scP-RfW7vsaCftoxFsbUGM82AzrCKB5gyWc7lsUFSF9eVBESnDqfEwSgF3SD49nwPMM544RrlsyI5ksmiJ09Hk-CSeG3YZ1rEnVDjlVgJ0Z6tw__"
+            src="/src/assets/cities/kyoto.jpg"
             w="full"
             h="full"
             objectFit="cover"

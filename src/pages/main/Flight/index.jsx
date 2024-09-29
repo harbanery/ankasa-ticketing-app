@@ -31,6 +31,8 @@ import {
   ModalBody,
   ModalCloseButton,
   ModalContent,
+  ModalFooter,
+  ModalHeader,
   ModalOverlay,
   Select,
   Stack,
@@ -58,7 +60,7 @@ import {
   LuggageIcon,
   WifiIcon,
 } from "../../../components/base/Icons";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import api from "../../../services/api";
 import { formatScheduleDate, formatTimeFull } from "../../../utils/date";
 import { rupiah } from "../../../utils/currency";
@@ -221,7 +223,7 @@ const FlightDetail = () => {
               justifyContent="center"
               display={{ base: "none", lg: "flex" }}
             >
-              <AlertDialogFlight data={data} />
+              <ModalPayment data={data} />
             </Flex>
           </Box>
           <Box
@@ -714,60 +716,121 @@ const ModalFlight = ({
   );
 };
 
-const AlertDialogFlight = ({ data = {} }) => {
+const ModalPayment = ({ data = {} }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const cancelRef = useRef();
-  const toast = useToast();
 
-  const handleCreatePayment = async () => {
-    const checkPassengers = data?.passengers?.filter(
-      (passenger) =>
-        passenger?.name === "" ||
-        passenger.nationality === "" ||
-        Object.values(passenger?.seat_selected).length === 0
-    );
+  const [paymentRequest, setPaymentRequest] = useState({
+    type: "",
+    name: "",
+    ewallet: {},
+  });
 
-    if (checkPassengers.length == 0) {
-      try {
-        const res = await api.post(`orders`, {
-          ticket_id: data?.ticket?.id,
-          total_price: data?.cost?.total_price,
-          passengers: data?.passengers?.map((passenger) => ({
-            seat_id: passenger?.seat_selected?.id,
-            name: `${passenger?.title} ${passenger?.name}`,
-            category: passenger?.type,
-            nationality: passenger?.nationality,
-          })),
-        });
-        toast({
-          title: "Order Successfully",
-          status: "success",
-          ...optionToast,
-        });
-        if (res?.data?.url) {
-          const timeout = setTimeout(() => {
-            onClose();
-            window.open(res?.data?.url, "_blank");
-            // window.location.replace(res?.data?.url);
-          }, 2000);
-          return () => clearTimeout(timeout);
-        }
-      } catch (err) {
-        console.log(err);
-        toast({
-          title: "Order failed",
-          status: "error",
-          ...optionToast,
-        });
-      }
-    } else {
-      toast({
-        title: "Order failed",
-        description: `Seat and form not complete.`,
-        status: "error",
-        ...optionToast,
-      });
+  const payment_method = [
+    {
+      name: "Internal Wallet",
+      code: "INTERNAL",
+      active: true,
+      items: [
+        {
+          name: "ANKASA_PAY",
+          image: "/src/assets/payments/ankasapay.png",
+          active: false,
+          input_actions: [],
+        },
+      ],
+    },
+    {
+      name: "E-Wallet",
+      code: "EWALLET",
+      active: true,
+      items: [
+        {
+          name: "JENIUS",
+          image: "/src/assets/payments/ewallet_jenius.png",
+          active: true,
+          input_actions: [
+            {
+              type: "text",
+              label: "CashTag",
+              value: paymentRequest?.ewallet?.cashtag,
+              name: "cashtag",
+              readOnly: false,
+              placeholder: "Input your tagcash (ex. @johndoe)",
+            },
+          ],
+        },
+        {
+          name: "DANA",
+          image: "/src/assets/payments/ewallet_dana.png",
+          active: true,
+          input_actions: [],
+        },
+        {
+          name: "OVO",
+          image: "/src/assets/payments/ewallet_ovo.png",
+          active: true,
+          input_actions: [
+            {
+              type: "text",
+              label: "Mobile Number",
+              value: paymentRequest?.ewallet?.mobile_number,
+              name: "mobile_number",
+              readOnly: false,
+              placeholder: "Input your phone number",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "Bank Transfer",
+      code: "VA",
+      active: false,
+      items: [
+        {
+          name: "BNI",
+          image: "/src/assets/payments/va_bni.png",
+          input_actions: [],
+        },
+        {
+          name: "MANDIRI",
+          image: "/src/assets/payments/va_mandiri.png",
+          input_actions: [],
+        },
+        {
+          name: "BCA",
+          image: "/src/assets/payments/va_bca.png",
+          input_actions: [],
+        },
+      ],
+    },
+  ];
+
+  const handlePaymentMethodButton = (type, name) => {
+    if (!type || !name) {
+      return null;
     }
+
+    setPaymentRequest({
+      ...paymentRequest,
+      type: type,
+      name: name,
+    });
+  };
+
+  const handleChangePaymentMethodInput = (e, type) => {
+    if (!type) {
+      return null;
+    }
+
+    setPaymentRequest({
+      ...paymentRequest,
+      ...(type == "EWALLET" && {
+        ewallet: {
+          [e.target.name]: e.target.value,
+        },
+      }),
+    });
   };
 
   return (
@@ -793,6 +856,280 @@ const AlertDialogFlight = ({ data = {} }) => {
         }}
       >
         Proceed to Payment
+      </Button>
+      <Modal size={`xl`} isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent fontFamily="Poppins" mx="1rem">
+          <ModalHeader bg="#2395FF" color="white" roundedTop="inherit">
+            Payment Method
+          </ModalHeader>
+          <ModalCloseButton color="white" />
+          <ModalBody>
+            <Stack mt={4}>
+              {payment_method?.[0]?.code == "INTERNAL" && (
+                <Flex
+                  flexWrap="wrap"
+                  gap="5%"
+                  justifyContent="flex-start"
+                  mt={4}
+                >
+                  {payment_method?.[0]?.items?.[0]?.name == "ANKASA_PAY" && (
+                    <Tooltip
+                      hasArrow
+                      placement="top"
+                      label="Still in Development..."
+                      bg="red.500"
+                      borderRadius="4px"
+                      fontFamily="Poppins"
+                    >
+                      <Button
+                        w="30%"
+                        h="80px"
+                        border="1px solid #EDF2F7"
+                        bg="white"
+                        mb={4}
+                        isDisabled={
+                          payment_method?.[0]?.items?.[0]?.active ? false : true
+                        }
+                      >
+                        <Image
+                          src={payment_method?.[0]?.items?.[0]?.image || ""}
+                          alt={payment_method?.[0]?.items?.[0]?.name || ""}
+                          objectFit="contain"
+                          w="full"
+                          h="full"
+                        />
+                      </Button>
+                    </Tooltip>
+                  )}
+                </Flex>
+              )}
+              <Accordion allowMultiple>
+                {payment_method
+                  ?.slice(
+                    payment_method?.[0]?.name == "Internal Wallet" ? 1 : 0
+                  )
+                  .map((method, index) => (
+                    <AccordionItem key={index}>
+                      {method?.active && (
+                        <>
+                          <h2>
+                            <AccordionButton>
+                              <Box
+                                as="span"
+                                flex="1"
+                                textAlign="left"
+                                fontWeight={600}
+                              >
+                                {method?.name}
+                              </Box>
+                              <AccordionIcon />
+                            </AccordionButton>
+                          </h2>
+                          <AccordionPanel>
+                            <Flex
+                              flexWrap="wrap"
+                              gap="5%"
+                              justifyContent="flex-start"
+                              mt={4}
+                            >
+                              {method?.items?.map((payment, payment_index) => (
+                                <Button
+                                  key={payment_index}
+                                  w="30%"
+                                  h="80px"
+                                  border="1px solid #EDF2F7"
+                                  bg={
+                                    paymentRequest?.name == payment?.name
+                                      ? "blue.100"
+                                      : "white"
+                                  }
+                                  mb={4}
+                                  isDisabled={payment?.active ? false : true}
+                                  onClick={() => {
+                                    handlePaymentMethodButton(
+                                      method?.code,
+                                      payment?.name
+                                    );
+                                  }}
+                                  _focus={{
+                                    bg:
+                                      paymentRequest?.name == payment?.name
+                                        ? "blue.100"
+                                        : "gray.300",
+                                  }}
+                                >
+                                  <Image
+                                    draggable={false}
+                                    src={payment?.image || ""}
+                                    alt={payment?.name || ""}
+                                    objectFit="contain"
+                                    w="full"
+                                    h="full"
+                                  />
+                                </Button>
+                              ))}
+                            </Flex>
+
+                            <Box w="full">
+                              <Collapse
+                                in={
+                                  method?.items?.find(
+                                    (item) =>
+                                      item?.name === paymentRequest?.name
+                                  )?.input_actions?.length != 0
+                                    ? true
+                                    : false
+                                }
+                                animateOpacity
+                              >
+                                {method?.items
+                                  ?.find(
+                                    (item) =>
+                                      item?.name === paymentRequest?.name
+                                  )
+                                  ?.input_actions?.map((input, index) => (
+                                    <Box key={index} w="full">
+                                      <FormLabel fontSize="small">
+                                        {input?.label}
+                                      </FormLabel>
+                                      <Input
+                                        variant="outline"
+                                        size="sm"
+                                        name={input?.name || ""}
+                                        value={input?.value || ""}
+                                        onChange={(e) =>
+                                          handleChangePaymentMethodInput(
+                                            e,
+                                            paymentRequest?.type
+                                          )
+                                        }
+                                        placeholder={input?.placeholder || ""}
+                                      />
+                                    </Box>
+                                  ))}
+                              </Collapse>
+                            </Box>
+                          </AccordionPanel>
+                        </>
+                      )}
+                    </AccordionItem>
+                  ))}
+              </Accordion>
+            </Stack>
+          </ModalBody>
+          <ModalFooter>
+            <Flex w="full" justifyContent="space-between" alignItems="center">
+              <Stack>
+                <AlertDialogFlight data={data} payment={paymentRequest} />
+              </Stack>
+              <HStack>
+                <Text fontWeight={500} fontSize={12}>
+                  Supported by
+                </Text>
+                <Image h={8} src="/src/assets/brands/xendit_logo.png" />
+              </HStack>
+            </Flex>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </>
+  );
+};
+
+const AlertDialogFlight = ({ data = {}, payment = {} }) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const cancelRef = useRef();
+  const toast = useToast();
+  const navigate = useNavigate();
+
+  const handleCreatePayment = async () => {
+    const checkPassengers = data?.passengers?.filter(
+      (passenger) =>
+        passenger?.name === "" ||
+        passenger.nationality === "" ||
+        Object.values(passenger?.seat_selected).length === 0
+    );
+
+    if (checkPassengers.length == 0) {
+      const data_request = {
+        ticket_id: data?.ticket?.id,
+        total_price: data?.cost?.total_price,
+        passengers: data?.passengers?.map((passenger) => ({
+          seat_id: passenger?.seat_selected?.id,
+          name: `${passenger?.title} ${passenger?.name}`,
+          category: passenger?.type,
+          nationality: passenger?.nationality,
+        })),
+        payment_method_type: payment?.type,
+        ...(payment?.type == "EWALLET" && {
+          payment_method_ewallet: {
+            name: payment?.name,
+            ...(payment?.ewallet?.mobile_number &&
+              payment?.name == "OVO" && {
+                mobile_number: payment?.ewallet?.mobile_number,
+              }),
+            ...(payment?.ewallet?.cashtag &&
+              payment?.name == "JENIUS" && {
+                cashtag: payment?.ewallet?.cashtag,
+              }),
+          },
+        }),
+      };
+
+      try {
+        await api.post(`orders`, data_request);
+        toast({
+          title:
+            "Order Successfully. Please check your order to confirm payment.",
+          status: "success",
+          ...optionToast,
+        });
+        const timeout = setTimeout(() => {
+          navigate("/profile/my-booking");
+        }, 2000);
+        return () => clearTimeout(timeout);
+      } catch (err) {
+        console.log(err);
+        toast({
+          title: "Order failed",
+          status: "error",
+          ...optionToast,
+        });
+      }
+    } else {
+      toast({
+        title: "Order failed",
+        description: `Seat and form not complete.`,
+        status: "error",
+        ...optionToast,
+      });
+    }
+    onClose();
+  };
+
+  return (
+    <>
+      <Button
+        onClick={onOpen}
+        type="submit"
+        bg="#2395FF"
+        borderRadius="10px"
+        fontWeight="700"
+        color="white"
+        transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+        boxShadow="0px 8px 10px 0px #2395FF4D"
+        _hover={{ bg: "#1971c2" }}
+        _active={
+          !payment?.name ||
+          !payment?.type || {
+            bg: "#dddfe2",
+            boxShadow: "0px 8px 10px 0px #dddfe24D",
+          }
+        }
+        isDisabled={!payment?.name || !payment?.type ? true : false}
+      >
+        Buy Ticket
       </Button>
       <AlertDialog
         motionPreset="slideInBottom"
@@ -1639,7 +1976,7 @@ const MobileFlightDetails = ({ data = {}, insurance = false }) => {
           </Text>
         </Flex>
         <Flex>
-          <AlertDialogFlight data={data} />
+          <ModalPayment data={data} />
         </Flex>
       </Box>
     </>

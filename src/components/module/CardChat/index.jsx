@@ -330,8 +330,13 @@ const CardChat = ({ data = [], user = {} }) => {
             justifyContent="center"
             alignItems="center"
           >
-            <Heading fontSize="20px" fontFamily="Poppins" fontWeight="600">
-              No Chat Today
+            <Heading
+              textAlign="center"
+              fontSize="20px"
+              fontFamily="Poppins"
+              fontWeight="600"
+            >
+              Chat feature still in development...
             </Heading>
           </Box>
         )}

@@ -4,12 +4,10 @@ import {
   Button,
   Drawer,
   DrawerBody,
-  DrawerCloseButton,
   DrawerContent,
   DrawerHeader,
   DrawerOverlay,
   Flex,
-  Heading,
   Image,
   Menu,
   MenuButton,
@@ -19,19 +17,15 @@ import {
   Popover,
   PopoverArrow,
   PopoverBody,
-  PopoverCloseButton,
   PopoverContent,
-  PopoverFooter,
-  PopoverHeader,
   PopoverTrigger,
-  Portal,
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
 import React, { useRef } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { AiFillBell, AiOutlineBell } from "react-icons/ai";
-import { HiEnvelopeOpen, HiOutlineEnvelope } from "react-icons/hi2";
+import { AiOutlineBell } from "react-icons/ai";
+import { HiOutlineEnvelope } from "react-icons/hi2";
 import { IoClose } from "react-icons/io5";
 import { FaBars } from "react-icons/fa6";
 import { GiPlainCircle } from "react-icons/gi";
@@ -43,12 +37,11 @@ import CardChat from "../CardChat";
 import { IoMdSettings } from "react-icons/io";
 import { FaRegUserCircle } from "react-icons/fa";
 import { RiLogoutBoxRLine } from "react-icons/ri";
+import { menu_lists } from "../../../utils/constants";
 
 const Navbar = ({ data_user = {}, data_chat = [], token = "" }) => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  // const { token } = getTokenfromLocalStorage();
 
   const handleLogout = async (e) => {
     e.preventDefault();
@@ -57,11 +50,7 @@ const Navbar = ({ data_user = {}, data_chat = [], token = "" }) => {
 
       const user = auth.currentUser;
       if (user) {
-        try {
-          await signOut(auth);
-        } catch (error) {
-          //
-        }
+        await signOut(auth);
       }
 
       removeTokenfromLocalStorage();
@@ -71,19 +60,6 @@ const Navbar = ({ data_user = {}, data_chat = [], token = "" }) => {
       setAlertKey(alertKey + 1);
     }
   };
-
-  const menu_lists = [
-    {
-      name: "Find Ticket",
-      navigation: "/browse",
-      required_token: false,
-    },
-    {
-      name: "My Booking",
-      navigation: "/profile/my-booking",
-      required_token: true,
-    },
-  ];
 
   return (
     <Box
@@ -192,14 +168,13 @@ const Navbar = ({ data_user = {}, data_chat = [], token = "" }) => {
                       Profile
                     </MenuItem>
                   </NavLink>
-                  <NavLink to="/settings">
-                    <MenuItem
-                      icon={<IoMdSettings color="#595959" fontSize="20px" />}
-                      fontWeight={600}
-                    >
-                      Settings
-                    </MenuItem>
-                  </NavLink>
+                  <MenuItem
+                    icon={<IoMdSettings color="#595959" fontSize="20px" />}
+                    fontWeight={600}
+                    isDisabled
+                  >
+                    Settings
+                  </MenuItem>
                   <MenuItem
                     icon={<RiLogoutBoxRLine color="#F24545" fontSize="20px" />}
                     color="#F24545"
@@ -220,13 +195,6 @@ const Navbar = ({ data_user = {}, data_chat = [], token = "" }) => {
                       Chat
                     </MenuItem>
                   </NavLink>
-                  {/* <MenuItem
-                    icon={<AiOutlineBell color="#595959" fontSize="20px" />}
-                    display={{ base: "flex", sm: "none" }}
-                    fontWeight={600}
-                  >
-                    Notifications
-                  </MenuItem> */}
                 </MenuList>
               </Menu>
             </>
@@ -354,20 +322,8 @@ const NotificationBar = () => {
             borderColor: "#2395FF",
             pb: "8px",
           }}
-          // sx={{
-          //   "& .icon-hover": {
-          //     display: isOpen ? "block" : "none",
-          //   },
-          //   "& .icon-default": {
-          //     display: isOpen ? "none" : "block",
-          //   },
-          // }}
         >
-          <AiOutlineBell
-            // className="icon-default"
-            color="#595959"
-            fontSize="28px"
-          ></AiOutlineBell>
+          <AiOutlineBell color="#595959" fontSize="28px"></AiOutlineBell>
           <GiPlainCircle
             fontSize="12px"
             color="#2395FF"
@@ -379,7 +335,6 @@ const NotificationBar = () => {
               borderRadius: "100%",
             }}
           />
-          {/* <AiFillBell className="icon-hover" color="#595959" fontSize="28px" /> */}
         </Box>
       </PopoverTrigger>
       <PopoverContent
@@ -428,30 +383,8 @@ const ChatBar = ({ data = [], user = {}, location }) => {
               pb: "8px",
             }
           }
-          // sx={{
-          //   "& .icon-hover": {
-          //     display: "none",
-          //     opacity: "0%",
-          //   },
-          //   "&:hover .icon-hover": {
-          //     display: "block",
-          //     opacity: "100%",
-          //   },
-          //   "& .icon-default": {
-          //     display: "block",
-          //     opacity: "100%",
-          //   },
-          //   "&:hover .icon-default": {
-          //     display: "none",
-          //     opacity: "0%",
-          //   },
-          // }}
         >
-          <HiOutlineEnvelope
-            // className="icon-default"
-            color="#595959"
-            fontSize="28px"
-          />
+          <HiOutlineEnvelope color="#595959" fontSize="28px" />
           <GiPlainCircle
             fontSize="12px"
             color="#2395FF"
@@ -463,11 +396,6 @@ const ChatBar = ({ data = [], user = {}, location }) => {
               borderRadius: "100%",
             }}
           />
-          {/* <HiEnvelopeOpen
-                  className="icon-hover"
-                  color="#595959"
-                  fontSize="28px"
-                /> */}
         </Box>
       </PopoverTrigger>
       <PopoverContent
@@ -482,7 +410,7 @@ const ChatBar = ({ data = [], user = {}, location }) => {
           mx={{ base: "16px", md: "28px" }}
           my={{ base: "20px", md: "40px" }}
         >
-          <CardChat />
+          <CardChat data={data} user={user} />
         </PopoverBody>
       </PopoverContent>
     </Popover>

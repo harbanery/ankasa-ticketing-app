@@ -1,33 +1,27 @@
 import {
-  Alert,
-  AlertIcon,
-  AlertTitle,
   Box,
   Button,
   Checkbox,
   Collapse,
-  Container,
   Flex,
   FormControl,
-  FormErrorMessage,
   Heading,
-  Image,
   Input,
   InputGroup,
   InputRightElement,
-  Stack,
   Text,
+  Tooltip,
   useToast,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { registerValidation } from "../../../utils/validation";
-import AlertCustom from "../../../components/base/AlertCustom";
 import api from "../../../services/api";
 import { optionToast } from "../../../utils/constants";
 import { BsEye, BsEyeSlash } from "react-icons/bs";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
+import { signInWithPopup } from "firebase/auth";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -76,14 +70,13 @@ const Register = () => {
         setLoading(false);
       } else {
         try {
-          const res = await api.post(`register`, {
+          await api.post(`register`, {
             username: form.username,
             email: form.email,
             password: form.password,
             role: "customer",
           });
 
-          console.log(res.data.message);
           toast({
             title: "Register Successfully",
             description: "Please check in your email to activate.",
@@ -93,7 +86,6 @@ const Register = () => {
           setLoading(false);
           navigate("/auth/login");
         } catch (err) {
-          console.log(err);
           toast({
             title: "Register Failed",
             ...(err?.response?.data?.message
@@ -112,6 +104,50 @@ const Register = () => {
         }, {});
         setErrors(formErrors);
       }
+      setLoading(false);
+    }
+  };
+
+  const handleLoginGoogle = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await signInWithPopup(auth, provider);
+      const user = response.user;
+      try {
+        const res = await api.post(`loginAuthProvider`, {
+          username: user.displayName,
+          email: user.email,
+          phone_number: user.phoneNumber,
+          image: user.photoURL,
+          role: "customer",
+          google_uid: user.uid,
+        });
+
+        if (res.data) {
+          toast({
+            title: "Login Successfully",
+            status: "success",
+            ...optionToast,
+          });
+          setLoading(false);
+          setTokentoLocalStorage(res.data);
+          navigate("/");
+        } else {
+          throw "Token doesn't created.";
+        }
+      } catch (err) {
+        toast({
+          title: "Login Failed",
+          ...(err?.response?.data?.message
+            ? { description: "Email or password incorrectly." }
+            : {}),
+          status: "error",
+          ...optionToast,
+        });
+        setLoading(false);
+      }
+    } catch (error) {
       setLoading(false);
     }
   };
@@ -295,6 +331,7 @@ const Register = () => {
         <Text textColor="#595959">or</Text>
         <Flex gap="4">
           <Button
+            onClick={handleLoginGoogle}
             bg="white"
             borderRadius="10px"
             color="white"
@@ -311,23 +348,33 @@ const Register = () => {
           >
             <FcGoogle fontSize="24px" />
           </Button>
-          <Button
-            bg="white"
-            borderRadius="10px"
-            color="#4175DF"
-            border="1px"
-            borderColor="#2395FF"
-            size="lg"
-            w="100%"
-            h="52px"
-            transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
-            _active={{
-              bg: "#2395FF",
-              boxShadow: "0px 8px 10px 0px #2395FF4D",
-            }}
+          <Tooltip
+            hasArrow
+            placement="top"
+            label="Facebook not available at the moment..."
+            bg="red.500"
+            borderRadius="4px"
+            fontFamily="Poppins"
           >
-            <FaFacebook fontSize="24px" />
-          </Button>
+            <Button
+              bg="white"
+              borderRadius="10px"
+              color="#4175DF"
+              border="1px"
+              borderColor="#2395FF"
+              size="lg"
+              w="100%"
+              h="52px"
+              transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+              _active={{
+                bg: "#2395FF",
+                boxShadow: "0px 8px 10px 0px #2395FF4D",
+              }}
+              isDisabled
+            >
+              <FaFacebook fontSize="24px" />
+            </Button>
+          </Tooltip>
         </Flex>
       </Box>
     </>

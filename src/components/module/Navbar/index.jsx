@@ -168,13 +168,15 @@ const Navbar = ({ data_user = {}, data_chat = [], token = "" }) => {
                       Profile
                     </MenuItem>
                   </NavLink>
-                  <MenuItem
-                    icon={<IoMdSettings color="#595959" fontSize="20px" />}
-                    fontWeight={600}
-                    isDisabled
-                  >
-                    Settings
-                  </MenuItem>
+                  <NavLink to="">
+                    <MenuItem
+                      icon={<IoMdSettings color="#595959" fontSize="20px" />}
+                      fontWeight={600}
+                      isDisabled
+                    >
+                      Settings
+                    </MenuItem>
+                  </NavLink>
                   <MenuItem
                     icon={<RiLogoutBoxRLine color="#F24545" fontSize="20px" />}
                     color="#F24545"
@@ -184,13 +186,14 @@ const Navbar = ({ data_user = {}, data_chat = [], token = "" }) => {
                     Logout
                   </MenuItem>
                   <MenuDivider display={{ lg: "none" }} />
-                  <NavLink to="/chat">
+                  <NavLink to="">
                     <MenuItem
                       icon={
                         <HiOutlineEnvelope color="#595959" fontSize="20px" />
                       }
                       display={{ base: "flex", lg: "none" }}
                       fontWeight={600}
+                      isDisabled
                     >
                       Chat
                     </MenuItem>

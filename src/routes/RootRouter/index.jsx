@@ -64,6 +64,7 @@ const RootRouter = () => {
         {
           path: "chat",
           element: <Chat />,
+          loader: protectedLoader,
           children: [
             {
               path: ":id",

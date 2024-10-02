@@ -20,9 +20,9 @@ import api from "../../../services/api";
 import { loginValidation } from "../../../utils/validation";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../../../services/firebase";
-import { setTokentoLocalStorage } from "../../../utils/localStorage";
 import { optionToast } from "../../../utils/constants";
 import { BsEye, BsEyeSlash } from "react-icons/bs";
+import { setTokentoLocalStorage } from "../../../utils/storage";
 
 const Login = () => {
   const navigate = useNavigate();

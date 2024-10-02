@@ -22,6 +22,8 @@ import { BsEye, BsEyeSlash } from "react-icons/bs";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
 import { signInWithPopup } from "firebase/auth";
+import { setTokentoLocalStorage } from "../../../utils/storage";
+import { auth, provider } from "../../../services/firebase";
 
 const Register = () => {
   const navigate = useNavigate();

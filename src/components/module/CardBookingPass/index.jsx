@@ -7,14 +7,14 @@ import {
   Image,
   Stack,
   Text,
-  useToast,
 } from "@chakra-ui/react";
+import React from "react";
 import { IoMdArrowBack } from "react-icons/io";
 import QRCode from "react-qr-code";
-import { redirect, useNavigate } from "react-router-dom";
-import { getTokenfromLocalStorage } from "../../../utils/localStorage";
+import { useNavigate } from "react-router-dom";
+import { formatOrderDate } from "../../../utils/date";
 
-const BoardingPass = ({ checkout }) => {
+const CardBookingPass = ({ ticket = {} }) => {
   const navigate = useNavigate();
 
   const DepartureArrival = ({ departureCode, arrivalCode, images }) => (
@@ -29,20 +29,21 @@ const BoardingPass = ({ checkout }) => {
     </Flex>
   );
 
-  const InfoItem = ({ label, value }) => (
-    <GridItem>
+  const InfoItem = ({ label, value, ...props }) => (
+    <GridItem {...props}>
       <Text color="gray.400" fontSize={14}>
         {label}
       </Text>
-      <Text>{value}</Text>
+      <Text textTransform="capitalize">{value}</Text>
     </GridItem>
   );
 
   return (
-    <Box bg="#2395FF" py={10} px={{ base: "10px" }}>
+    <Flex>
       <Box
         bg="white"
         w={{ base: "", lg: "900px" }}
+        maxW={{ base: "auto", lg: "900px" }}
         mx="auto"
         borderRadius={20}
         px={{ base: "20px", lg: "40px" }}
@@ -64,8 +65,12 @@ const BoardingPass = ({ checkout }) => {
           </Text>
           <Button
             variant="unstyled"
-            onClick={() => navigate("/")}
-            transform={{ base: "", md: "rotate(180deg)", lg: "rotate(180deg)" }}
+            onClick={() => navigate("/profile/my-booking", { replace: true })}
+            transform={{
+              base: "",
+              md: "rotate(180deg)",
+              lg: "rotate(180deg)",
+            }}
           >
             <IoMdArrowBack size={20} strokeWidth={100} color="#2395FF" />
           </Button>
@@ -83,24 +88,18 @@ const BoardingPass = ({ checkout }) => {
               gap={{ base: 10, lg: 5 }}
               flexDir={{ base: "column", md: "row", lg: "row" }}
             >
-              {checkout && (
+              {ticket && (
                 <>
-                  <Image src={checkout[0]?.tickets[0]?.merchant[0]?.images} />
+                  <Image maxW="100px" src={ticket?.merchant_image || ""} />
                   <DepartureArrival
-                    departureCode={
-                      checkout[0]?.tickets[0]?.departure[0]?.cities[0]
-                        ?.countries[0]?.code
-                    }
-                    arrivalCode={
-                      checkout[0]?.tickets[0]?.arrivals[0]?.cities[0]
-                        ?.countries[0]?.code
-                    }
+                    departureCode={ticket?.departure_country_code}
+                    arrivalCode={ticket?.arrival_country_code}
                     images={"/src/assets/flight.svg"}
                   />
                 </>
               )}
             </Flex>
-            {checkout && (
+            {ticket && (
               <Grid
                 templateColumns={{
                   base: "repeat(4, 1fr)",
@@ -109,25 +108,38 @@ const BoardingPass = ({ checkout }) => {
                 }}
                 gap={{ base: 4, lg: 6 }}
                 mt={{ base: 8, lg: 16 }}
+                fontFamily={"Lato"}
               >
                 <InfoItem
-                  label="Seats"
-                  value={checkout[0]?.details
-                    ?.map((item) => item?.seats)
-                    .join(", ")}
+                  label="Seat"
+                  value={ticket?.passenger_seat_code || "-"}
                 />
-                <InfoItem label="Clas" value={checkout[0]?.tickets[0]?.class} />
                 <InfoItem
-                  label="Passengers"
-                  value={checkout[0]?.total_passegers}
+                  label="Class"
+                  value={ticket?.class_name || "-"}
+                  colSpan={{ base: 2, md: 1, lg: 1 }}
                 />
-                <InfoItem label="Gate" value={checkout[0]?.tickets[0]?.gate} />
-                <GridItem colSpan={{ base: 4, md: 2, lg: 2 }}>
-                  <Text color="gray.400" fontSize={14}>
-                    Departure
-                  </Text>
-                  <Text>{checkout[0]?.tickets[0]?.departure[0]?.schedule}</Text>
-                </GridItem>
+                <InfoItem
+                  label="Name of Passenger"
+                  value={`${ticket?.passenger_name || "-"} (${
+                    ticket?.passenger_category
+                  })`}
+                  display={{ base: "none", lg: "block" }}
+                />
+                <InfoItem label="Gate" value={ticket?.gate || "-"} />
+                <InfoItem
+                  label="Name of Passenger"
+                  value={`${ticket?.passenger_name || "-"} (${
+                    ticket?.passenger_category
+                  })`}
+                  colSpan={{ base: 4 }}
+                  display={{ base: "block", lg: "none" }}
+                />
+                <InfoItem
+                  label="Departure"
+                  value={formatOrderDate(ticket?.departure_schedule) || "-"}
+                  colSpan={{ base: 4, md: 2, lg: 2 }}
+                />
               </Grid>
             )}
           </Box>
@@ -164,7 +176,7 @@ const BoardingPass = ({ checkout }) => {
               borderRadius="full"
             ></Stack>
           </Box>
-          {checkout && (
+          {ticket && (
             <Flex
               position={{ base: "static", md: "relative", lg: "relative" }}
               w={{ base: "", md: "200px", lg: "300px" }}
@@ -172,8 +184,12 @@ const BoardingPass = ({ checkout }) => {
               py={{ base: 5, lg: 0 }}
             >
               <Flex
-                position={{ base: "static", md: "absolute", lg: "absolute" }}
-                right={{ md: -8, lg: 8 }}
+                position={{
+                  base: "static",
+                  md: "absolute",
+                  lg: "absolute",
+                }}
+                right={{ md: 1, lg: 8 }}
                 top={{ md: 20, lg: 28 }}
               >
                 <QRCode
@@ -186,8 +202,8 @@ const BoardingPass = ({ checkout }) => {
           )}
         </Flex>
       </Box>
-    </Box>
+    </Flex>
   );
 };
 
-export default BoardingPass;
+export default CardBookingPass;

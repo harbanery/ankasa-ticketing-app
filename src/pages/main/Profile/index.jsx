@@ -112,7 +112,7 @@ const ProfileMobile = ({
               </Text>
               <Button
                 bgColor={"transparent"}
-                _hover={"none"}
+                _hover={{}}
                 fontFamily={"poppins"}
                 fontWeight={600}
                 fontSize={"14px"}
@@ -386,7 +386,7 @@ const Profile = () => {
               </Text>
               <Button
                 bgColor={"transparent"}
-                _hover={"none"}
+                _hover={{}}
                 fontFamily={"poppins"}
                 fontWeight={600}
                 fontSize={"14px"}

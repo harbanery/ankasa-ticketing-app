@@ -12,7 +12,6 @@ import {
   GridItem,
   HStack,
   Image,
-  Link as ChakraLink,
   List,
   ListItem,
   StackDivider,
@@ -40,11 +39,7 @@ import {
 } from "../../../components/module/Filter";
 import { useEffect, useState } from "react";
 import api from "../../../services/api";
-import {
-  convertDistanceTime,
-  formatTime,
-  formatTimeFull,
-} from "../../../utils/date";
+import { convertDistanceTime, formatTimeFull } from "../../../utils/date";
 import { rupiah } from "../../../utils/currency";
 
 function SearchDestinationItem({ label, destination, textAlign }) {
@@ -489,15 +484,15 @@ function FlightCard({ flight }) {
               </Text>
             </Flex>
             <Box display={{ base: "none", md: "block" }}>
-              <ChakraLink
-                as={ReactRouterLink}
-                to={`/flight/${flight?.id}`}
+              <Button
                 fontSize="16px"
-                fontWeight="700"
+                fontWeight={700}
+                minW={{ base: "auto", xl: "150px" }}
+                minH={{ base: "auto", xl: "50px" }}
+                px="28px"
                 py="14px"
                 color="white"
                 bgColor="#2395FF"
-                px="28px"
                 rounded="8px"
                 boxShadow="0px 8px 10px 0px #2395FF4D"
                 pointerEvents={{ base: "auto" }}
@@ -506,7 +501,7 @@ function FlightCard({ flight }) {
                 }}
               >
                 Select
-              </ChakraLink>
+              </Button>
             </Box>
           </Flex>
         </Box>

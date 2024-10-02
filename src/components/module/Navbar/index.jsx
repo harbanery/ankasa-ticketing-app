@@ -30,7 +30,6 @@ import { IoClose } from "react-icons/io5";
 import { FaBars } from "react-icons/fa6";
 import { GiPlainCircle } from "react-icons/gi";
 import { auth } from "../../../services/firebase";
-import { removeTokenfromLocalStorage } from "../../../utils/localStorage";
 import api from "../../../services/api";
 import CardNotification from "../CardNotification";
 import CardChat from "../CardChat";
@@ -38,6 +37,7 @@ import { IoMdSettings } from "react-icons/io";
 import { FaRegUserCircle } from "react-icons/fa";
 import { RiLogoutBoxRLine } from "react-icons/ri";
 import { menu_lists } from "../../../utils/constants";
+import { removeTokenfromLocalStorage } from "../../../utils/storage";
 
 const Navbar = ({ data_user = {}, data_chat = [], token = "" }) => {
   const navigate = useNavigate();

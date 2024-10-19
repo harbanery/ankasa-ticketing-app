@@ -258,7 +258,7 @@ const Explore = () => {
           justifyContent="center"
         >
           <Image
-            src="https://s3-alpha-sig.figma.com/img/d80b/8091/3097cdde4bed0635ba416301c724bea9?Expires=1725840000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=YEBJOYqlt3i4br~uC3JdqRhQlafZYIL1rXPObbBqQE8jO7MtitUWdrhTqIAc6vOgL45-SlOym2JJmLSI2zyvJZKfg~VD08VuYyUYLWg5bJC59ErAccX~sWj5FSvfYEwvQoGBd5TPzMe4zjEadbQ9lELbPc0EGkrqcmb1gg-UmOv6-Vv2hrDFqrEeowtrLK30AYMt2geWZSt3Cc3ciolQuk~4UuDyyZxOYAAFx~20scP-RfW7vsaCftoxFsbUGM82AzrCKB5gyWc7lsUFSF9eVBESnDqfEwSgF3SD49nwPMM544RrlsyI5ksmiJ09Hk-CSeG3YZ1rEnVDjlVgJ0Z6tw__"
+            src="/src/assets/bg-landing-2.png"
             w="full"
             h="full"
             objectFit="cover"
@@ -288,7 +288,7 @@ const Explore = () => {
           justifyContent="center"
         >
           <Image
-            src="https://s3-alpha-sig.figma.com/img/d80b/8091/3097cdde4bed0635ba416301c724bea9?Expires=1725840000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=YEBJOYqlt3i4br~uC3JdqRhQlafZYIL1rXPObbBqQE8jO7MtitUWdrhTqIAc6vOgL45-SlOym2JJmLSI2zyvJZKfg~VD08VuYyUYLWg5bJC59ErAccX~sWj5FSvfYEwvQoGBd5TPzMe4zjEadbQ9lELbPc0EGkrqcmb1gg-UmOv6-Vv2hrDFqrEeowtrLK30AYMt2geWZSt3Cc3ciolQuk~4UuDyyZxOYAAFx~20scP-RfW7vsaCftoxFsbUGM82AzrCKB5gyWc7lsUFSF9eVBESnDqfEwSgF3SD49nwPMM544RrlsyI5ksmiJ09Hk-CSeG3YZ1rEnVDjlVgJ0Z6tw__"
+            src="/src/assets/bg-landing-2.png"
             w="full"
             h="full"
             objectFit="cover"
@@ -309,7 +309,7 @@ const Explore = () => {
           right={{ base: 0, md: 75, lg: 25, xl: 200 }}
         >
         </Box>
-        {/* <Box
+        <Box
           bg={"white"}
           position={"absolute"}
           top={{ base: 190, lg: 135 }}
@@ -385,7 +385,7 @@ const Explore = () => {
             </GridItem>
           </Grid>
 
-          <Stack
+          {/* <Stack
             direction="row"
             spacing={4}
             mb={5}
@@ -422,7 +422,7 @@ const Explore = () => {
             >
               Round Trip
             </Button>
-          </Stack>
+          </Stack> */}
           <Box mb={5} p={{ base: 2, lg: 0 }}>
             <Text color={"gray"} align={"left"}>
               Departure
@@ -465,7 +465,7 @@ const Explore = () => {
               </Stack>
             </RadioGroup>
           </Box>
-          <ChakraLink as={ReactRouterLink} to="/browse">
+          <Link as={ReactRouterLink} to="/browse">
           <Button
             width="full"
             rightIcon={<CgArrowRight />}
@@ -484,8 +484,8 @@ const Explore = () => {
             Search Flight
             
           </Button>
-          </ChakraLink>
-        </Box> */}
+          </Link>
+        </Box>
       </Box>
       <Box mt={860} w={"80%"} mx={"auto"}>
         <Box>

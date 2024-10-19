@@ -258,7 +258,7 @@ const Explore = () => {
           justifyContent="center"
         >
           <Image
-            src="/src/assets/bg-landing-2.png"
+            src="/src/assets/cities/kyoto.jpg"
             w="full"
             h="full"
             objectFit="cover"
@@ -288,7 +288,7 @@ const Explore = () => {
           justifyContent="center"
         >
           <Image
-            src="/src/assets/bg-landing-2.png"
+            src="/src/assets/cities/kyoto.jpg"
             w="full"
             h="full"
             objectFit="cover"

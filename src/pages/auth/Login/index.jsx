@@ -1,36 +1,28 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
-  Alert,
-  AlertDescription,
-  AlertIcon,
-  AlertTitle,
   Box,
   Button,
   Collapse,
-  Container,
   Flex,
   FormControl,
-  FormErrorMessage,
   Heading,
-  Image,
   Input,
   InputGroup,
   InputRightElement,
-  Stack,
   Text,
+  Tooltip,
   useToast,
 } from "@chakra-ui/react";
-import { Link, redirect, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
 import api from "../../../services/api";
-import AlertCustom from "../../../components/base/AlertCustom";
 import { loginValidation } from "../../../utils/validation";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../../../services/firebase";
-import { setTokentoLocalStorage } from "../../../utils/localStorage";
 import { optionToast } from "../../../utils/constants";
 import { BsEye, BsEyeSlash } from "react-icons/bs";
+import { setTokentoLocalStorage } from "../../../utils/storage";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -45,7 +37,6 @@ const Login = () => {
   });
   const [errors, setErrors] = useState({});
 
-  // Function
   const handleShowPassword = () =>
     setAuthState({
       ...authState,
@@ -60,8 +51,6 @@ const Login = () => {
     });
     try {
       const response = await signInWithPopup(auth, provider);
-      // const credential = GoogleAuthProvider.credentialFromResult(response);
-      // const token = credential.accessToken;
       const user = response.user;
       try {
         const res = await api.post(`loginAuthProvider`, {
@@ -73,21 +62,22 @@ const Login = () => {
           google_uid: user.uid,
         });
 
-        // console.log(res.data.message);
-        toast({
-          title: "Login Successfully",
-          status: "success",
-          ...optionToast,
-        });
-        //
-        setAuthState({
-          ...authState,
-          loading: false,
-        });
-        setTokentoLocalStorage(res.data);
-        navigate("/");
+        if (res.data) {
+          toast({
+            title: "Login Successfully",
+            status: "success",
+            ...optionToast,
+          });
+          setAuthState({
+            ...authState,
+            loading: false,
+          });
+          setTokentoLocalStorage(res.data);
+          navigate("/");
+        } else {
+          throw "Token doesn't created.";
+        }
       } catch (err) {
-        console.log(err);
         toast({
           title: "Login Failed",
           ...(err?.response?.data?.message
@@ -102,8 +92,6 @@ const Login = () => {
         });
       }
     } catch (error) {
-      // console.log(error.code);
-      // console.log(error.message);
       setAuthState({
         ...authState,
         loading: false,
@@ -142,7 +130,6 @@ const Login = () => {
           role: "customer",
         });
 
-        // console.log(res.data);
         toast({
           title: "Login Successfully",
           status: "success",
@@ -156,7 +143,6 @@ const Login = () => {
         setTokentoLocalStorage(res.data);
         navigate("/");
       } catch (err) {
-        console.log(err);
         toast({
           title: "Login Failed",
           ...(err?.response?.data?.message
@@ -180,10 +166,6 @@ const Login = () => {
           return { ...acc, [curr.path]: curr.message };
         }, {});
         setErrors(formErrors);
-        // setAuthState({
-        //   ...authState,
-        //   errors: formErrors,
-        // });
       }
       setAuthState({
         ...authState,
@@ -341,23 +323,33 @@ const Login = () => {
           >
             <FcGoogle fontSize="24px" />
           </Button>
-          <Button
-            bg="white"
-            borderRadius="10px"
-            color="#4175DF"
-            border="1px"
-            borderColor="#2395FF"
-            size="lg"
-            w="100%"
-            h="52px"
-            transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
-            _active={{
-              bg: "#2395FF",
-              boxShadow: "0px 8px 10px 0px #2395FF4D",
-            }}
+          <Tooltip
+            hasArrow
+            placement="top"
+            label="Facebook not available at the moment..."
+            bg="red.500"
+            borderRadius="4px"
+            fontFamily="Poppins"
           >
-            <FaFacebook fontSize="24px" />
-          </Button>
+            <Button
+              bg="white"
+              borderRadius="10px"
+              color="#4175DF"
+              border="1px"
+              borderColor="#2395FF"
+              size="lg"
+              w="100%"
+              h="52px"
+              transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+              _active={{
+                bg: "#2395FF",
+                boxShadow: "0px 8px 10px 0px #2395FF4D",
+              }}
+              isDisabled
+            >
+              <FaFacebook fontSize="24px" />
+            </Button>
+          </Tooltip>
         </Flex>
       </Box>
 

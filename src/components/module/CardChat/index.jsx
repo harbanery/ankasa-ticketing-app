@@ -134,87 +134,83 @@ const CardChat = ({ data = [], user = {} }) => {
             Chats
           </Text>
         </Box>
-        {data && data.length !== 0 && (
-          <>
-            <Button
-              onClick={onOpen}
-              bg="transparent"
-              py="0px"
-              px="0.5em"
-              h="auto"
-              mb="50px"
-              fontWeight={600}
-              fontSize={"16px"}
-              lineHeight={"24px"}
-              color={"#2395FF"}
-              fontFamily={"Poppins"}
-            >
-              Add Room
-            </Button>
+        <Button
+          onClick={onOpen}
+          bg="transparent"
+          py="0px"
+          px="0.5em"
+          h="auto"
+          mb="50px"
+          fontWeight={600}
+          fontSize={"16px"}
+          lineHeight={"24px"}
+          color={"#2395FF"}
+          fontFamily={"Poppins"}
+        >
+          Add Room
+        </Button>
 
-            <Modal isOpen={isOpen} onClose={onClose}>
-              <ModalOverlay />
-              <ModalContent fontFamily={"Poppins"}>
-                <ModalHeader>Find your new friend or customer!</ModalHeader>
-                <ModalBody>
-                  <Input
-                    onChange={handleChange}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleSearch();
-                    }}
-                    fontFamily={"Lato"}
-                    type="search"
-                    name="username"
-                    value={username}
-                    placeholder="Search username"
-                    autoComplete="off"
-                  />
+        <Modal isOpen={isOpen} onClose={onClose}>
+          <ModalOverlay />
+          <ModalContent fontFamily={"Poppins"}>
+            <ModalHeader>Find your new friend or customer!</ModalHeader>
+            <ModalBody>
+              <Input
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSearch();
+                }}
+                fontFamily={"Lato"}
+                type="search"
+                name="username"
+                value={username}
+                placeholder="Search username"
+                autoComplete="off"
+              />
 
-                  <Box
-                    mt={3}
-                    py="12px"
-                    px="4px"
-                    minW={{ lg: "319px" }}
-                    borderRadius="10px"
-                    display="flex"
-                    gap="30px"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    userSelect="none"
-                    cursor="pointer"
-                    transition="all 0.2s"
-                    _hover={{
-                      bg: "#E6E6E6",
-                    }}
+              <Box
+                mt={3}
+                py="12px"
+                px="4px"
+                minW={{ lg: "319px" }}
+                borderRadius="10px"
+                display="flex"
+                gap="30px"
+                justifyContent="space-between"
+                alignItems="center"
+                userSelect="none"
+                cursor="pointer"
+                transition="all 0.2s"
+                _hover={{
+                  bg: "#E6E6E6",
+                }}
+              >
+                <Avatar
+                  src={""}
+                  bg="gray.400"
+                  borderRadius="15px"
+                  borderWidth="0.5px"
+                  borderColor="#E6E6E6"
+                ></Avatar>
+                <Stack textAlign="left" w="100%">
+                  <Heading
+                    fontFamily="Poppins"
+                    fontSize="16px"
+                    fontWeight={600}
+                    lineHeight="24px"
+                    noOfLines={1}
                   >
-                    <Avatar
-                      src={""}
-                      bg="gray.400"
-                      borderRadius="15px"
-                      borderWidth="0.5px"
-                      borderColor="#E6E6E6"
-                    ></Avatar>
-                    <Stack textAlign="left" w="100%">
-                      <Heading
-                        fontFamily="Poppins"
-                        fontSize="16px"
-                        fontWeight={600}
-                        lineHeight="24px"
-                        noOfLines={1}
-                      >
-                        {"Qarun Mustafa"}
-                      </Heading>
-                    </Stack>
-                  </Box>
-                </ModalBody>
+                    {"Qarun Mustafa"}
+                  </Heading>
+                </Stack>
+              </Box>
+            </ModalBody>
 
-                <ModalFooter>
-                  <Button onClick={onClose}>Cancel</Button>
-                </ModalFooter>
-              </ModalContent>
-            </Modal>
-          </>
-        )}
+            <ModalFooter>
+              <Button onClick={onClose}>Cancel</Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
       </Flex>
 
       <Stack
@@ -334,8 +330,13 @@ const CardChat = ({ data = [], user = {} }) => {
             justifyContent="center"
             alignItems="center"
           >
-            <Heading fontSize="20px" fontFamily="Poppins" fontWeight="600">
-              No Chat Today
+            <Heading
+              textAlign="center"
+              fontSize="20px"
+              fontFamily="Poppins"
+              fontWeight="600"
+            >
+              Chat feature still in development...
             </Heading>
           </Box>
         )}

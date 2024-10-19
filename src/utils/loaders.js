@@ -3,31 +3,19 @@ import api from "../services/api";
 import {
   getTokenfromLocalStorage,
   removeTokenfromLocalStorage,
-} from "./localStorage";
+} from "./storage";
 
 export const authLoader = ({ request }) => {
   const url = new URL(request.url);
   const pathname = url.pathname;
   const { token } = getTokenfromLocalStorage();
-  // const previousPage = document.referrer;
-  // console.log(`${previousPage}`);
-
-  if (pathname == "/auth") {
-    return redirect("/auth/register");
-  }
 
   if (token) {
     return redirect("/");
-    // const redirectTo =
-    //   document.referrer !== window.location.origin + "/"
-    //     ? "/"
-    //     : document.referrer;
-    // return { redirectTo };
-    // if (previousPage !== window.location.origin + "/") {
-    //   return redirect("/");
-    // } else {
-    //   return redirect(-1);
-    // }
+  }
+
+  if (pathname == "/auth") {
+    return redirect("/auth/register");
   }
 
   return null;
@@ -38,12 +26,12 @@ export const profileLoader = ({ request }) => {
   const pathname = url.pathname;
   const { token } = getTokenfromLocalStorage();
 
-  if (pathname == "/profile") {
-    return redirect("/profile/my-profile");
+  if (!token) {
+    return redirect("/auth/login");
   }
 
-  if (!token) {
-    return redirect("/");
+  if (pathname == "/profile") {
+    return redirect("/profile/my-profile");
   }
 
   return null;
@@ -53,10 +41,6 @@ export const mainLoader = async ({ request }) => {
   const url = new URL(request.url);
   const pathname = url.pathname;
   const { token } = getTokenfromLocalStorage();
-
-  // if (pathname == "/auth") {
-  //   return redirect("/auth/register");
-  // }
 
   if (token) {
     try {
@@ -112,12 +96,18 @@ export const resetPasswordLoader = ({ request }) => {
   const params = new URLSearchParams(url.search);
   const user_id = params.get("id");
   const user_token = params.get("token");
-  // const params = url.search;
-  // console.log(params);
 
   if (!user_token || !user_id) {
     return redirect("/auth/login");
   }
 
   return { user_id, user_token };
+};
+
+export const protectedLoader = () => {
+  const { token } = getTokenfromLocalStorage();
+  if (!token) {
+    return redirect("/auth/login");
+  }
+  return null;
 };

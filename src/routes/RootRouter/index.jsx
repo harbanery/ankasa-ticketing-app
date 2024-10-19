@@ -4,6 +4,7 @@ import {
   authLoader,
   mainLoader,
   profileLoader,
+  protectedLoader,
   resetPasswordLoader,
   verifyEmailLoader,
 } from "../../utils/loaders";
@@ -15,7 +16,6 @@ import LayoutMain from "../../pages/layout/LayoutMain";
 import LayoutAuth from "../../pages/layout/LayoutAuth";
 import FlightDetail from "../../pages/main/Flight";
 import BoardingPassPage from "../../pages/main/BoardingPass";
-import { protectedRoute } from "../../utils/protectedRoute";
 import BrowsePage from "../../pages/main/Browse";
 import ResetPassword from "../../pages/auth/ResetPassword";
 import Profile from "../../pages/main/Profile";
@@ -39,12 +39,12 @@ const RootRouter = () => {
         {
           path: "flight/:id",
           element: <FlightDetail />,
-          loader: protectedRoute,
+          loader: protectedLoader,
         },
         {
           path: "my-booking/:id",
           element: <BoardingPassPage />,
-          loader: protectedRoute,
+          loader: protectedLoader,
         },
         {
           path: "profile",
@@ -64,6 +64,7 @@ const RootRouter = () => {
         {
           path: "chat",
           element: <Chat />,
+          loader: protectedLoader,
           children: [
             {
               path: ":id",

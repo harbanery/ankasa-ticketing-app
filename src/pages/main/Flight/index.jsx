@@ -31,6 +31,8 @@ import {
   ModalBody,
   ModalCloseButton,
   ModalContent,
+  ModalFooter,
+  ModalHeader,
   ModalOverlay,
   Select,
   Stack,
@@ -39,6 +41,7 @@ import {
   Text,
   Tooltip,
   useDisclosure,
+  useToast,
   VisuallyHidden,
   VStack,
 } from "@chakra-ui/react";
@@ -57,10 +60,11 @@ import {
   LuggageIcon,
   WifiIcon,
 } from "../../../components/base/Icons";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import api from "../../../services/api";
 import { formatScheduleDate, formatTimeFull } from "../../../utils/date";
 import { rupiah } from "../../../utils/currency";
+import { optionToast } from "../../../utils/constants";
 
 function CardFlightHeading({ children, ...props }) {
   return (
@@ -108,10 +112,6 @@ const FlightDetail = () => {
   const [insurance, setInsurance] = useState(false);
 
   const handleChangeContactPerson = (e) => {
-    // if (e?.target?.name === "phone") {
-    //   setForm({ ...form, phone: `${countryCode} + ${e.target.value}` });
-    // }
-    // setForm({ ...form, [e?.target?.name]: e?.target?.value });
     setData({
       ...data,
       contact_person: {
@@ -191,8 +191,6 @@ const FlightDetail = () => {
     }
   }, [data.ticket, data.passengers.length, insurance]);
 
-  console.log(data);
-
   return (
     <Box bg={"gray.200"} fontFamily="Poppins" pb="35px">
       <FlightDetailHeader />
@@ -225,7 +223,7 @@ const FlightDetail = () => {
               justifyContent="center"
               display={{ base: "none", lg: "flex" }}
             >
-              <AlertDialogFlight />
+              <ModalPayment data={data} />
             </Flex>
           </Box>
           <Box
@@ -246,402 +244,6 @@ const FlightDetail = () => {
         </Grid>
       </Container>
     </Box>
-  );
-};
-
-const SeatDetails = ({ passengers = [] }) => {
-  return (
-    <Collapse
-      in={
-        passengers?.filter((passenger) => passenger?.name !== "").length > 0
-          ? true
-          : false
-      }
-      animateOpacity
-      transition={{ enter: { delay: 0.5 } }}
-    >
-      <Box>
-        <Flex alignItems="center" justifyContent="space-between" mb="25px">
-          <CardFlightHeading color="black">Seat Details</CardFlightHeading>
-        </Flex>
-        <CardFlightDetail w="full">
-          <Flex
-            px="28px"
-            py="30px"
-            alignItems="center"
-            justifyContent="space-between"
-            fontFamily="Lato"
-            borderBottom="1px solid #E6E6E6"
-          >
-            <VStack
-              divider={
-                <StackDivider
-                  display={{ base: "none", lg: "block" }}
-                  borderColor="gray.200"
-                />
-              }
-              spacing={2}
-              align="stretch"
-              w={{ base: "full" }}
-              my={{ base: 0, lg: 4 }}
-            >
-              {passengers
-                ?.filter((passenger) => passenger?.name !== "")
-                .map((passenger) => (
-                  <Box
-                    key={passenger?.id}
-                    userSelect="none"
-                    display={{ base: "flex" }}
-                    justifyContent={{ base: "space-between" }}
-                    alignItems={{ base: "center" }}
-                    borderLeft="4px solid #2395FF"
-                    px={2}
-                  >
-                    <Stack spacing={1}>
-                      <Text
-                        fontSize={{ base: "16px", xl: "18px" }}
-                        fontWeight={500}
-                      >
-                        {`${
-                          passenger?.type === "adult" ? passenger?.title : ""
-                        } ${passenger?.name}`}
-                      </Text>
-                      <Text
-                        fontSize={{ base: "20px" }}
-                        fontWeight={600}
-                        textTransform="capitalize"
-                      >
-                        {`${passenger?.type}`}
-                      </Text>
-                    </Stack>
-                    <HStack
-                      bg={
-                        Object.values(passenger?.seat_selected).length !== 0
-                          ? "#2395FF1A"
-                          : "transparent"
-                      }
-                      py={1}
-                      px={2}
-                      rounded="15px"
-                      spacing={
-                        Object.values(passenger?.seat_selected).length !== 0
-                          ? 1
-                          : 0
-                      }
-                      maxW="35%"
-                      fontSize={
-                        Object.values(passenger?.seat_selected).length !== 0
-                          ? { base: 22, xl: 36 }
-                          : { base: 16, xl: 20 }
-                      }
-                      textAlign="right"
-                      fontWeight={
-                        Object.values(passenger?.seat_selected).length !== 0
-                          ? 700
-                          : 500
-                      }
-                    >
-                      {Object.values(passenger?.seat_selected).length !== 0 ? (
-                        <>
-                          <Text>
-                            {passenger?.seat_selected?.code?.split("-")[0]}
-                          </Text>
-                          <Text>-</Text>
-                          <Text>
-                            {passenger?.seat_selected?.code?.split("-")[1]}
-                          </Text>
-                        </>
-                      ) : (
-                        <Text>No Seat Selected</Text>
-                      )}
-                    </HStack>
-                  </Box>
-                ))}
-            </VStack>
-          </Flex>
-        </CardFlightDetail>
-      </Box>
-    </Collapse>
-  );
-};
-
-const MobileFlightDetails = ({ data = {}, insurance = false }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  return (
-    <>
-      <Box display={{ base: "block", lg: "none" }} gridColumn="1/-1">
-        <Flex
-          alignItems="center"
-          justifyContent="space-between"
-          color="black"
-          fontWeight="600"
-          my="2rem"
-        >
-          <Heading
-            fontFamily="Poppins"
-            fontSize={{ base: "1.125rem", md: "24px" }}
-          >
-            Flight Details
-          </Heading>
-          <Text
-            userSelect="none"
-            cursor="pointer"
-            onClick={onOpen}
-            fontSize={{ base: "1rem", md: "22px" }}
-          >
-            View Details
-          </Text>
-          <ModalFlight
-            isOpen={isOpen}
-            onClose={onClose}
-            cost={data?.cost}
-            passengers={data?.passengers}
-            insurance={insurance}
-          />
-        </Flex>
-        <Box bgColor="white" rounded="0.5rem" overflow="hidden">
-          <Box px="1.25rem" py="2.5rem" borderBottom="1px solid #E6E6E6">
-            <Flex justifyContent="space-between" mb="1.5rem">
-              <Box>
-                <Text fontSize="16px" fontWeight="500" color="black">
-                  {data?.ticket?.departure_city} (
-                  {data?.ticket?.departure_country_code})
-                </Text>
-                <Text fontSize="0.75rem" color="#6B6B6B">
-                  {formatTimeFull(data?.ticket?.departure_schedule)}
-                </Text>
-              </Box>
-              <Box mt="0.15rem">
-                <FlightIcon />
-              </Box>
-              <Box textAlign="right">
-                <Text fontSize="16px" fontWeight="500" color="black">
-                  {data?.ticket?.arrival_city} (
-                  {data?.ticket?.arrival_country_code})
-                </Text>
-                <Text fontSize="0.75rem" color="#6B6B6B">
-                  {formatTimeFull(data?.ticket?.arrival_schedule)}
-                </Text>
-              </Box>
-            </Flex>
-            <Flex
-              alignItems="center"
-              justifyContent="space-between"
-              gap={5}
-              mb="1.875rem"
-              fontFamily="Poppins"
-            >
-              <Box w="75px">
-                <Image
-                  w="full"
-                  src={data?.ticket?.merchant_image}
-                  alt={data?.ticket?.merchant_name}
-                />
-              </Box>
-              <Box display="flex" flexDirection="column" gap="10px">
-                {data?.ticket?.is_refund && (
-                  <Flex alignItems={"center"} gap={2} justifyContent="flex-end">
-                    <Text fontWeight={400}>Refundable</Text>
-                    <CiCircleCheck color="#2395FF" size={20} />
-                  </Flex>
-                )}
-                {data?.ticket?.is_reschedule && (
-                  <Flex alignItems={"center"} gap={2} justifyContent="flex-end">
-                    <Text align="right" fontWeight={400}>
-                      Can reschedule
-                    </Text>
-                    <CiCircleCheck color="#2395FF" size={20} />
-                  </Flex>
-                )}
-              </Box>
-            </Flex>
-            <Flex gap="20px" justifyContent="space-between">
-              <Box fontFamily="Lato" maxW="50%">
-                <Text fontSize="0.75rem" color="#A5A5A5">
-                  Schedule
-                </Text>
-                <Text fontSize="0.875rem" fontWeight="500" color="#595959">
-                  {formatScheduleDate(data?.ticket?.departure_schedule)}
-                </Text>
-              </Box>
-              <Box fontFamily="Lato">
-                <Text fontSize="0.75rem" color="#A5A5A5">
-                  Class
-                </Text>
-                <Text fontSize="0.875rem" fontWeight="500" color="#595959">
-                  {data?.ticket?.class}
-                </Text>
-              </Box>
-              <Box fontFamily="Lato">
-                <Text fontSize="0.75rem" color="#A5A5A5">
-                  Gate
-                </Text>
-                <Text fontSize="0.875rem" fontWeight="500" color="#595959">
-                  {data?.ticket?.gate}
-                </Text>
-              </Box>
-            </Flex>
-          </Box>
-          <Box
-            px="1.25rem"
-            pt="1.25rem"
-            pb="1.875rem"
-            shadow="0px 8px 27px 0px #0E3F6C30"
-          >
-            <Flex
-              alignItems="center"
-              justifyContent={
-                data?.passengers?.filter(
-                  (passenger) => passenger.type === "child"
-                ).length > 0
-                  ? "space-between"
-                  : "flex-end"
-              }
-            >
-              {data?.passengers?.filter(
-                (passenger) => passenger.type === "child"
-              ).length > 0 && (
-                <Flex alignItems="center" gap="16px">
-                  <Text
-                    as="span"
-                    fontWeight="700"
-                    fontSize="1.125rem"
-                    w="36px"
-                    aspectRatio="1/1"
-                    color="#2395FF"
-                    bgColor="#2395FF2E"
-                    rounded="100%"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    {
-                      data?.passengers?.filter(
-                        (passenger) => passenger.type === "child"
-                      ).length
-                    }
-                  </Text>
-                  <Text fontSize="0.875rem" color="#979797">
-                    Child
-                    {`${
-                      data?.passengers?.filter(
-                        (passenger) => passenger.type === "child"
-                      ).length > 1
-                        ? "s"
-                        : ""
-                    }`}
-                  </Text>
-                </Flex>
-              )}
-              <Flex alignItems="center" gap="16px">
-                <Text
-                  as="span"
-                  fontWeight="700"
-                  fontSize="1.125rem"
-                  w="36px"
-                  aspectRatio="1/1"
-                  color="#2395FF"
-                  bgColor="#2395FF2E"
-                  rounded="100%"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  {
-                    data?.passengers?.filter(
-                      (passenger) => passenger.type === "adult"
-                    ).length
-                  }
-                </Text>
-                <Text fontSize="0.875rem" color="#979797">
-                  Adult
-                  {`${
-                    data?.passengers?.filter(
-                      (passenger) => passenger.type === "adult"
-                    ).length > 1
-                      ? "s"
-                      : ""
-                  }`}
-                </Text>
-              </Flex>
-            </Flex>
-          </Box>
-        </Box>
-      </Box>
-      <Box display={{ base: "block", lg: "none" }} gridColumn="1/-1" mb="40px">
-        <Box mb="0.75rem">
-          <Heading fontSize="0.875rem" fontWeight="600">
-            Facilities
-          </Heading>
-        </Box>
-        <List display="flex" alignItems="center" gap="0.75rem" flexWrap="wrap">
-          {data?.ticket?.is_luggage && (
-            <ListItem
-              px="1.25rem"
-              py="1rem"
-              bgColor="#E45D32"
-              rounded="0.625rem"
-              display="flex"
-              alignItems="center"
-              gap="20px"
-              color="white"
-            >
-              <RiLuggageDepositFill size={22} />
-              <Text fontSize="0.875rem" fontWeight="600">
-                Luggage
-              </Text>
-            </ListItem>
-          )}
-          {data?.ticket?.is_inflight_meal && (
-            <ListItem
-              px="1.25rem"
-              py="1rem"
-              bgColor="#7861D7"
-              rounded="0.625rem"
-              display="flex"
-              alignItems="center"
-              gap="20px"
-              color="white"
-            >
-              <HamburgerIcon />
-              <Text fontSize="0.875rem" fontWeight="600">
-                Meal
-              </Text>
-            </ListItem>
-          )}
-          {data?.ticket?.is_wifi && (
-            <ListItem
-              px="1.25rem"
-              py="1rem"
-              bgColor="#6DDA6B"
-              rounded="0.625rem"
-              display="flex"
-              alignItems="center"
-              gap="20px"
-              color="white"
-            >
-              <WifiIcon />
-              <Text fontSize="0.875rem" fontWeight="600">
-                Wi-Fi
-              </Text>
-            </ListItem>
-          )}
-        </List>
-      </Box>
-      <Box display={{ base: "block", lg: "none" }} gridColumn="1/-1">
-        <Flex alignItems="center" justifyContent="space-between" mb="30px">
-          <Text fontSize="0.875rem" fontWeight="500" color="#6B6B6B">
-            Total you'll pay
-          </Text>
-          <Text fontSize="1.5rem" fontWeight="600" color="#2395FF">
-            {rupiah(data?.cost?.total_price)}
-          </Text>
-        </Flex>
-        <Flex>
-          <AlertDialogFlight />
-        </Flex>
-      </Box>
-    </>
   );
 };
 
@@ -728,52 +330,10 @@ const SeatsFlight = ({
     }
   };
 
-  // console.log(passenger_seat_selected);
-
-  const data_dummy = [
-    {
-      code: "1-A",
-      id: 1,
-      is_booking: false,
-    },
-    {
-      code: "1-B",
-      id: 2,
-      is_booking: false,
-    },
-    {
-      code: "1-C",
-      id: 3,
-      is_booking: false,
-    },
-    {
-      code: "1-D",
-      id: 4,
-      is_booking: false,
-    },
-    {
-      code: "2-A",
-      id: 5,
-      is_booking: false,
-    },
-    {
-      code: "2-B",
-      id: 6,
-      is_booking: false,
-    },
-    {
-      code: "2-C",
-      id: 7,
-      is_booking: false,
-    },
-  ];
-  // Function to split seats into rows and add spacing
   const arrangeSeats = (data, seatsPerRow) => {
     const rows = [];
     let numRows = data[0]?.code.split("-")[0] || 1;
 
-    // let code_data = data[0]?.code;
-    // console.log(code_data.split("-")[0]);
     const generateAlphabetRow = (seatPositions) => {
       const row = [];
       let seatIndex = 0;
@@ -789,22 +349,20 @@ const SeatsFlight = ({
       return row;
     };
 
-    // Fungsi untuk menyusun kursi dengan slot null yang teratur
     const generateRow = (rowSeats, seatPositions, numberOfRows) => {
       const row = [];
       let seatIndex = 0;
       for (let i = 0; i < seatPositions.length; i++) {
         if (seatPositions[i] === null) {
-          row.push(numberOfRows); // Tambah null di posisi yang sesuai
+          row.push(numberOfRows);
         } else {
-          row.push(rowSeats[seatIndex] || null); // Tambah kursi jika ada, jika tidak ada isi dengan null
+          row.push(rowSeats[seatIndex] || null);
           seatIndex++;
         }
       }
       return row;
     };
 
-    // Template posisi kursi berdasarkan jumlah seatsPerRow
     const seatLayouts = {
       4: [0, 1, null, 2, 3],
       6: [0, 1, 2, null, 3, 4, 5],
@@ -820,10 +378,9 @@ const SeatsFlight = ({
       const rowSeats = data.slice(i, i + seatsPerRow);
 
       if (seatsPerRow <= 10) {
-        // Jika seatsPerRow ada di layout yang ditentukan, gunakan fungsi generateRow
         rows.push(generateRow(rowSeats, seatLayouts[seatsPerRow], numRows));
       } else {
-        rows.push(rowSeats); // Jika lebih dari 10, masukkan kursi secara langsung
+        rows.push(rowSeats);
       }
 
       numRows++;
@@ -833,7 +390,6 @@ const SeatsFlight = ({
   };
 
   const seatRows = arrangeSeats(seats, count_row);
-  // console.log(seatRows);
 
   return (
     <Box
@@ -856,7 +412,7 @@ const SeatsFlight = ({
           templateColumns={`repeat(${
             count_row <= 6 ? count_row + 1 : count_row <= 10 ? count_row + 2 : 4
           }, 1fr)`}
-          mb={5} // Margin between rows
+          mb={5}
         >
           {row.map((seat, seatIndex) =>
             seat ? (
@@ -1160,9 +716,123 @@ const ModalFlight = ({
   );
 };
 
-const AlertDialogFlight = () => {
+const ModalPayment = ({ data = {} }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const cancelRef = useRef();
+
+  const [paymentRequest, setPaymentRequest] = useState({
+    type: "",
+    name: "",
+    ewallet: {},
+  });
+
+  const payment_method = [
+    {
+      name: "Internal Wallet",
+      code: "INTERNAL",
+      active: true,
+      items: [
+        {
+          name: "ANKASA_PAY",
+          image: "/src/assets/payments/ankasapay.png",
+          active: false,
+          input_actions: [],
+        },
+      ],
+    },
+    {
+      name: "E-Wallet",
+      code: "EWALLET",
+      active: true,
+      items: [
+        {
+          name: "JENIUS",
+          image: "/src/assets/payments/ewallet_jenius.png",
+          active: true,
+          input_actions: [
+            {
+              type: "text",
+              label: "CashTag",
+              value: paymentRequest?.ewallet?.cashtag,
+              name: "cashtag",
+              readOnly: false,
+              placeholder: "Input your tagcash (ex. @johndoe)",
+            },
+          ],
+        },
+        {
+          name: "DANA",
+          image: "/src/assets/payments/ewallet_dana.png",
+          active: true,
+          input_actions: [],
+        },
+        {
+          name: "OVO",
+          image: "/src/assets/payments/ewallet_ovo.png",
+          active: true,
+          input_actions: [
+            {
+              type: "text",
+              label: "Mobile Number",
+              value: paymentRequest?.ewallet?.mobile_number,
+              name: "mobile_number",
+              readOnly: false,
+              placeholder: "Input your phone number",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "Bank Transfer",
+      code: "VA",
+      active: false,
+      items: [
+        {
+          name: "BNI",
+          image: "/src/assets/payments/va_bni.png",
+          input_actions: [],
+        },
+        {
+          name: "MANDIRI",
+          image: "/src/assets/payments/va_mandiri.png",
+          input_actions: [],
+        },
+        {
+          name: "BCA",
+          image: "/src/assets/payments/va_bca.png",
+          input_actions: [],
+        },
+      ],
+    },
+  ];
+
+  const handlePaymentMethodButton = (type, name) => {
+    if (!type || !name) {
+      return null;
+    }
+
+    setPaymentRequest({
+      ...paymentRequest,
+      type: type,
+      name: name,
+    });
+  };
+
+  const handleChangePaymentMethodInput = (e, type) => {
+    if (!type) {
+      return null;
+    }
+
+    setPaymentRequest({
+      ...paymentRequest,
+      ...(type == "EWALLET" && {
+        ewallet: {
+          [e.target.name]: e.target.value,
+        },
+      }),
+    });
+  };
+
   return (
     <>
       <Button
@@ -1187,6 +857,280 @@ const AlertDialogFlight = () => {
       >
         Proceed to Payment
       </Button>
+      <Modal size={`xl`} isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent fontFamily="Poppins" mx="1rem">
+          <ModalHeader bg="#2395FF" color="white" roundedTop="inherit">
+            Payment Method
+          </ModalHeader>
+          <ModalCloseButton color="white" />
+          <ModalBody>
+            <Stack mt={4}>
+              {payment_method?.[0]?.code == "INTERNAL" && (
+                <Flex
+                  flexWrap="wrap"
+                  gap="5%"
+                  justifyContent="flex-start"
+                  mt={4}
+                >
+                  {payment_method?.[0]?.items?.[0]?.name == "ANKASA_PAY" && (
+                    <Tooltip
+                      hasArrow
+                      placement="top"
+                      label="Still in Development..."
+                      bg="red.500"
+                      borderRadius="4px"
+                      fontFamily="Poppins"
+                    >
+                      <Button
+                        w="30%"
+                        h="80px"
+                        border="1px solid #EDF2F7"
+                        bg="white"
+                        mb={4}
+                        isDisabled={
+                          payment_method?.[0]?.items?.[0]?.active ? false : true
+                        }
+                      >
+                        <Image
+                          src={payment_method?.[0]?.items?.[0]?.image || ""}
+                          alt={payment_method?.[0]?.items?.[0]?.name || ""}
+                          objectFit="contain"
+                          w="full"
+                          h="full"
+                        />
+                      </Button>
+                    </Tooltip>
+                  )}
+                </Flex>
+              )}
+              <Accordion allowMultiple>
+                {payment_method
+                  ?.slice(
+                    payment_method?.[0]?.name == "Internal Wallet" ? 1 : 0
+                  )
+                  .map((method, index) => (
+                    <AccordionItem key={index}>
+                      {method?.active && (
+                        <>
+                          <h2>
+                            <AccordionButton>
+                              <Box
+                                as="span"
+                                flex="1"
+                                textAlign="left"
+                                fontWeight={600}
+                              >
+                                {method?.name}
+                              </Box>
+                              <AccordionIcon />
+                            </AccordionButton>
+                          </h2>
+                          <AccordionPanel>
+                            <Flex
+                              flexWrap="wrap"
+                              gap="5%"
+                              justifyContent="flex-start"
+                              mt={4}
+                            >
+                              {method?.items?.map((payment, payment_index) => (
+                                <Button
+                                  key={payment_index}
+                                  w="30%"
+                                  h="80px"
+                                  border="1px solid #EDF2F7"
+                                  bg={
+                                    paymentRequest?.name == payment?.name
+                                      ? "blue.100"
+                                      : "white"
+                                  }
+                                  mb={4}
+                                  isDisabled={payment?.active ? false : true}
+                                  onClick={() => {
+                                    handlePaymentMethodButton(
+                                      method?.code,
+                                      payment?.name
+                                    );
+                                  }}
+                                  _focus={{
+                                    bg:
+                                      paymentRequest?.name == payment?.name
+                                        ? "blue.100"
+                                        : "gray.300",
+                                  }}
+                                >
+                                  <Image
+                                    draggable={false}
+                                    src={payment?.image || ""}
+                                    alt={payment?.name || ""}
+                                    objectFit="contain"
+                                    w="full"
+                                    h="full"
+                                  />
+                                </Button>
+                              ))}
+                            </Flex>
+
+                            <Box w="full">
+                              <Collapse
+                                in={
+                                  method?.items?.find(
+                                    (item) =>
+                                      item?.name === paymentRequest?.name
+                                  )?.input_actions?.length != 0
+                                    ? true
+                                    : false
+                                }
+                                animateOpacity
+                              >
+                                {method?.items
+                                  ?.find(
+                                    (item) =>
+                                      item?.name === paymentRequest?.name
+                                  )
+                                  ?.input_actions?.map((input, index) => (
+                                    <Box key={index} w="full">
+                                      <FormLabel fontSize="small">
+                                        {input?.label}
+                                      </FormLabel>
+                                      <Input
+                                        variant="outline"
+                                        size="sm"
+                                        name={input?.name || ""}
+                                        value={input?.value || ""}
+                                        onChange={(e) =>
+                                          handleChangePaymentMethodInput(
+                                            e,
+                                            paymentRequest?.type
+                                          )
+                                        }
+                                        placeholder={input?.placeholder || ""}
+                                      />
+                                    </Box>
+                                  ))}
+                              </Collapse>
+                            </Box>
+                          </AccordionPanel>
+                        </>
+                      )}
+                    </AccordionItem>
+                  ))}
+              </Accordion>
+            </Stack>
+          </ModalBody>
+          <ModalFooter>
+            <Flex w="full" justifyContent="space-between" alignItems="center">
+              <Stack>
+                <AlertDialogFlight data={data} payment={paymentRequest} />
+              </Stack>
+              <HStack>
+                <Text fontWeight={500} fontSize={12}>
+                  Supported by
+                </Text>
+                <Image h={8} src="/src/assets/brands/xendit_logo.png" />
+              </HStack>
+            </Flex>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </>
+  );
+};
+
+const AlertDialogFlight = ({ data = {}, payment = {} }) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const cancelRef = useRef();
+  const toast = useToast();
+  const navigate = useNavigate();
+
+  const handleCreatePayment = async () => {
+    const checkPassengers = data?.passengers?.filter(
+      (passenger) =>
+        passenger?.name === "" ||
+        passenger.nationality === "" ||
+        Object.values(passenger?.seat_selected).length === 0
+    );
+
+    if (checkPassengers.length == 0) {
+      const data_request = {
+        ticket_id: data?.ticket?.id,
+        total_price: data?.cost?.total_price,
+        passengers: data?.passengers?.map((passenger) => ({
+          seat_id: passenger?.seat_selected?.id,
+          name: `${passenger?.title} ${passenger?.name}`,
+          category: passenger?.type,
+          nationality: passenger?.nationality,
+        })),
+        payment_method_type: payment?.type,
+        ...(payment?.type == "EWALLET" && {
+          payment_method_ewallet: {
+            name: payment?.name,
+            ...(payment?.ewallet?.mobile_number &&
+              payment?.name == "OVO" && {
+                mobile_number: payment?.ewallet?.mobile_number,
+              }),
+            ...(payment?.ewallet?.cashtag &&
+              payment?.name == "JENIUS" && {
+                cashtag: payment?.ewallet?.cashtag,
+              }),
+          },
+        }),
+      };
+
+      try {
+        await api.post(`orders`, data_request);
+        toast({
+          title:
+            "Order Successfully. Please check your order to confirm payment.",
+          status: "success",
+          ...optionToast,
+        });
+        const timeout = setTimeout(() => {
+          navigate("/profile/my-booking");
+        }, 2000);
+        return () => clearTimeout(timeout);
+      } catch (err) {
+        console.log(err);
+        toast({
+          title: "Order failed",
+          status: "error",
+          ...optionToast,
+        });
+      }
+    } else {
+      toast({
+        title: "Order failed",
+        description: `Seat and form not complete.`,
+        status: "error",
+        ...optionToast,
+      });
+    }
+    onClose();
+  };
+
+  return (
+    <>
+      <Button
+        onClick={onOpen}
+        type="submit"
+        bg="#2395FF"
+        borderRadius="10px"
+        fontWeight="700"
+        color="white"
+        transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+        boxShadow="0px 8px 10px 0px #2395FF4D"
+        _hover={{ bg: "#1971c2" }}
+        _active={
+          !payment?.name ||
+          !payment?.type || {
+            bg: "#dddfe2",
+            boxShadow: "0px 8px 10px 0px #dddfe24D",
+          }
+        }
+        isDisabled={!payment?.name || !payment?.type ? true : false}
+      >
+        Buy Ticket
+      </Button>
       <AlertDialog
         motionPreset="slideInBottom"
         leastDestructiveRef={cancelRef}
@@ -1206,7 +1150,12 @@ const AlertDialogFlight = () => {
             <Button ref={cancelRef} onClick={onClose} variant="solid">
               No, Let me check again!
             </Button>
-            <Button bg="#2395FF" color="white" ml={3}>
+            <Button
+              bg="#2395FF"
+              onClick={handleCreatePayment}
+              color="white"
+              ml={3}
+            >
               Yes
             </Button>
           </AlertDialogFooter>
@@ -1268,40 +1217,6 @@ const ContactPersonDetails = ({ contact_person = [], callback }) => {
               />
             </Box>
           ))}
-          {/* <Flex
-        alignItems={"end"}
-        gap={3}
-        borderBottom={"1px solid"}
-        borderColor={"gray.400"}
-      >
-        <Box>
-          <FormLabel color={"gray.500"}>Phone</FormLabel>
-          <Select
-            variant="flushed"
-            w={70}
-            fontSize={14}
-            focusBorderColor="transparent"
-            onChange={(e) => setCountryCode(e.target.value)}
-          >
-            <option value="+62">+62</option>
-            <option value="+63">+63</option>
-            <option value="+64">+64</option>
-          </Select>
-        </Box>
-        <Stack h={8} w={"2px"} bg={"gray.300"}></Stack>
-        <Input
-          py={2}
-          variant="unstyled"
-          placeholder="Phone number"
-          focusBorderColor="transparent"
-          type="text"
-          border={"none"}
-          borderColor="transparent"
-          value={form?.phone}
-          name="phone"
-          onChange={(e) => handleChange(e)}
-        />
-      </Flex> */}
         </FormControl>
         <Flex
           bg={"#F245451A"}
@@ -1788,6 +1703,286 @@ const FlightDetails = ({
   );
 };
 
+const MobileFlightDetails = ({ data = {}, insurance = false }) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  return (
+    <>
+      <Box display={{ base: "block", lg: "none" }} gridColumn="1/-1">
+        <Flex
+          alignItems="center"
+          justifyContent="space-between"
+          color="black"
+          fontWeight="600"
+          my="2rem"
+        >
+          <Heading
+            fontFamily="Poppins"
+            fontSize={{ base: "1.125rem", md: "24px" }}
+          >
+            Flight Details
+          </Heading>
+          <Text
+            userSelect="none"
+            cursor="pointer"
+            onClick={onOpen}
+            fontSize={{ base: "1rem", md: "22px" }}
+          >
+            View Details
+          </Text>
+          <ModalFlight
+            isOpen={isOpen}
+            onClose={onClose}
+            cost={data?.cost}
+            passengers={data?.passengers}
+            insurance={insurance}
+          />
+        </Flex>
+        <Box bgColor="white" rounded="0.5rem" overflow="hidden">
+          <Box px="1.25rem" py="2.5rem" borderBottom="1px solid #E6E6E6">
+            <Flex justifyContent="space-between" mb="1.5rem">
+              <Box>
+                <Text fontSize="16px" fontWeight="500" color="black">
+                  {data?.ticket?.departure_city} (
+                  {data?.ticket?.departure_country_code})
+                </Text>
+                <Text fontSize="0.75rem" color="#6B6B6B">
+                  {formatTimeFull(data?.ticket?.departure_schedule)}
+                </Text>
+              </Box>
+              <Box mt="0.15rem">
+                <FlightIcon />
+              </Box>
+              <Box textAlign="right">
+                <Text fontSize="16px" fontWeight="500" color="black">
+                  {data?.ticket?.arrival_city} (
+                  {data?.ticket?.arrival_country_code})
+                </Text>
+                <Text fontSize="0.75rem" color="#6B6B6B">
+                  {formatTimeFull(data?.ticket?.arrival_schedule)}
+                </Text>
+              </Box>
+            </Flex>
+            <Flex
+              alignItems="center"
+              justifyContent="space-between"
+              gap={5}
+              mb="1.875rem"
+              fontFamily="Poppins"
+            >
+              <Box w="75px">
+                <Image
+                  w="full"
+                  src={data?.ticket?.merchant_image}
+                  alt={data?.ticket?.merchant_name}
+                />
+              </Box>
+              <Box display="flex" flexDirection="column" gap="10px">
+                {data?.ticket?.is_refund && (
+                  <Flex alignItems={"center"} gap={2} justifyContent="flex-end">
+                    <Text fontWeight={400}>Refundable</Text>
+                    <CiCircleCheck color="#2395FF" size={20} />
+                  </Flex>
+                )}
+                {data?.ticket?.is_reschedule && (
+                  <Flex alignItems={"center"} gap={2} justifyContent="flex-end">
+                    <Text align="right" fontWeight={400}>
+                      Can reschedule
+                    </Text>
+                    <CiCircleCheck color="#2395FF" size={20} />
+                  </Flex>
+                )}
+              </Box>
+            </Flex>
+            <Flex gap="20px" justifyContent="space-between">
+              <Box fontFamily="Lato" maxW="50%">
+                <Text fontSize="0.75rem" color="#A5A5A5">
+                  Schedule
+                </Text>
+                <Text fontSize="0.875rem" fontWeight="500" color="#595959">
+                  {formatScheduleDate(data?.ticket?.departure_schedule)}
+                </Text>
+              </Box>
+              <Box fontFamily="Lato">
+                <Text fontSize="0.75rem" color="#A5A5A5">
+                  Class
+                </Text>
+                <Text fontSize="0.875rem" fontWeight="500" color="#595959">
+                  {data?.ticket?.class}
+                </Text>
+              </Box>
+              <Box fontFamily="Lato">
+                <Text fontSize="0.75rem" color="#A5A5A5">
+                  Gate
+                </Text>
+                <Text fontSize="0.875rem" fontWeight="500" color="#595959">
+                  {data?.ticket?.gate}
+                </Text>
+              </Box>
+            </Flex>
+          </Box>
+          <Box
+            px="1.25rem"
+            pt="1.25rem"
+            pb="1.875rem"
+            shadow="0px 8px 27px 0px #0E3F6C30"
+          >
+            <Flex
+              alignItems="center"
+              justifyContent={
+                data?.passengers?.filter(
+                  (passenger) => passenger.type === "child"
+                ).length > 0
+                  ? "space-between"
+                  : "flex-end"
+              }
+            >
+              {data?.passengers?.filter(
+                (passenger) => passenger.type === "child"
+              ).length > 0 && (
+                <Flex alignItems="center" gap="16px">
+                  <Text
+                    as="span"
+                    fontWeight="700"
+                    fontSize="1.125rem"
+                    w="36px"
+                    aspectRatio="1/1"
+                    color="#2395FF"
+                    bgColor="#2395FF2E"
+                    rounded="100%"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    {
+                      data?.passengers?.filter(
+                        (passenger) => passenger.type === "child"
+                      ).length
+                    }
+                  </Text>
+                  <Text fontSize="0.875rem" color="#979797">
+                    Child
+                    {`${
+                      data?.passengers?.filter(
+                        (passenger) => passenger.type === "child"
+                      ).length > 1
+                        ? "s"
+                        : ""
+                    }`}
+                  </Text>
+                </Flex>
+              )}
+              <Flex alignItems="center" gap="16px">
+                <Text
+                  as="span"
+                  fontWeight="700"
+                  fontSize="1.125rem"
+                  w="36px"
+                  aspectRatio="1/1"
+                  color="#2395FF"
+                  bgColor="#2395FF2E"
+                  rounded="100%"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  {
+                    data?.passengers?.filter(
+                      (passenger) => passenger.type === "adult"
+                    ).length
+                  }
+                </Text>
+                <Text fontSize="0.875rem" color="#979797">
+                  Adult
+                  {`${
+                    data?.passengers?.filter(
+                      (passenger) => passenger.type === "adult"
+                    ).length > 1
+                      ? "s"
+                      : ""
+                  }`}
+                </Text>
+              </Flex>
+            </Flex>
+          </Box>
+        </Box>
+      </Box>
+      <Box display={{ base: "block", lg: "none" }} gridColumn="1/-1" mb="40px">
+        <Box mb="0.75rem">
+          <Heading fontSize="0.875rem" fontWeight="600">
+            Facilities
+          </Heading>
+        </Box>
+        <List display="flex" alignItems="center" gap="0.75rem" flexWrap="wrap">
+          {data?.ticket?.is_luggage && (
+            <ListItem
+              px="1.25rem"
+              py="1rem"
+              bgColor="#E45D32"
+              rounded="0.625rem"
+              display="flex"
+              alignItems="center"
+              gap="20px"
+              color="white"
+            >
+              <RiLuggageDepositFill size={22} />
+              <Text fontSize="0.875rem" fontWeight="600">
+                Luggage
+              </Text>
+            </ListItem>
+          )}
+          {data?.ticket?.is_inflight_meal && (
+            <ListItem
+              px="1.25rem"
+              py="1rem"
+              bgColor="#7861D7"
+              rounded="0.625rem"
+              display="flex"
+              alignItems="center"
+              gap="20px"
+              color="white"
+            >
+              <HamburgerIcon />
+              <Text fontSize="0.875rem" fontWeight="600">
+                Meal
+              </Text>
+            </ListItem>
+          )}
+          {data?.ticket?.is_wifi && (
+            <ListItem
+              px="1.25rem"
+              py="1rem"
+              bgColor="#6DDA6B"
+              rounded="0.625rem"
+              display="flex"
+              alignItems="center"
+              gap="20px"
+              color="white"
+            >
+              <WifiIcon />
+              <Text fontSize="0.875rem" fontWeight="600">
+                Wi-Fi
+              </Text>
+            </ListItem>
+          )}
+        </List>
+      </Box>
+      <Box display={{ base: "block", lg: "none" }} gridColumn="1/-1">
+        <Flex alignItems="center" justifyContent="space-between" mb="30px">
+          <Text fontSize="0.875rem" fontWeight="500" color="#6B6B6B">
+            Total you'll pay
+          </Text>
+          <Text fontSize="1.5rem" fontWeight="600" color="#2395FF">
+            {rupiah(data?.cost?.total_price)}
+          </Text>
+        </Flex>
+        <Flex>
+          <ModalPayment data={data} />
+        </Flex>
+      </Box>
+    </>
+  );
+};
+
 const CostDetails = ({
   cost = {},
   passengers = [],
@@ -1902,6 +2097,122 @@ const CostDetails = ({
         ticket per seat
       </Text>
     </Box>
+  );
+};
+
+const SeatDetails = ({ passengers = [] }) => {
+  return (
+    <Collapse
+      in={
+        passengers?.filter((passenger) => passenger?.name !== "").length > 0
+          ? true
+          : false
+      }
+      animateOpacity
+      transition={{ enter: { delay: 0.5 } }}
+    >
+      <Box>
+        <Flex alignItems="center" justifyContent="space-between" mb="25px">
+          <CardFlightHeading color="black">Seat Details</CardFlightHeading>
+        </Flex>
+        <CardFlightDetail w="full">
+          <Flex
+            px="28px"
+            py="30px"
+            alignItems="center"
+            justifyContent="space-between"
+            fontFamily="Lato"
+            borderBottom="1px solid #E6E6E6"
+          >
+            <VStack
+              divider={
+                <StackDivider
+                  display={{ base: "none", lg: "block" }}
+                  borderColor="gray.200"
+                />
+              }
+              spacing={2}
+              align="stretch"
+              w={{ base: "full" }}
+              my={{ base: 0, lg: 4 }}
+            >
+              {passengers
+                ?.filter((passenger) => passenger?.name !== "")
+                .map((passenger) => (
+                  <Box
+                    key={passenger?.id}
+                    userSelect="none"
+                    display={{ base: "flex" }}
+                    justifyContent={{ base: "space-between" }}
+                    alignItems={{ base: "center" }}
+                    borderLeft="4px solid #2395FF"
+                    px={2}
+                  >
+                    <Stack spacing={1}>
+                      <Text
+                        fontSize={{ base: "16px", xl: "18px" }}
+                        fontWeight={500}
+                      >
+                        {`${
+                          passenger?.type === "adult" ? passenger?.title : ""
+                        } ${passenger?.name}`}
+                      </Text>
+                      <Text
+                        fontSize={{ base: "20px" }}
+                        fontWeight={600}
+                        textTransform="capitalize"
+                      >
+                        {`${passenger?.type}`}
+                      </Text>
+                    </Stack>
+                    <HStack
+                      bg={
+                        Object.values(passenger?.seat_selected).length !== 0
+                          ? "#2395FF1A"
+                          : "transparent"
+                      }
+                      py={1}
+                      px={2}
+                      rounded="15px"
+                      spacing={
+                        Object.values(passenger?.seat_selected).length !== 0
+                          ? 1
+                          : 0
+                      }
+                      maxW="35%"
+                      fontSize={
+                        Object.values(passenger?.seat_selected).length !== 0
+                          ? { base: 22, xl: 36 }
+                          : { base: 16, xl: 20 }
+                      }
+                      textAlign="right"
+                      fontWeight={
+                        Object.values(passenger?.seat_selected).length !== 0
+                          ? 700
+                          : 500
+                      }
+                    >
+                      {Object.values(passenger?.seat_selected).length !== 0 ? (
+                        <>
+                          <Text>
+                            {passenger?.seat_selected?.code?.split("-")[0]}
+                          </Text>
+                          <Text>-</Text>
+                          <Text>
+                            {passenger?.seat_selected?.code?.split("-")[1]}
+                          </Text>
+                        </>
+                      ) : (
+                        <Text>No Seat Selected</Text>
+                      )}
+                    </HStack>
+                  </Box>
+                ))}
+            </VStack>
+          </Flex>
+        </CardFlightDetail>
+      </Box>
+    </Collapse>
   );
 };
 

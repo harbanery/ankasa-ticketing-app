@@ -1,14 +1,11 @@
 import React, { useState } from "react";
 import { passwordValidation } from "../../../utils/validation";
 import {
-  Box,
   Button,
   Collapse,
-  Container,
   Flex,
   FormControl,
   Heading,
-  Image,
   Input,
   InputGroup,
   InputRightElement,
@@ -16,7 +13,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import api from "../../../services/api";
-import { Link, redirect, useLoaderData, useNavigate } from "react-router-dom";
+import { useLoaderData, useNavigate } from "react-router-dom";
 import { BsEye, BsEyeSlash } from "react-icons/bs";
 import { optionToast } from "../../../utils/constants";
 
@@ -72,9 +69,6 @@ const ResetPassword = () => {
         setLoading(false);
         navigate("/auth/login");
       } catch (err) {
-        console.log(err);
-        // setAlert({ status: "error", message: err?.response?.data?.message })
-
         toast({
           title: "Reset password failed",
           status: "error",

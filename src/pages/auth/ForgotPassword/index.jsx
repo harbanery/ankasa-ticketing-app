@@ -2,17 +2,14 @@ import {
   Box,
   Button,
   Collapse,
-  Container,
   Flex,
   FormControl,
   Heading,
-  Image,
   Input,
   Text,
   useToast,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import { emailValidation } from "../../../utils/validation";
 import api from "../../../services/api";
 import { optionToast } from "../../../utils/constants";
@@ -49,7 +46,6 @@ const ForgotPassword = () => {
           email: form.email,
         });
 
-        // console.log(res.data);
         toast({
           title: "Request reset password successfully",
           description: "Please check in your email to reset your password.",
@@ -59,7 +55,6 @@ const ForgotPassword = () => {
         setLoading(false);
         setMessageVisible(true);
       } catch (err) {
-        console.log(err);
         toast({
           title: "Failed",
           ...(err?.response?.data?.message

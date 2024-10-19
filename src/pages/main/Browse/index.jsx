@@ -563,6 +563,8 @@ export default function BrowsePage() {
   const [tickets, setTickets] = useState([]);
   const [searchParams] = useSearchParams();
   const queryString = searchParams.toString();
+  console.log("params", queryString);
+  
 
   const getTickets = async () => {
     try {

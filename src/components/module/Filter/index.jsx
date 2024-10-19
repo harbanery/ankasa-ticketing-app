@@ -38,6 +38,8 @@ function FilterItem({ item, resetFlag, filterType }) {
   useEffect(() => {
     setChecked(searchParams.getAll(filterType).includes(value));
   }, [searchParams, value, resetFlag, filterType]);
+  // console.log("item",item);
+  
 
   const handleChange = (value) => {
     const facilities = searchParams.getAll(filterType);

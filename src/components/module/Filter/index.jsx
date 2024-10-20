@@ -28,16 +28,37 @@ import {
 } from "@chakra-ui/react";
 import { useSearchParams } from "react-router-dom";
 import { FilterIcon } from "../../base/Icons";
+import { useEffect, useState } from "react";
+import { rupiah } from "../../../utils/currency";
 
-function FilterItem({ item }) {
+function FilterItem({ item, resetFlag, filterType }) {
   const { label, value } = item;
   const [searchParams, setSearchParams] = useSearchParams();
+  const [checked, setChecked] = useState(false);
+  useEffect(() => {
+    setChecked(searchParams.getAll(filterType).includes(value));
+  }, [searchParams, value, resetFlag, filterType]);
+  // console.log("item",item);
+  
 
   const handleChange = (value) => {
-    setSearchParams((prev) => {
-      console.log("prev > ", prev);
-      return [...prev.entries(), ["facilities", value]];
-    });
+    const facilities = searchParams.getAll(filterType);
+
+    if (facilities.includes(value)) {
+      const newFacilities = facilities.filter((facility) => facility !== value);
+      setSearchParams((prev) => {
+        prev.delete(filterType);
+        newFacilities.forEach((facility) =>
+          prev.append(filterType, facility)
+        );
+        return prev;
+      });
+    } else {
+      setSearchParams((prev) => {
+        prev.append(filterType, value);
+        return prev;
+      });
+    }
   };
 
   return (
@@ -47,20 +68,21 @@ function FilterItem({ item }) {
       justifyContent="space-between"
       value={value}
       onChange={() => handleChange(value)}
+      isChecked={checked} // Pastikan checkbox sinkron dengan search params
     >
       {label}
     </Checkbox>
   );
 }
 
-function FilterList({ items }) {
+function FilterList({ items, resetFlag, filterType }) {
   return (
     <List>
       <ListItem>
         <CheckboxGroup>
           <VStack spacing="20px">
             {items.map((item) => (
-              <FilterItem item={item} key={item.label} />
+              <FilterItem item={item} key={item.label} resetFlag={resetFlag} filterType={filterType} />
             ))}
           </VStack>
         </CheckboxGroup>
@@ -69,7 +91,7 @@ function FilterList({ items }) {
   );
 }
 
-export function FilterGroup({ label, items }) {
+export function FilterGroup({ label, items, resetFlag, filterType }) {
   return (
     <Accordion w="100%" allowMultiple defaultIndex={[0, 1]}>
       <AccordionItem borderTop="0px">
@@ -89,23 +111,17 @@ export function FilterGroup({ label, items }) {
         </h2>
 
         <AccordionPanel>
-          <FilterList items={items} />
+          <FilterList items={items} resetFlag={resetFlag} filterType={filterType} />
         </AccordionPanel>
       </AccordionItem>
     </Accordion>
   );
 }
 
-const TRANSIT_LIST = [
-  { label: "Direct", value: 0 },
-  { label: "Transit", value: 1 },
-  { label: "Transit 2+", value: 2 },
-];
-
 const FACILITY_LIST = [
-  { label: "Luggage", value: "luggage" },
-  { label: "In-Flight Meal", value: "in-flight meal" },
-  { label: "Wi-fi", value: "wi-fi" },
+  { label: "Luggage", value: "is_luggage" },
+  { label: "In-Flight Meal", value: "is_flight_meal" },
+  { label: "Wi-fi", value: "is_wi-fi" },
 ];
 
 const DEPARTURE_TIME_LIST = [
@@ -128,14 +144,48 @@ const AIRLINE_LIST = [
   { label: "Lion Air", value: "Lion Air" },
 ];
 
-export function FilterWrapper() {
+export function FilterWrapper({ resetFlag }) {
+  const [priceStart, setPriceStart] = useState(500000);
+  const [priceEnd, setPriceEnd] = useState(500000);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const handleSliderChange = (val) => {
+    const [min, max] = val;
+    setPriceStart(min);
+    setPriceEnd(max);
+
+    setSearchParams((prev) => {
+      prev.set("priceStart", min);
+      prev.set("priceEnd", max);
+      return prev;
+    });
+  };
   return (
     <VStack>
-      <FilterGroup label="Transit" items={TRANSIT_LIST} />
-      <FilterGroup label="Facilities" items={FACILITY_LIST} />
-      <FilterGroup label="Departure Time" items={DEPARTURE_TIME_LIST} />
-      <FilterGroup label="Arrival Time" items={ARRIVAL_TIME_LIST} />
-      <FilterGroup label="Airlines" items={AIRLINE_LIST} />
+      <FilterGroup
+        label="Facilities"
+        items={FACILITY_LIST}
+        resetFlag={resetFlag}
+        filterType="facilities"
+      />
+      <FilterGroup
+        label="Departure Time"
+        items={DEPARTURE_TIME_LIST}
+        resetFlag={resetFlag}
+        filterType="departure"
+      />
+      <FilterGroup
+        label="Arrival Time"
+        items={ARRIVAL_TIME_LIST}
+        resetFlag={resetFlag}
+        filterType="arrival"
+      />
+      <FilterGroup
+        label="Airlines"
+        items={AIRLINE_LIST}
+        resetFlag={resetFlag}
+        filterType="merchant"
+      />
       <Accordion w="100%" allowMultiple defaultIndex={[0, 1]}>
         <AccordionItem border="0px">
           <h2>
@@ -165,10 +215,11 @@ export function FilterWrapper() {
               </Flex>
               <RangeSlider
                 aria-label={["min", "max"]}
-                min={140}
-                max={300}
-                defaultValue={[160, 190]}
-                step={5}
+                min={500000}
+                max={10000000}
+                step={20}
+                value={[priceStart, priceEnd]} // Sync slider with state
+                onChange={handleSliderChange} // Update state and params on change
               >
                 <RangeSliderTrack>
                   <RangeSliderFilledTrack />
@@ -182,8 +233,8 @@ export function FilterWrapper() {
                 fontSize="16px"
                 fontWeight="600"
               >
-                <Text>$ 145,00</Text>
-                <Text>$ 300,00</Text>
+                <Text>{rupiah(priceStart)}</Text>
+                <Text>{rupiah(priceEnd)}</Text>
               </Flex>
             </Grid>
           </AccordionPanel>

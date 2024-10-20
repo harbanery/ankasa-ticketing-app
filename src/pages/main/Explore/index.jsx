@@ -10,7 +10,7 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
@@ -21,11 +21,25 @@ import { FaPlaneDeparture } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import CardComponent from "../../../components/module/CardDestination";
 import CircleCard from "../../../components/base/CircleCard";
+import api from "../../../services/api";
+import { Link as ReactRouterLink } from 'react-router-dom';
 
 const Explore = () => {
   const sliderRef = useRef(null);
   const cardSliderRef = useRef(null);
   const [value, setValue] = React.useState("1");
+  const [countries, setCountries] = useState([])
+  useEffect(()=> {
+    api.get("countries")
+    .then((res)=> {
+      setCountries(res.data.data)
+      console.log(res.data.data);
+    })
+    .catch((err)=>{
+      console.log("error: ", err);
+      
+    })
+  },[])
   const cardData = [
     {
       backgroundImage: "/src/assets/card-tokyo.png",
@@ -294,10 +308,6 @@ const Explore = () => {
           top={{ base: 840, lg: 750, xl: 650, "2xl": 680 }}
           right={{ base: 0, md: 75, lg: 25, xl: 200 }}
         >
-          <Image
-            src="/src/assets/vector-landing-page.png"
-            w={{ base: "110px", xl: "auto" }}
-          />
         </Box>
         <Box
           bg={"white"}
@@ -375,7 +385,7 @@ const Explore = () => {
             </GridItem>
           </Grid>
 
-          <Stack
+          {/* <Stack
             direction="row"
             spacing={4}
             mb={5}
@@ -412,7 +422,7 @@ const Explore = () => {
             >
               Round Trip
             </Button>
-          </Stack>
+          </Stack> */}
           <Box mb={5} p={{ base: 2, lg: 0 }}>
             <Text color={"gray"} align={"left"}>
               Departure
@@ -455,6 +465,7 @@ const Explore = () => {
               </Stack>
             </RadioGroup>
           </Box>
+          <Link as={ReactRouterLink} to="/browse">
           <Button
             width="full"
             rightIcon={<CgArrowRight />}
@@ -469,8 +480,11 @@ const Explore = () => {
               borderColor: "#2395FF",
             }}
           >
+          
             Search Flight
+            
           </Button>
+          </Link>
         </Box>
       </Box>
       <Box mt={860} w={"80%"} mx={"auto"}>
@@ -496,13 +510,13 @@ const Explore = () => {
         </Flex>
         <Box mt={10} w={{ base: "full", lg: "full" }} mx={"auto"}>
           <Slider ref={cardSliderRef} {...cardSettings}>
-            {cardData.map((card, index) => (
+            {countries.map((country, index) => (
               <CardComponent
                 key={index}
-                backgroundImage={card.backgroundImage}
-                airlinesCount={card.airlinesCount}
-                city={card.city}
-                country={card.country}
+                backgroundImage={country.cities[0].image}
+                airlinesCount={10}
+                city={country.cities[0].name}
+                country={country.name}
               />
             ))}
           </Slider>
@@ -536,8 +550,8 @@ const Explore = () => {
             </Text>
             <Box mt={10} w={"full"}>
               <Slider ref={sliderRef} {...settings}>
-                {circleCardData.map((data, index) => (
-                  <CircleCard key={index} image={data.image} city={data.city} />
+                {countries.map((data, index) => (
+                  <CircleCard key={index} image={data.cities[0].image} city={data.name} />
                 ))}
               </Slider>
             </Box>

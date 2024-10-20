@@ -1,14 +1,70 @@
-import { Box, Button, Flex, Input, Stack, Text } from "@chakra-ui/react";
+import { Box, Button, Flex, Input, Stack, Text, useToast } from "@chakra-ui/react";
+import { useState } from "react";
 import { IoIosArrowForward } from "react-icons/io";
+import api from "../../../../services/api";
 const MyProfile = () => {
+  const toast = useToast(); // Initialize toast
+
+  // State to manage form data
+  const [profileData, setProfileData] = useState({
+    email: "",
+    phoneNumber: "",
+    username: "",
+    city: "",
+    address: "",
+    postCode: "",
+  });
+
+  // Handle input change
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setProfileData({
+      ...profileData,
+      [name]: value,
+    });
+  };
+
+  // Handle form submission with validation
+  const handleSubmit = async () => {
+    const { email, phoneNumber, username, city, address, postCode } = profileData;
+
+    // Check if any required field is empty
+    if (!email && !phoneNumber && !username && !city && !address && !postCode) {
+      toast({
+        title: "All fields are empty. Please fill in at least one field.",
+        status: "error",
+        duration: 3000, // Duration in milliseconds
+        isClosable: true,
+      });
+      return;
+    }
+
+    try {
+      const response = await api.put("customer/profile", profileData);
+      toast({
+        title: "Profile updated successfully.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      console.log("Profile updated successfully:", response.data);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast({
+        title: "Error updating profile. Please try again.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
   return (
-    <>
+    <Box fontFamily={"poppins"}>
       <Box>
         <Text
-          font-family={"poppins"}
           fontWeight={500}
-          fontSize={"14px"}
-          lineHeight={"21px"}
+          fontSize={{ base: "12px", md: "14px" }}
+          lineHeight={{ base: "18px", md: "21px" }}
           letterSpacing={5}
           color={"#2395FF"}
         >
@@ -16,174 +72,194 @@ const MyProfile = () => {
         </Text>
         <Text
           mt={2}
-          font-family={"poppins"}
           fontWeight={600}
-          fontSize={"24px"}
-          lineHeight={"36px"}
+          fontSize={{ base: "20px", md: "24px" }}
+          lineHeight={{ base: "30px", md: "36px" }}
         >
           Profile
         </Text>
       </Box>
-      <Flex mt={5} flexDir={{ base: "column", md: "row", lg: "row" }}>
-        <Box>
+      <Flex
+        mt={5}
+        flexDir={{ base: "column", md: "row", lg: "row" }}
+        gap={5}
+      >
+        <Box flex={{ base: "1 1 100%", md: "1" }}>
           <Text
-            fontFamily={"poppins"}
             fontWeight={600}
-            fontSize={16}
+            fontSize={{ base: "14px", md: "16px" }}
             lineHeight={"24px"}
           >
             Contact
           </Text>
-          <Stack mt={4} p={3}>
-            <Text
-              fontFamily={"lato"}
-              fontWeight={400}
-              fontSize={14}
-              lineHeight={"16.8px"}
-              color={"#9B96AB"}
-            >
-              Email
-            </Text>
-            <Input
-              type="email"
-              variant="flushed"
-              placeholder="Enter your email here"
-              w={"397px"}
-              borderBottom="2px"
-              borderBottomColor={"#D2C2FFAD"}
-              pl={3}
-            />
-          </Stack>
-          <Stack mt={4} p={3}>
-            <Text
-              fontFamily={"lato"}
-              fontWeight={400}
-              fontSize={14}
-              lineHeight={"16.8px"}
-              color={"#9B96AB"}
-            >
-              Phone Number
-            </Text>
-            <Input
-              type="tel"
-              variant="flushed"
-              placeholder="Enter your phone number here"
-              w={"397px"}
-              borderBottom="2px"
-              borderBottomColor={"#D2C2FFAD"}
-              pl={3}
-            />
+          <Stack spacing={4} p={3}>
+            <Stack spacing={1}>
+              <Text
+                fontFamily={"lato"}
+                fontWeight={400}
+                fontSize={{ base: "12px", md: "14px" }}
+                lineHeight={"16.8px"}
+                color={"#9B96AB"}
+              >
+                Email
+              </Text>
+              <Input
+                type="email"
+                name="email"
+                value={profileData.email}
+                onChange={handleInputChange}
+                variant="flushed"
+                placeholder="Enter your email here"
+                w={{ base: "100%" }}
+                borderBottom="2px"
+                borderBottomColor={"#D2C2FFAD"}
+                pl={3}
+              />
+            </Stack>
+            <Stack spacing={1}>
+              <Text
+                fontFamily={"lato"}
+                fontWeight={400}
+                fontSize={{ base: "12px", md: "14px" }}
+                lineHeight={"16.8px"}
+                color={"#9B96AB"}
+              >
+                Phone Number
+              </Text>
+              <Input
+                type="tel"
+                name="phoneNumber"
+                value={profileData.phoneNumber}
+                onChange={handleInputChange}
+                variant="flushed"
+                placeholder="Enter your phone number here"
+                w={{ base: "100%", md: "100%" }}
+                borderBottom="2px"
+                borderBottomColor={"#D2C2FFAD"}
+                pl={3}
+              />
+            </Stack>
           </Stack>
           <Stack
-            display={"flex"}
             direction={"row"}
             alignItems={"center"}
-            justify={{ base: "start", md: "end", lg: "end" }}
-            columnGap={8}
+            justify={{ base: "start", md: "end" }}
+            spacing={8}
             mt={5}
           >
             <Text
-              fontFamily={"poppins"}
               fontWeight={600}
-              fontSize={16}
+              fontSize={{ base: "14px", md: "16px" }}
               lineHeight={"24px"}
-              align={"right"}
               color={"#2395FF"}
             >
               Account Setting
             </Text>
             <IoIosArrowForward strokeWidth={40} height={10} color="#2395FF" />
-            {/* <Image src="/src/assets/btnback.png" width={"10px"} height={"15px"}/> */}
           </Stack>
         </Box>
-        <Box>
+
+        <Box flex={{ base: "1 1 100%", md: "1" }}>
           <Text
-            fontFamily={"poppins"}
             fontWeight={600}
-            fontSize={16}
+            fontSize={{ base: "14px", md: "16px" }}
             lineHeight={"24px"}
           >
             Biodata
           </Text>
-          <Stack mt={4} p={3}>
-            <Text
-              fontFamily={"lato"}
-              fontWeight={400}
-              fontSize={14}
-              lineHeight={"16.8px"}
-              color={"#9B96AB"}
-            >
-              Username
-            </Text>
-            <Input
-              type="text"
-              variant="flushed"
-              placeholder="Enter your username here"
-              w={"397px"}
-              borderBottom="2px"
-              borderBottomColor={"#D2C2FFAD"}
-              pl={3}
-            />
-          </Stack>
-          <Stack mt={4} p={3}>
-            <Text
-              fontFamily={"lato"}
-              fontWeight={400}
-              fontSize={14}
-              lineHeight={"16.8px"}
-              color={"#9B96AB"}
-            >
-              City
-            </Text>
-            <Input
-              type="tel"
-              variant="flushed"
-              placeholder="Enter your here"
-              w={"397px"}
-              borderBottom="2px"
-              borderBottomColor={"#D2C2FFAD"}
-              pl={3}
-            />
-          </Stack>
-          <Stack mt={4} p={3}>
-            <Text
-              fontFamily={"lato"}
-              fontWeight={400}
-              fontSize={14}
-              lineHeight={"16.8px"}
-              color={"#9B96AB"}
-            >
-              Address
-            </Text>
-            <Input
-              type="text"
-              variant="flushed"
-              placeholder="Enter your address here"
-              w={"397px"}
-              borderBottom="2px"
-              borderBottomColor={"#D2C2FFAD"}
-              pl={3}
-            />
-          </Stack>
-          <Stack mt={4} p={3}>
-            <Text
-              fontFamily={"lato"}
-              fontWeight={400}
-              fontSize={14}
-              lineHeight={"16.8px"}
-              color={"#9B96AB"}
-            >
-              Post Code
-            </Text>
-            <Input
-              type="text"
-              variant="flushed"
-              placeholder="Enter your post code here"
-              w={"397px"}
-              borderBottom="2px"
-              borderBottomColor={"#D2C2FFAD"}
-              pl={3}
-            />
+          <Stack spacing={4} p={3}>
+            <Stack spacing={1}>
+              <Text
+                fontFamily={"lato"}
+                fontWeight={400}
+                fontSize={{ base: "12px", md: "14px" }}
+                lineHeight={"16.8px"}
+                color={"#9B96AB"}
+              >
+                Username
+              </Text>
+              <Input
+                type="text"
+                name="username"
+                value={profileData.username}
+                onChange={handleInputChange}
+                variant="flushed"
+                placeholder="Enter your username here"
+                w={{ base: "100%", md: "100%" }}
+                borderBottom="2px"
+                borderBottomColor={"#D2C2FFAD"}
+                pl={3}
+              />
+            </Stack>
+            <Stack spacing={1}>
+              <Text
+                fontFamily={"lato"}
+                fontWeight={400}
+                fontSize={{ base: "12px", md: "14px" }}
+                lineHeight={"16.8px"}
+                color={"#9B96AB"}
+              >
+                City
+              </Text>
+              <Input
+                type="text"
+                name="city"
+                value={profileData.city}
+                onChange={handleInputChange}
+                variant="flushed"
+                placeholder="Enter your city here"
+                w={{ base: "100%", md: "100%" }}
+                borderBottom="2px"
+                borderBottomColor={"#D2C2FFAD"}
+                pl={3}
+              />
+            </Stack>
+            <Stack spacing={1}>
+              <Text
+                fontFamily={"lato"}
+                fontWeight={400}
+                fontSize={{ base: "12px", md: "14px" }}
+                lineHeight={"16.8px"}
+                color={"#9B96AB"}
+              >
+                Address
+              </Text>
+              <Input
+                type="text"
+                name="address"
+                value={profileData.address}
+                onChange={handleInputChange}
+                variant="flushed"
+                placeholder="Enter your address here"
+                w={{ base: "100%", md: "100%" }}
+                borderBottom="2px"
+                borderBottomColor={"#D2C2FFAD"}
+                pl={3}
+              />
+            </Stack>
+            <Stack spacing={1}>
+              <Text
+                fontFamily={"lato"}
+                fontWeight={400}
+                fontSize={{ base: "12px", md: "14px" }}
+                lineHeight={"16.8px"}
+                color={"#9B96AB"}
+              >
+                Post Code
+              </Text>
+              <Input
+                type="text"
+                name="postCode"
+                value={profileData.postCode}
+                onChange={handleInputChange}
+                variant="flushed"
+                placeholder="Enter your post code here"
+                w={{ base: "100%" }}
+                borderBottom="2px"
+                borderBottomColor={"#D2C2FFAD"}
+                pl={3}
+              />
+            </Stack>
           </Stack>
           <Stack display={"flex"} direction={"row"} justify={"end"}>
             <Button
@@ -196,13 +272,14 @@ const MyProfile = () => {
               color={"white"}
               _hover={"none"}
               rounded={10}
+              onClick={handleSubmit} // Attach the handleSubmit function
             >
               Save
             </Button>
           </Stack>
         </Box>
       </Flex>
-    </>
+    </Box>
   );
 };
 

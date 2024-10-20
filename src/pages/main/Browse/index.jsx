@@ -20,7 +20,7 @@ import {
   ListIcon,
   Skeleton,
 } from "@chakra-ui/react";
-import { Link as ReactRouterLink, useSearchParams } from "react-router-dom";
+import { Link as ReactRouterLink, useLocation, useSearchParams } from "react-router-dom";
 import {
   FilterIcon,
   FlightIcon,
@@ -526,11 +526,13 @@ function FlightList({ data }) {
   );
 }
 
-function SearchSidebar() {
+function SearchSidebar({ticket}) {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [resetFlag, setResetFlag] = useState(false)
 
   const handleReset = () => {
     setSearchParams({});
+    setResetFlag((prev) => !prev)
   };
 
   return (
@@ -551,7 +553,7 @@ function SearchSidebar() {
       </Flex>
 
       <Box bgColor="white" rounded="15px" p="30px">
-        <FilterWrapper />
+        <FilterWrapper ticket={ticket} resetFlag={resetFlag} />
       </Box>
     </>
   );
@@ -559,12 +561,18 @@ function SearchSidebar() {
 
 export default function BrowsePage() {
   const [tickets, setTickets] = useState([]);
+  const [searchParams] = useSearchParams();
+  const queryString = searchParams.toString();
+  console.log("params", queryString);
+  
 
   const getTickets = async () => {
     try {
-      const response = await api.get("tickets");
+      const response = await api.get(`tickets?${queryString}`);
 
       setTickets(response?.data?.data);
+      console.log(response.data.data);
+      
     } catch (error) {
       console.error("Error fetching profile data", error);
     }
@@ -572,9 +580,8 @@ export default function BrowsePage() {
 
   useEffect(() => {
     getTickets();
-  }, []);
+  }, [searchParams]);
 
-  //   console.log(tickets);
 
   return (
     <Box
@@ -588,7 +595,7 @@ export default function BrowsePage() {
         <Container maxW="1226px" px="28px">
           <Flex gap="24px" flexDirection={{ base: "column", lg: "row" }}>
             <Box display={{ base: "none", md: "block" }} flexBasis="300px">
-              <SearchSidebar />
+              <SearchSidebar ticket={tickets} />
             </Box>
             <Box flex="1">
               <Flex
